@@ -38,7 +38,6 @@ namespace TelegramBotMinecraft
             InitializeComponent();
             json = File.ReadAllText("Servers.json");
             servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
-            MessageBox.Show(json);
 
             /*rcon = RCONClient.INSTANCE;
             rcon.setupStream(servers[0].Ip, Convert.ToInt32(servers[0].RconPort), password: servers[0].RconPassword);*/
@@ -127,9 +126,7 @@ namespace TelegramBotMinecraft
             if (newRcon != null)
             {
                 rcon = newRcon; // только если подключение удалось
-                MessageBox.Show("Подключение успешно обновлено.");
             }
-            MessageBox.Show(json);
             AppendText($"Json - файл серверов обновлён!");
         }
 
@@ -149,7 +146,6 @@ namespace TelegramBotMinecraft
             if (newRcon != null)
             {
                 rcon = newRcon; // только если подключение удалось
-                MessageBox.Show("Подключение успешно обновлено.");
             }
             _ = Task.Run(() => CheckServerAsync());
             _ = Task.Run(() => CheckRconAsync());
@@ -214,10 +210,6 @@ namespace TelegramBotMinecraft
                                         UseShellExecute = false,
                                         WorkingDirectory = @$"{servers[0].Path}"
                                     });
-                                }
-                                else
-                                {
-                                    MessageBox.Show($"servers == null {servers}");
                                 }
                                 notifyIcon1.BalloonTipTitle = "Сервер";
                                 notifyIcon1.BalloonTipText = "Minecraft-сервер успешно запущен!";
