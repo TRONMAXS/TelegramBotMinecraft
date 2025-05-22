@@ -265,7 +265,7 @@ namespace TelegramBotMinecraft
         {
             TextBoxAdmin = textBox2.Text;
             textBox2.Text = null;
-            if (TextBoxAdmin != null)
+            if (!string.IsNullOrWhiteSpace(TextBoxAdmin))
             {
                 switch (TextBoxAdmin)
                 {
