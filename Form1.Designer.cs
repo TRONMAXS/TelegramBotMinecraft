@@ -37,7 +37,6 @@
             button1 = new Button();
             button2 = new Button();
             button3 = new Button();
-            button4 = new Button();
             SuspendLayout();
             // 
             // textBox1
@@ -55,7 +54,6 @@
             // 
             // textBox2
             // 
-            textBox2.Enabled = false;
             textBox2.Location = new Point(7, 336);
             textBox2.Name = "textBox2";
             textBox2.PlaceholderText = "Введите команду";
@@ -72,16 +70,14 @@
             // label1
             // 
             label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label1.Location = new Point(7, 405);
+            label1.Location = new Point(7, 372);
             label1.Name = "label1";
             label1.Size = new Size(166, 27);
             label1.TabIndex = 2;
             label1.Text = "Сервер - выключен";
-            label1.Enabled = false;
             // 
             // button1
             // 
-            button1.Enabled = true;
             button1.Location = new Point(713, 372);
             button1.Name = "button1";
             button1.Size = new Size(81, 27);
@@ -91,7 +87,6 @@
             // 
             // button2
             // 
-            button2.Enabled = false;
             button2.Location = new Point(713, 405);
             button2.Name = "button2";
             button2.Size = new Size(81, 27);
@@ -101,31 +96,18 @@
             // 
             // button3
             // 
-            button3.Enabled = false;
-            button3.Location = new Point(575, 384);
+            button3.Location = new Point(575, 405);
             button3.Name = "button3";
-            button3.Size = new Size(132, 39);
+            button3.Size = new Size(132, 27);
             button3.TabIndex = 5;
-            button3.Text = "Переподключиться к боту";
+            button3.Text = "Обновить Json-файл";
             button3.UseVisualStyleBackColor = true;
-            button3.Visible = false;
-            // 
-            // button4
-            // 
-            button4.Enabled = false;
-            button4.Location = new Point(7, 365);
-            button4.Name = "button4";
-            button4.Size = new Size(133, 27);
-            button4.TabIndex = 6;
-            button4.Text = "Выполнить команду";
-            button4.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(button4);
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
@@ -148,6 +130,5 @@
         private Button button1;
         private Button button2;
         private Button button3;
-        private Button button4;
     }
 }

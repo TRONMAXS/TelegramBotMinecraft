@@ -2,7 +2,6 @@
 using CoreRCON.PacketFormats;
 //using MinecraftServerRCON;
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -21,13 +20,10 @@ namespace TelegramBotMinecraft
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private string TextBoxAdmin;
         private string jsonFilePath;
-        private string json;
-        private string pathSettings;
-        private string jsonSettings;
-        private List<SettingsConfig> settings = new List<SettingsConfig>();
+        private static string json;
         private List<ServerConfig> servers = new List<ServerConfig>();
         private bool isServerRunning = false;
-        private string BotToken;
+        private static readonly string BotToken = "7849309077:AAGH40mYb04wvXz2MflStS_vhl671iPgbkA";
         private static readonly HashSet<long> AllowedUsers = new HashSet<long>
         {
             903878687,         // твой ID
@@ -43,21 +39,25 @@ namespace TelegramBotMinecraft
             json = File.ReadAllText("Servers.json");
             servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
 
-            jsonSettings = File.ReadAllText("Settings.json");
-            settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+            /*rcon = RCONClient.INSTANCE;
+            rcon.setupStream(servers[0].Ip, Convert.ToInt32(servers[0].RconPort), password: servers[0].RconPassword);*/
 
+
+
+            
             this.Load += Form1_Load;
+            
+            this.KeyDown += Grid_KeyUp;
             this.Resize += Form1_Resize;
 
             button1.Click += button1_Click;
             button2.Click += button2_Click;
             button3.Click += button3_Click;
-            button4.Click += RunСommand;
 
-            // Скрываем окно
+            /*// Скрываем окно
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
-            this.Hide(); // спрятать форму
+            this.Hide(); // спрятать форму*/
 
             var contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("Открыть", null, (s, e) =>
@@ -72,7 +72,9 @@ namespace TelegramBotMinecraft
 
 
             // Уведомление при запуске
-            _ = ShowBalloonTip("Бот запущен", "Ожидает команд через Telegram.");
+            notifyIcon1.BalloonTipTitle = "Бот запущен";
+            notifyIcon1.BalloonTipText = "Ожидает команд через Telegram.";
+            notifyIcon1.ShowBalloonTip(2000);
 
 
             AutoCompleteStringCollection source = new AutoCompleteStringCollection()
@@ -85,19 +87,7 @@ namespace TelegramBotMinecraft
             textBox2.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             textBox2.AutoCompleteSource = AutoCompleteSource.CustomSource;
 
-
-        }
-
-        private async Task ShowBalloonTip(string title, string text)
-        {
-            jsonSettings = File.ReadAllText("Settings.json");
-            settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-            if (settings[0].Notifications == true)
-            {
-                notifyIcon1.BalloonTipText = text;
-                notifyIcon1.BalloonTipTitle = title;
-                notifyIcon1.ShowBalloonTip(2000);
-            }
+            
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -121,47 +111,35 @@ namespace TelegramBotMinecraft
         }
         private async void button3_Click(object sender, EventArgs e)
         {
-            jsonSettings = File.ReadAllText("Settings.json");
-            settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-            if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
+            json = File.ReadAllText("Servers.json");
+            if (IsValidJson(json))
             {
-                MessageBox.Show("Не указан токен бота в файле Settings.json!");
-                AppendText($"Зайдите в настройки и введите токен бота");
-                button3.Enabled = true;
-                button3.Visible = true;
-                return;
+                servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
             }
             else
             {
-                try
-                {
-
-                    BotToken = settings[0].BotToken;
-                    botClient = new TelegramBotClient(BotToken);
-                    var me = await botClient.GetMe(); // проверка, что бот жив
-                    AppendText($"Бот {me.Username} запущен и готов к работе.");
-
-                    botClient.StartReceiving(
-                        new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
-                        cancellationToken: cts.Token
-                    );
-                }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при запуске бота: {ex.Message}");
-                    AppendText($"Возможно не правильный токен бота. Пожалуйста проверьте его на правильность написания!");
-                    button3.Enabled = true;
-                    button3.Visible = true;
-                    return;
-                }
-                button1.Enabled = true;
-                button2.Enabled = true;
-                button3.Enabled = true;
-                button4.Enabled = true;
-                textBox2.Enabled = true;
-                label1.Enabled = true;
-
+                MessageBox.Show("Файл Servers.json содержит некорректный JSON!");
             }
+
+            var newRcon = await ConnectToRconAsync(servers[0]);
+
+            if (newRcon != null)
+            {
+                rcon = newRcon; // только если подключение удалось
+            }
+            AppendText($"Json - файл серверов обновлён!");
+        }
+
+        private async void Form1_Load(object sender, EventArgs e)
+        {
+            botClient = new TelegramBotClient(BotToken);
+            var me = await botClient.GetMe(); // проверка, что бот жив
+            AppendText($"Бот {me.Username} запущен и готов к работе.");
+
+            botClient.StartReceiving(
+                new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
+                cancellationToken: cts.Token
+            );
 
             var newRcon = await ConnectToRconAsync(servers[0]);
 
@@ -171,58 +149,6 @@ namespace TelegramBotMinecraft
             }
             _ = Task.Run(() => CheckServerAsync());
             _ = Task.Run(() => CheckRconAsync());
-        }
-
-        private async void Form1_Load(object sender, EventArgs e)
-        {
-            if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
-            {
-                MessageBox.Show("Не указан токен бота в файле Settings.json!");
-                AppendText($"Зайдите в настройки и введите токен бота");
-                button3.Enabled = true;
-                button3.Visible = true;
-                return;
-            }
-            else
-            {
-                try
-                {
-
-                    BotToken = settings[0].BotToken;
-                    botClient = new TelegramBotClient(BotToken);
-                    var me = await botClient.GetMe(); // проверка, что бот жив
-                    AppendText($"Бот {me.Username} запущен и готов к работе.");
-
-                    botClient.StartReceiving(
-                        new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
-                        cancellationToken: cts.Token
-                    );
-                }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при запуске бота: {ex.Message}");
-                    AppendText($"Возможно не правильный токен бота. Пожалуйста проверьте его на правильность написания!");
-                    button3.Enabled = true;
-                    button3.Visible = true;
-                    return;
-                }
-                button1.Enabled = true;
-                button2.Enabled = true;
-                button3.Enabled = true;
-                button4.Enabled = true;
-                textBox2.Enabled = true;
-                label1.Enabled = true;
-
-
-                var newRcon = await ConnectToRconAsync(servers[0]);
-
-                if (newRcon != null)
-                {
-                    rcon = newRcon; // только если подключение удалось
-                }
-                _ = Task.Run(() => CheckServerAsync());
-                _ = Task.Run(() => CheckRconAsync());
-            }
         }
         public static bool IsValidJson(string json)
         {
@@ -261,48 +187,54 @@ namespace TelegramBotMinecraft
                 return null;
             }
         }
-        private void RunСommand(object sender, EventArgs e)
+        private void Grid_KeyUp(object sender, KeyEventArgs e)
         {
-            TextBoxAdmin = textBox2.Text;
-            textBox2.Text = null;
-            if (!string.IsNullOrWhiteSpace(TextBoxAdmin))
+            if (e.KeyCode == Keys.Enter)
             {
-                switch (TextBoxAdmin)
+                TextBoxAdmin = textBox2.Text;
+                textBox2.Text = null;
+                if (TextBoxAdmin != null)
                 {
-                    case "start":
-                        if (isServerRunning == false)
-                        {
-                            isServerRunning = true;
-
-                            if (servers != null && servers.Count > 0)
+                    switch (TextBoxAdmin)
+                    {
+                        case "start":
+                            if (isServerRunning == false)
                             {
-                                Process.Start(new ProcessStartInfo
+                                isServerRunning = true;
+
+                                if (servers != null && servers.Count > 0)
                                 {
-                                    FileName = "start.cmd",
-                                    UseShellExecute = false,
-                                    WorkingDirectory = @$"{servers[0].Path}"
-                                });
+                                    Process.Start(new ProcessStartInfo
+                                    {
+                                        FileName = "start.cmd",
+                                        UseShellExecute = false,
+                                        WorkingDirectory = @$"{servers[0].Path}"
+                                    });
+                                }
+                                notifyIcon1.BalloonTipTitle = "Сервер";
+                                notifyIcon1.BalloonTipText = "Minecraft-сервер успешно запущен!";
+                                notifyIcon1.ShowBalloonTip(5000); // 5 секунд
                             }
-                            _ = ShowBalloonTip("Сервер", "Minecraft-сервер успешно запущен!");
+                            else
+                            {
+                                AppendText($"Сервер уже запущен!");
+                            }
+                                break;
+                        case "stop":
+                            _ = Task.Run(() => RconServerAnyAsync("stop"));
+                            notifyIcon1.BalloonTipTitle = "Сервер";
+                            notifyIcon1.BalloonTipText = "Minecraft-сервер остановлен!";
+                            notifyIcon1.ShowBalloonTip(5000); // 5 секунд
+                            break;
+                        case "list":
+                            _ = Task.Run(() => RconServerAnyAsync("list"));
+                            break;
 
-                        }
-                        else
-                        {
-                            AppendText($"Сервер уже запущен!");
-                        }
-                        break;
-                    case "stop":
-                        _ = Task.Run(() => RconServerAnyAsync("stop"));
-                        _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
-                        break;
-                    case "list":
-                        _ = Task.Run(() => RconServerAnyAsync("list"));
-                        break;
+                        default:
+                            _ = Task.Run(() => RconServerAnyAsync(TextBoxAdmin));
+                            break;
 
-                    default:
-                        _ = Task.Run(() => RconServerAnyAsync(TextBoxAdmin));
-                        break;
-
+                    }
                 }
             }
         }
@@ -376,7 +308,9 @@ namespace TelegramBotMinecraft
                                 //WorkingDirectory = @"G:\Server Minecraft - Forge - 1.20.1\"
                                 WorkingDirectory = @$"{servers[0].Path}"
                             });
-                            _= ShowBalloonTip("Сервер", "Minecraft-сервер успешно запущен!");
+                            notifyIcon1.BalloonTipTitle = "Сервер";
+                            notifyIcon1.BalloonTipText = "Minecraft-сервер успешно запущен!";
+                            notifyIcon1.ShowBalloonTip(5000); // 5 секунд
                             chatReply = "Сервер запускается...";
                             await Task.Delay(20000);
                             _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
@@ -392,7 +326,9 @@ namespace TelegramBotMinecraft
                         //Directory.Delete(@"G:\Server Minecraft - Forge - 1.20.1\world", true);
                         Directory.Delete(@$"{servers[0].Path}world", true);
                         chatReply = "Мир успешно удалён!";
-                        _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
+                        notifyIcon1.BalloonTipTitle = "Сервер";
+                        notifyIcon1.BalloonTipText = "Мир успешно удалён!";
+                        notifyIcon1.ShowBalloonTip(5000); // 5 секунд
                         break;
 
                     case "/bot_server_list":
@@ -403,7 +339,9 @@ namespace TelegramBotMinecraft
                     case "/bot_server_stop":
                     case "/bot_server_stop@xy8zjr4tqbot":
                         chatReply = await RconServerStop();
-                        _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
+                        notifyIcon1.BalloonTipTitle = "Сервер";
+                        notifyIcon1.BalloonTipText = "Minecraft-сервер остановлен!";
+                        notifyIcon1.ShowBalloonTip(5000); // 5 секунд
                         break;
 
                     default:

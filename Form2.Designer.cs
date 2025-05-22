@@ -28,15 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
             textBox1 = new TextBox();
             button2 = new Button();
             button1 = new Button();
             checkedListBox1 = new CheckedListBox();
-            notifyIcon1 = new NotifyIcon(components);
             SuspendLayout();
             // 
             // openFileDialog1
@@ -83,12 +80,6 @@
             checkedListBox1.Size = new Size(165, 364);
             checkedListBox1.TabIndex = 7;
             // 
-            // notifyIcon1
-            // 
-            notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-            notifyIcon1.Text = "notifyIcon1";
-            notifyIcon1.Visible = true;
-            // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -111,6 +102,5 @@
         private Button button2;
         private Button button1;
         private CheckedListBox checkedListBox1;
-        public NotifyIcon notifyIcon1;
     }
 }
