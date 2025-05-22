@@ -40,6 +40,7 @@ namespace TelegramBotMinecraft
             string filename = openFileDialog1.FileName;
             string fileText = File.ReadAllText(filename);
             textBox1.Text = fileText;
+            LoadServersToList();
         }
 
         void SaveJson(object sender, EventArgs e)
@@ -49,6 +50,7 @@ namespace TelegramBotMinecraft
             string filename = saveFileDialog1.FileName;
             File.WriteAllText(filename, textBox1.Text);
             MessageBox.Show("Файл сохранен");
+            LoadServersToList();
         }
 
         private void LoadServersToList()
@@ -97,17 +99,11 @@ namespace TelegramBotMinecraft
 
     public class ServerConfig
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
         public string Ip { get; set; }
         public string RconPort { get; set; }
         public string RconPassword { get; set; }
         public bool Enabled { get; set; }
-    }
-
-    public class SettingsConfig
-    {
-        public bool notifications { get; set; }
     }
 }
