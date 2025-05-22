@@ -20,13 +20,12 @@ namespace TelegramBotMinecraft
             string pathServers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Servers.json");
             string pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
 
-            if (!File.Exists(pathServers))
+            if (!File.Exists(pathServers) || new FileInfo(pathServers).Length == 0)
             {
                 var servers = new List<ServerConfig>
                 {
                     new ServerConfig
                     {
-                        Id = 1,
                         Name = "Name Server",
                         Path = @"Path to the server folder (example:  G:\MinecraftServers\Survival)",
                         Ip = "server ip (example:  127.0.0.1)",
@@ -40,13 +39,14 @@ namespace TelegramBotMinecraft
                 string json = System.Text.Json.JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(pathServers, json);
             }
-            if (!File.Exists(pathSettings))
+            if (!File.Exists(pathSettings) || new FileInfo(pathSettings).Length == 0)
             {
                 var settings = new List<SettingsConfig>
                 {
                     new SettingsConfig
                     {
-                        notifications = true
+                        Notifications = true,
+                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)"
                     }
                 };
 
