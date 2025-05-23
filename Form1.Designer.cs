@@ -138,12 +138,14 @@
             textBox3.ReadOnly = true;
             textBox3.Size = new Size(193, 29);
             textBox3.TabIndex = 8;
+            textBox3.Enabled = false;   
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            AutoScaleMode = AutoScaleMode.None;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new Size(800, 504);
             Controls.Add(textBox3);
             Controls.Add(label2);
             Controls.Add(button4);
@@ -155,6 +157,8 @@
             Controls.Add(textBox1);
             KeyPreview = true;
             Name = "Form1";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Telegram Bot Minecraft";
             ResumeLayout(false);
             PerformLayout();
         }

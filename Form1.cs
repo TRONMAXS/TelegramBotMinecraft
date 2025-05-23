@@ -1,12 +1,14 @@
 ﻿using CoreRCON;
 using System.Diagnostics;
 using System.Net;
+using System.Security.Policy;
 using System.Text.Json;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using System.Threading;
 
 
 namespace TelegramBotMinecraft
@@ -14,7 +16,7 @@ namespace TelegramBotMinecraft
     public partial class Form1 : Form
     {
         private TelegramBotClient botClient;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private CancellationTokenSource cts = new CancellationTokenSource();
         private string TextBoxAdmin;
         private string pathServers;
         private string json;
@@ -26,14 +28,15 @@ namespace TelegramBotMinecraft
         private string BotToken;
         private int CheckEnableServer = -1;
         private bool flagStartCheck = true;
-        private static readonly HashSet<long> AllowedUsers = new HashSet<long>
-        {
-            903878687,         // твой ID
-            -1002163535137     // групповой чат
-        };
+        private static readonly HashSet<long> AllowedUsers = new HashSet<long>{};
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
+        private bool StartBot = true;
         private static readonly int ThreadId = 2258;
         RCON rcon;
+
+        private Form2 form2;
+        private Form3 form3;
 
         public Form1()
         {
@@ -42,6 +45,7 @@ namespace TelegramBotMinecraft
             json = File.ReadAllText("Servers.json");
             servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
 
+            pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
             jsonSettings = File.ReadAllText("Settings.json");
             settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
 
@@ -71,7 +75,7 @@ namespace TelegramBotMinecraft
 
 
             // Уведомление при запуске
-            _ = ShowBalloonTip("Бот запущен", "Ожидает команд через Telegram.");
+            _ = ShowBalloonTip("Приложение запущено", "Ожидает команд через Telegram.");
 
 
             AutoCompleteStringCollection source = new AutoCompleteStringCollection()
@@ -110,61 +114,163 @@ namespace TelegramBotMinecraft
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form3 form3 = new Form3();
+            if (form3 == null || form3.IsDisposed)
+            {
+                form3 = new Form3();
+            }
             form3.Show();
+            form3.BringToFront();
+            form3.WindowState = FormWindowState.Normal;
+            form3.Update();
         }
+
         private void button2_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2();
+            if (form2 == null || form2.IsDisposed)
+            {
+                form2 = new Form2();
+            }
             form2.Show();
+            form2.BringToFront();
+            form2.WindowState = FormWindowState.Normal;
+            form2.Update();
         }
         private async void button3_Click(object sender, EventArgs e)
         {
-            jsonSettings = File.ReadAllText("Settings.json");
-            settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-            Form1_Load(this, EventArgs.Empty);
+            try
+            {
+                jsonSettings = File.ReadAllText("Settings.json");
+                settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+            }
+            catch (Exception ex)
+            {
+                settings = new List<SettingsConfig>
+                    {
+                        new SettingsConfig
+                        {
+                            Notifications = true,
+                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                            ChatIds = new List<ChatId>
+                            {
+                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                            }
+                        }
+                    };
+                string jsonStr = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(pathSettings, jsonStr);
+                AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки.");
+            }
+            try
+            {
+                if (cts != null)
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                }
+                Form1_Load(this, EventArgs.Empty);
+
+            }
+            catch { Form1_Load(this, EventArgs.Empty); }
         }
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+            try
+            {
+                jsonSettings = File.ReadAllText("Settings.json");
+                settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+            }
+            catch (Exception ex) 
+            {
+                settings = new List<SettingsConfig>
+                    {
+                        new SettingsConfig
+                        {
+                            Notifications = true,
+                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                            ChatIds = new List<ChatId>
+                            {
+                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                            }
+                        }
+                    };
+                string jsonStr = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(pathSettings, jsonStr);
+                AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки."); 
+            }
             if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
             {
+                AppendText($"Перейдите в настройки и введите токен бота");
                 MessageBox.Show("Не указан токен бота в файле Settings.json!", "Ошибка в файле Settings.json");
-                AppendText($"Зайдите в настройки и введите токен бота");
-                button3.Enabled = true;
-                button3.Visible = true;
-                return;
-            }
-            else
-            {
-                try
+                this.Invoke(new Action(() =>
                 {
-
-                    BotToken = settings[0].BotToken;
-                    botClient = new TelegramBotClient(BotToken);
-                    var me = await botClient.GetMe(); // проверка, что бот жив
-                    AppendText($"Бот {me.Username} запущен и готов к работе.");
-
-                    botClient.StartReceiving(
-                        new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
-                        cancellationToken: cts.Token
-                    );
-                }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при запуске бота: {ex.Message}");
-                    AppendText($"Возможно не правильный токен бота. Пожалуйста проверьте его на правильность написания!");
                     button3.Enabled = true;
                     button3.Visible = true;
-                    return;
+
+                }));
+                return;
+            }
+
+            if (settings[0].ChatIds == null ||
+                settings[0].ChatIds.Any(c => c.Identifier == "example: 646516246" || c.Name == "example: Admin") ||
+                settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)) ||
+                settings[0].ChatIds.Count == 0)
+            {
+                if (settings[0].ChatIds.Count == 0)
+                {
+                    BotToken = settings[0].BotToken;
+                    bool? Notifications = settings[0].Notifications;
+                    settings = new List<SettingsConfig>
+                    {
+                        new SettingsConfig
+                        {
+                            Notifications = Notifications,
+                            BotToken = BotToken,
+                            ChatIds = new List<ChatId>
+                            {
+                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                            }
+                        }
+                    };
                 }
-                button1.Enabled = true;
-                button2.Enabled = true;
-                button3.Enabled = true;
-                button3.Visible = false;
-                button4.Enabled = true;
-                textBox2.Enabled = true;
-                label1.Enabled = true;
+                string jsonStr = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(pathSettings, jsonStr);
+                AppendText($"Перейдите в настройки и введите ID нужных групп или чатов.");
+                MessageBox.Show("Не указаны ID групп или чатов в файле Settings.json!", "Ошибка в файле Settings.json");
+
+                this.Invoke(new Action(() =>
+                {
+                    button3.Enabled = true;
+                    button3.Visible = true;
+
+                }));
+                return;
+            }
+            try
+            {
+                StartBot = true;
+                for (int i = 0; i < settings[0].ChatIds.Count; i++)
+                {
+
+                    if (long.TryParse(settings[0].ChatIds[i].Identifier, out long chatId))
+                    {
+                        AllowedUsers.Add(chatId);
+                    }
+                }
+                _ = RunBotLoopAsync();
+
+                this.Invoke(new Action(() =>
+                {
+                    button1.Enabled = true;
+                    button2.Enabled = true;
+                    button3.Enabled = true;
+                    button3.Visible = false;
+                    button4.Enabled = true;
+                    textBox1.Enabled = true;
+                    textBox2.Enabled = true;
+                    textBox3.Enabled = true;
+                    label1.Enabled = true;
+                }));
 
                 _ = Task.Run(() => CheckInfoServers());
 
@@ -178,12 +284,50 @@ namespace TelegramBotMinecraft
                     }
                 }
                 _ = Task.Run(() => CheckServerAsync());
-                //_ = Task.Run(() => CheckRconAsync());
-                
+                _ = Task.Run(() => CheckRconAsync());
+                _ = Task.Run(() => CheckJsonSettings());
             }
-            _ = Task.Run(() => CheckRconAsync());
+            catch { }
+        }
+        private async Task RunBotLoopAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    await StartBotAsync();
+                    // Если StartBotAsync завершился без ошибок — выходим из цикла
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    AppendText($"Бот завершил работу: {ex.Message}.");
+                    await Task.Delay(5000);
+                }
+            }
         }
 
+        private async Task StartBotAsync()
+        {
+            cts = new CancellationTokenSource();
+
+            if (StartBot == true)
+            {
+                BotToken = settings[0].BotToken;
+                botClient = new TelegramBotClient(BotToken);
+                var me = await botClient.GetMe();
+                AppendText($"Бот {me.Username} запущен и готов к работе.");
+
+                botClient.StartReceiving(
+                    new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
+                    cancellationToken: cts.Token
+                );
+                StartBot = false;
+            }
+
+            // Можно добавить ожидание завершения работы, если нужно
+            await Task.Delay(Timeout.Infinite, cts.Token);
+        }
         private async Task CheckInfoServers()
         {
             while (true)
@@ -278,6 +422,76 @@ namespace TelegramBotMinecraft
 
                 await Task.Delay(5000);
                 flagStartCheck = false;
+            }
+        }
+
+        private async Task CheckJsonSettings()
+        {
+            while (true)
+            {
+                try
+                {
+
+                    //jsonSettings = File.ReadAllText("Settings.json");
+                    settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+                    if (settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)))
+                    {
+                        settings[0].ChatIds.RemoveAll(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name));
+                        string jsonStr = JsonSerializer.Serialize(settings, options);
+                        File.WriteAllText(pathSettings, jsonStr);
+                    }
+
+                    if (settings[0].ChatIds == null ||
+                        settings[0].ChatIds.Any(c => c.Identifier == "example: 646516246" || c.Name == "example: Admin") ||
+                        settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)) ||
+                        settings[0].ChatIds.Count == 0)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            button1.Enabled = true;
+                            button2.Enabled = false;
+                            button3.Enabled = true;
+                            button3.Visible = true;
+                            button4.Enabled = false;
+                            textBox2.Enabled = false;
+                            textBox3.Enabled = false;
+                            label1.Enabled = false;
+                        }));
+
+                        if (cts != null)
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        }
+                        Form1_Load(this, EventArgs.Empty);
+                        return;
+                    }
+                }
+                catch{}
+                try
+                {
+                    jsonSettings = File.ReadAllText("Settings.json");
+                    settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+                }
+                catch (Exception ex)
+                {
+                    settings = new List<SettingsConfig>
+                    {
+                        new SettingsConfig
+                        {
+                            Notifications = true,
+                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                            ChatIds = new List<ChatId>
+                            {
+                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                            }
+                        }
+                    };
+                    string jsonStr = JsonSerializer.Serialize(settings, options);
+                    File.WriteAllText(pathSettings, jsonStr);
+                    AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки.");
+                }
+                await Task.Delay(1500);
             }
         }
 
@@ -584,6 +798,7 @@ namespace TelegramBotMinecraft
                     }
                 }
 
+
                 await Task.Delay(5000); // Ждем 5 секунд перед следующим запросом
             }
         }
@@ -772,5 +987,4 @@ namespace TelegramBotMinecraft
             }
         }
     }
-
 }

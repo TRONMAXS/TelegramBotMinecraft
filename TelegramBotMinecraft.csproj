@@ -15,8 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RCONServer" Version="1.0.2" />
     <PackageReference Include="Telegram.Bot" Version="22.5.2-dev.5" />
   </ItemGroup>
 

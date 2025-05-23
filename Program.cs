@@ -50,7 +50,11 @@ namespace TelegramBotMinecraft
                     new SettingsConfig
                     {
                         Notifications = true,
-                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)"
+                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                        ChatIds = new List<ChatId>
+                        {
+                            new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                        }
                     }
                 };
 
@@ -87,6 +91,28 @@ namespace TelegramBotMinecraft
                     changed = true;
                 }
 
+                if (config.ChatIds == null || config.ChatIds.Count == 0)
+                {
+                    config.ChatIds = new List<ChatId>
+                    {
+                        new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                    };
+                    changed = true;
+                }
+                else
+                {
+                    foreach (var chatId in config.ChatIds)
+                    {
+                        if (string.IsNullOrWhiteSpace(chatId.Identifier) || string.IsNullOrWhiteSpace(chatId.Name))
+                        {
+                            chatId.Identifier = "example: 646516246";
+                            chatId.Name = "example: Admin";
+                            changed = true;
+                        }
+                    }
+                }
+
+
                 if (changed)
                 {
                     var options = new JsonSerializerOptions { WriteIndented = true };
@@ -101,7 +127,11 @@ namespace TelegramBotMinecraft
                     new SettingsConfig
                     {
                         Notifications = true,
-                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)"
+                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                        ChatIds = new List<ChatId>
+                        {
+                            new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
+                        }
                     }
                 };
 

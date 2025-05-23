@@ -96,13 +96,16 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(800, 450);
             Controls.Add(checkedListBox1);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(textBox1);
             Name = "Form2";
-            Text = "Form2";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Сервера";
             ResumeLayout(false);
             PerformLayout();
         }
