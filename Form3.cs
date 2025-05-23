@@ -37,14 +37,14 @@ namespace TelegramBotMinecraft
             var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
             if (checkBox1.Checked)
             {
-                MessageBox.Show("Уведомления включены");
+                MessageBox.Show("Уведомления включены", "Настройки");
                 settings[0].Notifications = true;
                 string json = System.Text.Json.JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, json);
             }
             else
             {
-                MessageBox.Show("Уведомления отключены");
+                MessageBox.Show("Уведомления отключены", "Настройки");
                 settings[0].Notifications = false;
                 string json = System.Text.Json.JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, json);
@@ -55,7 +55,7 @@ namespace TelegramBotMinecraft
         {
             var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
             suppressCheckedChanged = true;
-            checkBox1.Checked = settings[0].Notifications;
+            checkBox1.Checked = settings[0].Notifications ?? false;
             if (settings[0].BotToken == null)
             {
                 BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)";
@@ -78,19 +78,19 @@ namespace TelegramBotMinecraft
             {
                 BotToken = input;
                 settings[0].BotToken = BotToken;
-                string jsonStr = System.Text.Json.JsonSerializer.Serialize(settings, options);
+                string jsonStr = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, jsonStr);
-                MessageBox.Show("Токен бота успешно сохранён!");
+                MessageBox.Show("Токен бота успешно сохранён!", "Telegram Bot");
             }
             else
             {
-                MessageBox.Show("Введите токен бота перед сохранением.");
+                MessageBox.Show("Введите токен бота перед сохранением.", "Telegram Bot");
             }
         }
     }
     public class SettingsConfig
     {
-        public bool Notifications { get; set; }
+        public bool? Notifications { get; set; }
         public string BotToken { get; set; }
     }
 }

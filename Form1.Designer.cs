@@ -38,6 +38,8 @@
             button2 = new Button();
             button3 = new Button();
             button4 = new Button();
+            label2 = new Label();
+            textBox3 = new TextBox();
             SuspendLayout();
             // 
             // textBox1
@@ -71,17 +73,16 @@
             // 
             // label1
             // 
+            label1.Enabled = false;
             label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label1.Location = new Point(7, 405);
+            label1.Location = new Point(7, 395);
             label1.Name = "label1";
             label1.Size = new Size(166, 27);
             label1.TabIndex = 2;
             label1.Text = "Сервер - выключен";
-            label1.Enabled = false;
             // 
             // button1
             // 
-            button1.Enabled = true;
             button1.Location = new Point(713, 372);
             button1.Name = "button1";
             button1.Size = new Size(81, 27);
@@ -102,7 +103,7 @@
             // button3
             // 
             button3.Enabled = false;
-            button3.Location = new Point(575, 384);
+            button3.Location = new Point(575, 383);
             button3.Name = "button3";
             button3.Size = new Size(132, 39);
             button3.TabIndex = 5;
@@ -120,11 +121,31 @@
             button4.Text = "Выполнить команду";
             button4.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 12F);
+            label2.Location = new Point(12, 422);
+            label2.Name = "label2";
+            label2.Size = new Size(0, 21);
+            label2.TabIndex = 7;
+            // 
+            // textBox3
+            // 
+            textBox3.Font = new Font("Segoe UI", 12F);
+            textBox3.Location = new Point(7, 420);
+            textBox3.Name = "textBox3";
+            textBox3.ReadOnly = true;
+            textBox3.Size = new Size(193, 29);
+            textBox3.TabIndex = 8;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(textBox3);
+            Controls.Add(label2);
             Controls.Add(button4);
             Controls.Add(button3);
             Controls.Add(button2);
@@ -134,7 +155,6 @@
             Controls.Add(textBox1);
             KeyPreview = true;
             Name = "Form1";
-            Text = "TelegramBotMinecraft";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -149,5 +169,7 @@
         private Button button2;
         private Button button3;
         private Button button4;
+        private Label label2;
+        private TextBox textBox3;
     }
 }

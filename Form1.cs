@@ -1,11 +1,7 @@
 ﻿using CoreRCON;
-using CoreRCON.PacketFormats;
-//using MinecraftServerRCON;
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.Net;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -20,7 +16,7 @@ namespace TelegramBotMinecraft
         private TelegramBotClient botClient;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private string TextBoxAdmin;
-        private string jsonFilePath;
+        private string pathServers;
         private string json;
         private string pathSettings;
         private string jsonSettings;
@@ -28,6 +24,8 @@ namespace TelegramBotMinecraft
         private List<ServerConfig> servers = new List<ServerConfig>();
         private bool isServerRunning = false;
         private string BotToken;
+        private int CheckEnableServer = -1;
+        private bool flagStartCheck = true;
         private static readonly HashSet<long> AllowedUsers = new HashSet<long>
         {
             903878687,         // твой ID
@@ -40,6 +38,7 @@ namespace TelegramBotMinecraft
         public Form1()
         {
             InitializeComponent();
+            pathServers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Servers.json");
             json = File.ReadAllText("Servers.json");
             servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
 
@@ -123,61 +122,14 @@ namespace TelegramBotMinecraft
         {
             jsonSettings = File.ReadAllText("Settings.json");
             settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-            if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
-            {
-                MessageBox.Show("Не указан токен бота в файле Settings.json!");
-                AppendText($"Зайдите в настройки и введите токен бота");
-                button3.Enabled = true;
-                button3.Visible = true;
-                return;
-            }
-            else
-            {
-                try
-                {
-
-                    BotToken = settings[0].BotToken;
-                    botClient = new TelegramBotClient(BotToken);
-                    var me = await botClient.GetMe(); // проверка, что бот жив
-                    AppendText($"Бот {me.Username} запущен и готов к работе.");
-
-                    botClient.StartReceiving(
-                        new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
-                        cancellationToken: cts.Token
-                    );
-                }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при запуске бота: {ex.Message}");
-                    AppendText($"Возможно не правильный токен бота. Пожалуйста проверьте его на правильность написания!");
-                    button3.Enabled = true;
-                    button3.Visible = true;
-                    return;
-                }
-                button1.Enabled = true;
-                button2.Enabled = true;
-                button3.Enabled = true;
-                button4.Enabled = true;
-                textBox2.Enabled = true;
-                label1.Enabled = true;
-
-            }
-
-            var newRcon = await ConnectToRconAsync(servers[0]);
-
-            if (newRcon != null)
-            {
-                rcon = newRcon; // только если подключение удалось
-            }
-            _ = Task.Run(() => CheckServerAsync());
-            _ = Task.Run(() => CheckRconAsync());
+            Form1_Load(this, EventArgs.Empty);
         }
 
         private async void Form1_Load(object sender, EventArgs e)
         {
             if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
             {
-                MessageBox.Show("Не указан токен бота в файле Settings.json!");
+                MessageBox.Show("Не указан токен бота в файле Settings.json!", "Ошибка в файле Settings.json");
                 AppendText($"Зайдите в настройки и введите токен бота");
                 button3.Enabled = true;
                 button3.Visible = true;
@@ -209,21 +161,126 @@ namespace TelegramBotMinecraft
                 button1.Enabled = true;
                 button2.Enabled = true;
                 button3.Enabled = true;
+                button3.Visible = false;
                 button4.Enabled = true;
                 textBox2.Enabled = true;
                 label1.Enabled = true;
 
+                _ = Task.Run(() => CheckInfoServers());
 
-                var newRcon = await ConnectToRconAsync(servers[0]);
 
-                if (newRcon != null)
+                if (CheckEnableServer != -1)
                 {
-                    rcon = newRcon; // только если подключение удалось
+                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                    if (newRcon != null)
+                    {
+                        rcon = newRcon; // только если подключение удалось
+                    }
                 }
                 _ = Task.Run(() => CheckServerAsync());
-                _ = Task.Run(() => CheckRconAsync());
+                //_ = Task.Run(() => CheckRconAsync());
+                
+            }
+            _ = Task.Run(() => CheckRconAsync());
+        }
+
+        private async Task CheckInfoServers()
+        {
+            while (true)
+            {
+                string json = File.ReadAllText(pathServers);
+                servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
+
+                int count = 0;
+                int countFalse = 0;
+
+
+                if (rcon != null)
+                {
+                    if (flagStartCheck == false && servers[CheckEnableServer].RconPort != Convert.ToString(rcon.Port))
+                    {
+                        if (rcon != null && rcon.Connected == true) 
+                        {
+                            AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
+                            rcon.Dispose(); 
+                            rcon = null;
+                        }
+                        if (CheckEnableServer != -1)
+                        {
+                            var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                            if (newRcon != null)
+                            {
+                                rcon = newRcon; // только если подключение удалось
+                            }
+                        }
+                    }
+                }
+                for (int i = 0; i < servers.Count; i++)
+                {
+                    if (servers[i].Enabled == true)
+                    {
+                        CheckEnableServer = i;
+                        this.Invoke(new Action(() =>
+                        { 
+                        textBox3.Text = "Server - " + servers[i].Name;
+                        }));
+
+                        if (rcon != null && rcon.Connected == false)
+                        {
+                            var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                            if (newRcon != null)
+                            {
+                                rcon = newRcon; // только если подключение удалось
+                            }
+                        }
+                    }
+                }
+                for (int i = 0; i < servers.Count; i++)
+                {
+                    if (servers[i].Enabled == false)
+                    {
+                        countFalse++;
+                    }
+                }
+                if (countFalse == servers.Count)
+                {
+                    MessageBox.Show($"В файле Servers.json нет включённых серверов. Пожалуйста, включите хотя бы один, чтобы можно было с ним работать.", "Ошибка в файле Servers.json");
+                }
+
+                for (int i = 0; i < servers.Count; i++)
+                {
+                    if (servers[i].Enabled == true)
+                    {
+                        count++;
+                    }
+                }
+
+                if (count > 1)
+                {
+                    for (int i = 0; i < servers.Count; i++)
+                    {
+                        servers[i].Enabled = false;
+                    }
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    string jsonStr = JsonSerializer.Serialize(servers, options);
+                    File.WriteAllText(pathServers, jsonStr);
+
+                    MessageBox.Show("Можно включить только один сервер. Все серверы были отключены. Включите нужный сервер.", "Ошибка в файле Servers.json");
+                    this.Invoke(new Action(() =>
+                    {
+                        textBox3.Text = "Server - ";
+                    }));
+                }
+                else
+                {
+
+                }
+
+                await Task.Delay(5000);
+                flagStartCheck = false;
             }
         }
+
         public static bool IsValidJson(string json)
         {
             try
@@ -240,7 +297,12 @@ namespace TelegramBotMinecraft
         }
         private async Task<RCON?> ConnectToRconAsync(ServerConfig config)
         {
-            if (rcon != null && rcon.Connected == true) { rcon.Dispose();}
+            if (rcon != null && rcon.Connected == true) 
+            {
+                AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
+                rcon.Dispose();
+                rcon = null;
+            }
             try
             {
 
@@ -274,17 +336,14 @@ namespace TelegramBotMinecraft
                         {
                             isServerRunning = true;
 
-                            if (servers != null && servers.Count > 0)
+                            Process.Start(new ProcessStartInfo
                             {
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = "start.cmd",
-                                    UseShellExecute = false,
-                                    WorkingDirectory = @$"{servers[0].Path}"
-                                });
-                            }
+                                FileName = "start.cmd",
+                                UseShellExecute = false,
+                                WorkingDirectory = @$"{servers[CheckEnableServer].Path}"
+                            });
+                            AppendText($"Сервер {servers[CheckEnableServer].Name} запущен!");
                             _ = ShowBalloonTip("Сервер", "Minecraft-сервер успешно запущен!");
-
                         }
                         else
                         {
@@ -293,7 +352,11 @@ namespace TelegramBotMinecraft
                         break;
                     case "stop":
                         _ = Task.Run(() => RconServerAnyAsync("stop"));
-                        _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
+                        if (rcon != null)
+                        {
+                            _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
+                            AppendText($"Сервер {servers[CheckEnableServer].Name} остановлен!");
+                        }
                         break;
                     case "list":
                         _ = Task.Run(() => RconServerAnyAsync("list"));
@@ -374,7 +437,7 @@ namespace TelegramBotMinecraft
                                 FileName = "start.cmd",
                                 UseShellExecute = false,
                                 //WorkingDirectory = @"G:\Server Minecraft - Forge - 1.20.1\"
-                                WorkingDirectory = @$"{servers[0].Path}"
+                                WorkingDirectory = @$"{servers[CheckEnableServer].Path}"
                             });
                             _= ShowBalloonTip("Сервер", "Minecraft-сервер успешно запущен!");
                             chatReply = "Сервер запускается...";
@@ -390,7 +453,7 @@ namespace TelegramBotMinecraft
                     case "/bot_world_delete":
                     case "/bot_world_delete@xy8zjr4tqbot":
                         //Directory.Delete(@"G:\Server Minecraft - Forge - 1.20.1\world", true);
-                        Directory.Delete(@$"{servers[0].Path}world", true);
+                        Directory.Delete(@$"{servers[CheckEnableServer].Path}world", true);
                         chatReply = "Мир успешно удалён!";
                         _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
                         break;
@@ -494,19 +557,30 @@ namespace TelegramBotMinecraft
         }
         private async Task CheckRconAsync()
         {
+            await Task.Delay(5000);
             while (true)
             {
-                if (rcon != null)
+                if (rcon == null)
                 {
-
-                }
-                else
-                {
-                    var newRcon = await ConnectToRconAsync(servers[0]);
-
+                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
                     if (newRcon != null)
                     {
                         rcon = newRcon;
+                    }
+                }
+
+                if (rcon != null && servers[CheckEnableServer].RconPort != Convert.ToString(rcon.Port))
+                {
+                    if (rcon != null && rcon.Connected == true)
+                    {
+                        AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
+                        rcon.Dispose();
+                        rcon = null;
+                    }
+                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                    if (newRcon != null)
+                    {
+                        rcon = newRcon; 
                     }
                 }
 

@@ -41,7 +41,8 @@
             // 
             // openFileDialog1
             // 
-            openFileDialog1.FileName = "openFileDialog1";
+            openFileDialog1.FileName = "Servers.json";
+            openFileDialog1.ShowPreview = true;
             // 
             // textBox1
             // 
@@ -57,12 +58,14 @@
             // 
             // button2
             // 
+            button2.Enabled = false;
             button2.Location = new Point(707, 14);
             button2.Name = "button2";
             button2.Size = new Size(81, 27);
             button2.TabIndex = 6;
             button2.Text = "Сохранить";
             button2.UseVisualStyleBackColor = true;
+            button2.Visible = false;
             // 
             // button1
             // 

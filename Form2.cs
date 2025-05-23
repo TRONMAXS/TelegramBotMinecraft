@@ -60,6 +60,7 @@ namespace TelegramBotMinecraft
                 string json = File.ReadAllText(jsonFilePath);
                 servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
 
+                
                 checkedListBox1.Items.Clear();
                 foreach (var server in servers)
                 {
@@ -71,13 +72,21 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message);
+                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message, "Ошибка");
             }
         }
 
         private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            // Изменения применяются после события → нужно отложить действие
+            if (e.NewValue == CheckState.Checked)
+            {
+                for (int i = 0; i < checkedListBox1.Items.Count; i++)
+                {
+                    if (i != e.Index)
+                        checkedListBox1.SetItemChecked(i, false);
+                }
+            }
+
             BeginInvoke(new Action(() =>
             {
                 if (e.Index >= 0 && e.Index < servers.Count)
