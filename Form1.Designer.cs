@@ -1,5 +1,6 @@
 ﻿namespace TelegramBotMinecraft
 {
+
     partial class Form1
     {
         /// <summary>
@@ -70,6 +71,13 @@
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "notifyIcon1";
             notifyIcon1.Visible = true;
+
+            notifyIconMenu = new ContextMenuStrip();
+            exitMenuItem = new ToolStripMenuItem("Выход");
+            exitMenuItem.Click += ExitMenuItem_Click;
+            notifyIconMenu.Items.Add(exitMenuItem);
+            notifyIcon1.ContextMenuStrip = notifyIconMenu;
+
             // 
             // label1
             // 
@@ -132,20 +140,20 @@
             // 
             // textBox3
             // 
+            textBox3.Enabled = false;
             textBox3.Font = new Font("Segoe UI", 12F);
             textBox3.Location = new Point(7, 420);
             textBox3.Name = "textBox3";
             textBox3.ReadOnly = true;
             textBox3.Size = new Size(193, 29);
             textBox3.TabIndex = 8;
-            textBox3.Enabled = false;   
             // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.None;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(800, 504);
+            ClientSize = new Size(800, 460);
             Controls.Add(textBox3);
             Controls.Add(label2);
             Controls.Add(button4);
@@ -159,6 +167,8 @@
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Telegram Bot Minecraft";
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             ResumeLayout(false);
             PerformLayout();
         }

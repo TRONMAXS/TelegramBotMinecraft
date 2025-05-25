@@ -159,8 +159,10 @@
             Controls.Add(label1);
             Controls.Add(checkBox1);
             Name = "Form3";
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Настройки";
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             ResumeLayout(false);
             PerformLayout();
         }

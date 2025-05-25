@@ -44,6 +44,10 @@
             openFileDialog1.FileName = "Servers.json";
             openFileDialog1.ShowPreview = true;
             // 
+            // saveFileDialog1
+            // 
+            saveFileDialog1.FileName = "Servers.json";
+            // 
             // textBox1
             // 
             textBox1.Font = new Font("Segoe UI", 12F);
@@ -52,24 +56,22 @@
             textBox1.Name = "textBox1";
             textBox1.PlaceholderText = "Текствое поле для Json ";
             textBox1.ScrollBars = ScrollBars.Both;
-            textBox1.Size = new Size(602, 432);
+            textBox1.Size = new Size(602, 424);
             textBox1.TabIndex = 0;
             textBox1.WordWrap = false;
             // 
             // button2
             // 
-            button2.Enabled = false;
-            button2.Location = new Point(707, 14);
+            button2.Location = new Point(752, 12);
             button2.Name = "button2";
             button2.Size = new Size(81, 27);
             button2.TabIndex = 6;
             button2.Text = "Сохранить";
             button2.UseVisualStyleBackColor = true;
-            button2.Visible = false;
             // 
             // button1
             // 
-            button1.Location = new Point(620, 14);
+            button1.Location = new Point(620, 12);
             button1.Name = "button1";
             button1.Size = new Size(81, 27);
             button1.TabIndex = 5;
@@ -81,9 +83,9 @@
             checkedListBox1.Font = new Font("Segoe UI", 12F);
             checkedListBox1.FormattingEnabled = true;
             checkedListBox1.HorizontalScrollbar = true;
-            checkedListBox1.Location = new Point(620, 64);
+            checkedListBox1.Location = new Point(620, 50);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(165, 364);
+            checkedListBox1.Size = new Size(213, 388);
             checkedListBox1.TabIndex = 7;
             // 
             // notifyIcon1
@@ -98,14 +100,17 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(845, 450);
             Controls.Add(checkedListBox1);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(textBox1);
+            MaximizeBox = false;
             Name = "Form2";
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Сервера";
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             ResumeLayout(false);
             PerformLayout();
         }

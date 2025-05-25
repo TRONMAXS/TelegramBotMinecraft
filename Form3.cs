@@ -1,7 +1,4 @@
-﻿using CoreRCON.Parsers.Csgo;
-using System.Text.Json;
-using Telegram.Bot.Types;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Text.Json;
 
 namespace TelegramBotMinecraft
 {
