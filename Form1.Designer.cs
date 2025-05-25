@@ -34,6 +34,8 @@
             textBox1 = new TextBox();
             textBox2 = new TextBox();
             notifyIcon1 = new NotifyIcon(components);
+            notifyIconMenu = new ContextMenuStrip(components);
+            exitMenuItem = new ToolStripMenuItem();
             label1 = new Label();
             button1 = new Button();
             button2 = new Button();
@@ -41,6 +43,8 @@
             button4 = new Button();
             label2 = new Label();
             textBox3 = new TextBox();
+            button5 = new Button();
+            notifyIconMenu.SuspendLayout();
             SuspendLayout();
             // 
             // textBox1
@@ -68,16 +72,23 @@
             // 
             // notifyIcon1
             // 
+            notifyIcon1.ContextMenuStrip = notifyIconMenu;
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "notifyIcon1";
             notifyIcon1.Visible = true;
-
-            notifyIconMenu = new ContextMenuStrip();
-            exitMenuItem = new ToolStripMenuItem("Выход");
+            // 
+            // notifyIconMenu
+            // 
+            notifyIconMenu.Items.AddRange(new ToolStripItem[] { exitMenuItem });
+            notifyIconMenu.Name = "notifyIconMenu";
+            notifyIconMenu.Size = new Size(61, 4);
+            // 
+            // exitMenuItem
+            // 
+            exitMenuItem.Name = "exitMenuItem";
+            exitMenuItem.Size = new Size(32, 19);
+            exitMenuItem.Text = "Выход";
             exitMenuItem.Click += ExitMenuItem_Click;
-            notifyIconMenu.Items.Add(exitMenuItem);
-            notifyIcon1.ContextMenuStrip = notifyIconMenu;
-
             // 
             // label1
             // 
@@ -148,12 +159,24 @@
             textBox3.Size = new Size(193, 29);
             textBox3.TabIndex = 8;
             // 
+            // button5
+            // 
+            button5.Enabled = false;
+            button5.Location = new Point(575, 383);
+            button5.Name = "button5";
+            button5.Size = new Size(132, 39);
+            button5.TabIndex = 9;
+            button5.Text = "Перепроверить сервера";
+            button5.UseVisualStyleBackColor = true;
+            button5.Visible = false;
+            // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.None;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(800, 460);
+            Controls.Add(button5);
             Controls.Add(textBox3);
             Controls.Add(label2);
             Controls.Add(button4);
@@ -163,12 +186,13 @@
             Controls.Add(label1);
             Controls.Add(textBox2);
             Controls.Add(textBox1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             KeyPreview = true;
+            MaximizeBox = false;
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Telegram Bot Minecraft";
-            MaximizeBox = false;
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            notifyIconMenu.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -185,5 +209,6 @@
         private Button button4;
         private Label label2;
         private TextBox textBox3;
+        private Button button5;
     }
 }
