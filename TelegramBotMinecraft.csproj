@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageIcon>server-icon.png</PackageIcon>
+    <ApplicationIcon>ChatGPT-Image-26-мая-2025-г._-13_20_15.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="ChatGPT-Image-26-мая-2025-г._-13_20_15.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
     <PackageReference Include="Telegram.Bot" Version="22.5.2-dev.5" />
   </ItemGroup>
@@ -35,13 +40,6 @@
     <EmbeddedResource Include="Icons\server_stop.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\..\..\..\..\Изображения\server-icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>

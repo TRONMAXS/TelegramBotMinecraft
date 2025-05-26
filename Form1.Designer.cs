@@ -36,6 +36,10 @@
             notifyIcon1 = new NotifyIcon(components);
             notifyIconMenu = new ContextMenuStrip(components);
             exitMenuItem = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
+            toolStripMenuItem1 = new ToolStripMenuItem();
+            toolStripComboBox1 = new ToolStripComboBox();
+            toolStripTextBox1 = new ToolStripTextBox();
             label1 = new Label();
             button1 = new Button();
             button2 = new Button();
@@ -74,21 +78,42 @@
             // 
             notifyIcon1.ContextMenuStrip = notifyIconMenu;
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-            notifyIcon1.Text = "notifyIcon1";
+            notifyIcon1.Text = "TelegramBotMinecraft";
             notifyIcon1.Visible = true;
             // 
             // notifyIconMenu
             // 
-            notifyIconMenu.Items.AddRange(new ToolStripItem[] { exitMenuItem });
+            notifyIconMenu.Items.AddRange(new ToolStripItem[] { exitMenuItem, toolStripSeparator1, toolStripMenuItem1, toolStripComboBox1, toolStripTextBox1 });
             notifyIconMenu.Name = "notifyIconMenu";
-            notifyIconMenu.Size = new Size(61, 4);
+            notifyIconMenu.Size = new Size(182, 106);
+            notifyIconMenu.Text = "TelegramBotMinecraft";
             // 
             // exitMenuItem
             // 
             exitMenuItem.Name = "exitMenuItem";
-            exitMenuItem.Size = new Size(32, 19);
+            exitMenuItem.Size = new Size(181, 22);
             exitMenuItem.Text = "Выход";
             exitMenuItem.Click += ExitMenuItem_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(178, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(181, 22);
+            // 
+            // toolStripComboBox1
+            // 
+            toolStripComboBox1.Name = "toolStripComboBox1";
+            toolStripComboBox1.Size = new Size(121, 23);
+            // 
+            // toolStripTextBox1
+            // 
+            toolStripTextBox1.Name = "toolStripTextBox1";
+            toolStripTextBox1.Size = new Size(100, 23);
             // 
             // label1
             // 
@@ -193,6 +218,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Telegram Bot Minecraft";
             notifyIconMenu.ResumeLayout(false);
+            notifyIconMenu.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -210,5 +236,9 @@
         private Label label2;
         private TextBox textBox3;
         private Button button5;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripComboBox toolStripComboBox1;
+        private ToolStripTextBox toolStripTextBox1;
     }
 }

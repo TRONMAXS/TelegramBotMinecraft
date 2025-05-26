@@ -28,10 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form3));
             checkBox1 = new CheckBox();
-            notifyIcon1 = new NotifyIcon(components);
             label1 = new Label();
             textBox1 = new TextBox();
             button1 = new Button();
@@ -52,12 +49,6 @@
             checkBox1.TabIndex = 0;
             checkBox1.Text = "Всплывающие уведомления";
             checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // notifyIcon1
-            // 
-            notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-            notifyIcon1.Text = "notifyIcon1";
-            notifyIcon1.Visible = true;
             // 
             // label1
             // 
@@ -104,7 +95,6 @@
             listBox1.Name = "listBox1";
             listBox1.ScrollAlwaysVisible = true;
             listBox1.Size = new Size(222, 169);
-            listBox1.Sorted = false;
             listBox1.TabIndex = 6;
             // 
             // textBox2
@@ -158,11 +148,11 @@
             Controls.Add(textBox1);
             Controls.Add(label1);
             Controls.Add(checkBox1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "Form3";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Настройки";
-            MaximizeBox = false;
-            FormBorderStyle = FormBorderStyle.FixedSingle;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -170,7 +160,6 @@
         #endregion
 
         private CheckBox checkBox1;
-        public NotifyIcon notifyIcon1;
         private Label label1;
         private TextBox textBox1;
         private Button button1;

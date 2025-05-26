@@ -828,11 +828,12 @@ namespace TelegramBotMinecraft
                         chatReply =
                             "Доступные команды:\n" +
                             "/servers_list — показывает список доступных серверов Minecraft\n" +
-                            "/server_enable — включает указанный сервер Minecraft\n" +
+                            "/server_enable <админ пароль> <номер> — включает указанный сервер Minecraft\n" +
                             "/bot_server_start — запускает выбранный сервер\n" +
                             "/bot_servers_check — проверяет статус серверов\n" +
                             "/bot_server_list — показывает количество игроков на выбранном сервере\n" +
                             "/bot_server_stop — останавливает выбранный сервер\n" +
+                            "/bot_server_command <админ пароль> <команда> — выполняет написанную команду на выбранном сервере\n" +
                             "/bot_world_delete — удаляет мир на выбранном сервере";
                         break;
 
@@ -853,7 +854,7 @@ namespace TelegramBotMinecraft
                                 UseShellExecute = false,
                                 WorkingDirectory = @$"{servers[CheckEnableServer].Path}"
                             });
-                            _= ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
+                            _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
                             chatReply = "Сервер запускается...";
                             await Task.Delay(5000);
                             _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
@@ -862,7 +863,7 @@ namespace TelegramBotMinecraft
                         {
                             chatReply = "Сервер запущен!";
                         }
-                            break;
+                        break;
 
                     case "/bot_world_delete":
                     case "/bot_world_delete@xy8zjr4tqbot":
@@ -888,18 +889,19 @@ namespace TelegramBotMinecraft
                         chatReply = await ServersList();
                         break;
                     case "/server_enable@xy8zjr4tqbot":
-                        chatReply = "Укажите номер сервера: /server_enable <номер> . Можно включить только один сервер.";
+                    case "/server_enable":
+                        chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
                         break;
-                    case string s when s.StartsWith("/server_enable"):
+                    case string s when s.StartsWith("/server_enable admin200910"):
                         {
                             var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length == 2 && int.TryParse(parts[1], out int serverIndex))
+                            if (parts.Length == 3 && int.TryParse(parts[2], out int serverIndex))
                             {
-                                chatReply = await ServerEnable(Convert.ToInt32(parts[1]));
+                                chatReply = await ServerEnable(Convert.ToInt32(parts[2]));
                             }
                             else
                             {
-                                chatReply = "Укажите номер сервера: /server_enable <номер> . Можно включить только один сервер.";
+                                chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
                             }
                             break;
                         }
@@ -909,6 +911,24 @@ namespace TelegramBotMinecraft
                         chatReply = await RconServerStop();
                         _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
                         break;
+                    case "/bot_server_command@xy8zjr4tqbot":
+                    case "/bot_server_command":
+                        chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
+                        break;
+                    case string k when k.StartsWith("/bot_server_command admin200910"):
+                        {
+                            var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 3)
+                            {
+                                string runCommand = string.Join(' ', parts.Skip(2));
+                                chatReply = await ServerRunCommand(runCommand);
+                            }
+                            else
+                            {
+                                chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
+                            }
+                            break;
+                        }
 
                     default:
                         chatReply = "Неизвестная команда. Напиши /help.";
@@ -1297,6 +1317,25 @@ namespace TelegramBotMinecraft
             else
             {
                 response = "Остановка сервера.";
+            }
+            return response.Trim();
+        }
+
+        private async Task<string> ServerRunCommand(string command)
+        {
+            string response = "";
+            if (rcon != null)
+            {
+                response = await rcon.SendCommandAsync(command);
+            }
+            if (string.IsNullOrEmpty(response))
+            {
+                response = "Не удалось получить ответ от сервера. Возможно неправильная команда.";
+                AppendText($"Команда ({command}): {response}");
+            }
+            else
+            {
+                AppendText($"Команда ({command}) выполнена: {response}");
             }
             return response.Trim();
         }
