@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageIcon>server-icon.png</PackageIcon>
-    <ApplicationIcon>ChatGPT-Image-26-мая-2025-г._-13_20_15.ico</ApplicationIcon>
+    <ApplicationIcon>Telegram Bot Minecraft.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ChatGPT-Image-26-мая-2025-г._-13_20_15.ico" />
+    <Content Include="Telegram Bot Minecraft.ico" />
   </ItemGroup>
 
   <ItemGroup>
