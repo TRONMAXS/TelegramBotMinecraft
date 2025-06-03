@@ -1,4 +1,7 @@
-# Telegram Bot Minecraft
+# Telegram Bot Minecraft v0.0.1
+![GitHub release](https://img.shields.io/github/v/release/TRONMAXS/TelegramBotMinecraft?include_prereleases&label=release)
+![GitHub repo size](https://img.shields.io/github/repo-size/TRONMAXS/TelegramBotMinecraft)
+![GitHub issues](https://img.shields.io/github/issues/TRONMAXS/TelegramBotMinecraft)
 
 **Telegram-бот для удалённого управления Minecraft-серверами через Telegram.**
 Позволяет включать, выключать, проверять статус серверов и выполнять команды через RCON.
@@ -80,3 +83,13 @@
 * Права администратора требуются только для двух команд: `/server_enable`, `/bot_server_command`
 * **Поддержка Linux-серверов не тестировалась**
 * GUI доступен (Windows Forms интерфейс)
+
+---
+
+## 👤 Обо мне
+
+Привет! Меня зовут Максим — я изучаю C# и разработку игр на Unity.  
+Этот проект — моя практика и вдохновение от любимой игры *Cult of the Lamb*.  
+
+Если хочешь связаться — пиши на: popik.maxim@gmail.com  
+[Мои проекты на GitHub](https://github.com/TRONMAXS)
