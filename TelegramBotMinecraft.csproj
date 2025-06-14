@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
-    <PackageReference Include="Telegram.Bot" Version="22.5.2-dev.5" />
+    <PackageReference Include="Telegram.Bot" Version="22.5.2-dev.6" />
   </ItemGroup>
 
   <ItemGroup>
