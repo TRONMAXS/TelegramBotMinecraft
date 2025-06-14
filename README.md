@@ -19,7 +19,7 @@
 
 * Язык: **C#**
 * UI: **Windows Forms**
-* Библиотеки: [`Telegram.Bot`](https://github.com/TelegramBots/Telegram.Bot), [`CoreRCON`](https://github.com/dparparyan/CoreRCON)
+* Библиотеки: [`Telegram.Bot`](https://github.com/TelegramBots/Telegram.Bot), [`CoreRCON`](https://github.com/Challengermode/CoreRcon)
 
 ## Команды Telegram-бота
 
