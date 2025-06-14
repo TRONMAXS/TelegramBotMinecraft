@@ -1,4 +1,4 @@
-# Telegram Bot Minecraft v0.1.0
+# Telegram Bot Minecraft v0.2.0
 ![GitHub release](https://img.shields.io/github/v/release/TRONMAXS/TelegramBotMinecraft?include_prereleases&label=release)
 ![GitHub repo size](https://img.shields.io/github/repo-size/TRONMAXS/TelegramBotMinecraft)
 ![GitHub issues](https://img.shields.io/github/issues/TRONMAXS/TelegramBotMinecraft)
