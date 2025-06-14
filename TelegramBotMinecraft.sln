@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBotMinecraft", "TelegramBotMinecraft.csproj", "{4C49106D-EDCD-4DE8-8F23-4C64CCDB57EB}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupTelegramBotMinecraft", "..\SetupTelegramBotMinecraft\SetupTelegramBotMinecraft.vdproj", "{532E2B92-EBEA-9733-7765-A1A0F331311D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyInstallerActions", "..\MyInstallerActions\MyInstallerActions.csproj", "{F92F9E87-97B2-4D78-A9ED-DA014D158C12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,12 @@ Global
 		{4C49106D-EDCD-4DE8-8F23-4C64CCDB57EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C49106D-EDCD-4DE8-8F23-4C64CCDB57EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C49106D-EDCD-4DE8-8F23-4C64CCDB57EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{532E2B92-EBEA-9733-7765-A1A0F331311D}.Debug|Any CPU.ActiveCfg = Debug
+		{532E2B92-EBEA-9733-7765-A1A0F331311D}.Release|Any CPU.ActiveCfg = Release
+		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

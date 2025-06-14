@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Diagnostics;
 
 namespace TelegramBotMinecraft
 {
@@ -9,6 +10,12 @@ namespace TelegramBotMinecraft
         [STAThread]
         static void Main()
         {
+            string appName = "TelegramBotMinecraft";
+            if (IsAppAlreadyRunning(appName))
+            {
+                MessageBox.Show("Бот уже запущен!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             pathServers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Servers.json");
             pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
 
@@ -19,6 +26,12 @@ namespace TelegramBotMinecraft
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1()); // Бот стартует из Form1
+        }
+
+        public static bool IsAppAlreadyRunning(string appName)
+        {
+            Process[] processes = Process.GetProcessesByName(appName);
+            return processes.Length > 1;
         }
 
         static void LoadJsons()

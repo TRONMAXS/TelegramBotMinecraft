@@ -373,14 +373,14 @@ namespace TelegramBotMinecraft
                     var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
                     if (newRcon != null)
                     {
-                        rcon = newRcon; // только если подключение удалось
+                        rcon = newRcon;
                     }
                 }
                 StartCheck = true;
                 _ = Task.Run(() => CheckJson());
-
                 _ = Task.Run(() => CheckServerAsync());
                 _ = Task.Run(() => CheckRconAsync());
+
 
             }
             catch { }
@@ -716,7 +716,6 @@ namespace TelegramBotMinecraft
                     Convert.ToUInt16(config.RconPort),
                     config.RconPassword
                 );
-
                 await rcon.ConnectAsync();
                 await rcon.AuthenticateAsync();
 
@@ -817,14 +816,14 @@ namespace TelegramBotMinecraft
 
             try
             {
-                switch (text.ToLower())
+                switch (text)
                 {
                     case "/start":
                         chatReply = "Привет! напиши /help для списка всех команд";
                         break;
 
                     case "/help":
-                    case "/help@xy8zjr4tqbot":
+                    case "/help@Xy8zJr4tQBot":
                         chatReply =
                             "Доступные команды:\n" +
                             "/servers_list — показывает список доступных серверов Minecraft\n" +
@@ -838,12 +837,12 @@ namespace TelegramBotMinecraft
                         break;
 
                     case "/bot_servers_check":
-                    case "/bot_servers_check@xy8zjr4tqbot":
+                    case "/bot_servers_check@Xy8zJr4tQBot":
                         _ = Task.Run(() => RconCheckingServersAsync(msg.Chat.Id, msg.MessageThreadId));
                         break;
 
                     case "/bot_server_start":
-                    case "/bot_server_start@xy8zjr4tqbot":
+                    case "/bot_server_start@Xy8zJr4tQBot":
 
                         if (serversRunning[CheckEnableServer] == false)
                         {
@@ -866,7 +865,7 @@ namespace TelegramBotMinecraft
                         break;
 
                     case "/bot_world_delete":
-                    case "/bot_world_delete@xy8zjr4tqbot":
+                    case "/bot_world_delete@Xy8zJr4tQBot":
                         try
                         {
                             Directory.Delete(@$"{servers[CheckEnableServer].Path}world", true);
@@ -880,15 +879,15 @@ namespace TelegramBotMinecraft
                         break;
 
                     case "/bot_server_list":
-                    case "/bot_server_list@xy8zjr4tqbot":
+                    case "/bot_server_list@Xy8zJr4tQBot":
                         chatReply = await RconList();
                         break;
 
                     case "/servers_list":
-                    case "/servers_list@xy8zjr4tqbot":
+                    case "/servers_list@Xy8zJr4tQBot":
                         chatReply = await ServersList();
                         break;
-                    case "/server_enable@xy8zjr4tqbot":
+                    case "/server_enable@Xy8zJr4tQBot":
                     case "/server_enable":
                         chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
                         break;
@@ -907,11 +906,11 @@ namespace TelegramBotMinecraft
                         }
 
                     case "/bot_server_stop":
-                    case "/bot_server_stop@xy8zjr4tqbot":
+                    case "/bot_server_stop@Xy8zJr4tQBot":
                         chatReply = await RconServerStop();
                         _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
                         break;
-                    case "/bot_server_command@xy8zjr4tqbot":
+                    case "/bot_server_command@Xy8zJr4tQBot":
                     case "/bot_server_command":
                         chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
                         break;
