@@ -4,6 +4,8 @@ namespace TelegramBotMinecraft
 {
     public partial class Form3 : Form
     {
+        private Form4 form4;
+
         private string BotToken;
         private string pathSettings;
         private string json;
@@ -20,6 +22,7 @@ namespace TelegramBotMinecraft
             button1.Click += SaveBotToken;
             button2.Click += AddToListBox;
             button3.Click += DeleteItemListBox;
+            button4.Click += button4_Click;
             checkBox1.CheckedChanged += checkBox1_CheckedChanged;
 
             pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
@@ -29,6 +32,18 @@ namespace TelegramBotMinecraft
         private void Form3_Load(object sender, EventArgs e)
         {
             _ = JsonSettings();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (form4 == null || form4.IsDisposed)
+            {
+                form4 = new Form4();
+            }
+            form4.Show();
+            form4.BringToFront();
+            form4.WindowState = FormWindowState.Normal;
+            form4.Update();
         }
 
         private void AddToListBox(object sender, EventArgs e)

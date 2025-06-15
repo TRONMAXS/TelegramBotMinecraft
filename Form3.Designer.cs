@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form3));
             checkBox1 = new CheckBox();
             label1 = new Label();
             textBox1 = new TextBox();
@@ -38,6 +39,7 @@
             button2 = new Button();
             button3 = new Button();
             textBox3 = new TextBox();
+            button4 = new Button();
             SuspendLayout();
             // 
             // checkBox1
@@ -131,6 +133,15 @@
             textBox3.Size = new Size(161, 23);
             textBox3.TabIndex = 10;
             // 
+            // button4
+            // 
+            button4.Location = new Point(240, 294);
+            button4.Name = "button4";
+            button4.Size = new Size(106, 23);
+            button4.TabIndex = 11;
+            button4.Text = "Настроить";
+            button4.UseVisualStyleBackColor = true;
+            // 
             // Form3
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -138,6 +149,7 @@
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(358, 417);
+            Controls.Add(button4);
             Controls.Add(textBox3);
             Controls.Add(button3);
             Controls.Add(button2);
@@ -149,6 +161,7 @@
             Controls.Add(label1);
             Controls.Add(checkBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "Form3";
             StartPosition = FormStartPosition.CenterScreen;
@@ -170,5 +183,6 @@
         private Button button2;
         private Button button3;
         private TextBox textBox3;
+        private Button button4;
     }
 }
