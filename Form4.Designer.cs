@@ -42,64 +42,63 @@
             listBox1.FormattingEnabled = true;
             listBox1.HorizontalScrollbar = true;
             listBox1.ItemHeight = 15;
-            listBox1.Location = new Point(335, 54);
+            listBox1.Location = new Point(460, 63);
             listBox1.Name = "listBox1";
             listBox1.ScrollAlwaysVisible = true;
-            listBox1.Size = new Size(235, 304);
+            listBox1.Size = new Size(274, 454);
             listBox1.TabIndex = 7;
             // 
             // label3
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label3.Location = new Point(335, 9);
+            label3.Location = new Point(460, 9);
             label3.Name = "label3";
             label3.Size = new Size(235, 42);
             label3.TabIndex = 8;
             label3.Text = "               Разрешенные \r\nпользователи, чаты, группы";
-            label3.Click += label3_Click;
             // 
             // checkedListBox1
             // 
+            checkedListBox1.CheckOnClick = true;
             checkedListBox1.Font = new Font("Segoe UI", 12F);
             checkedListBox1.FormattingEnabled = true;
             checkedListBox1.HorizontalScrollbar = true;
-            checkedListBox1.Location = new Point(12, 54);
+            checkedListBox1.Location = new Point(12, 62);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(307, 124);
+            checkedListBox1.Size = new Size(442, 196);
             checkedListBox1.TabIndex = 9;
             // 
             // checkedListBox2
             // 
+            checkedListBox2.CheckOnClick = true;
             checkedListBox2.Font = new Font("Segoe UI", 12F);
             checkedListBox2.FormattingEnabled = true;
             checkedListBox2.HorizontalScrollbar = true;
-            checkedListBox2.Location = new Point(12, 208);
+            checkedListBox2.Location = new Point(12, 297);
             checkedListBox2.Name = "checkedListBox2";
-            checkedListBox2.Size = new Size(307, 148);
+            checkedListBox2.Size = new Size(442, 220);
             checkedListBox2.TabIndex = 10;
             // 
             // label1
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label1.Location = new Point(126, 30);
+            label1.Location = new Point(190, 38);
             label1.Name = "label1";
             label1.Size = new Size(76, 21);
             label1.TabIndex = 11;
             label1.Text = "Сервера";
-            label1.Click += label1_Click;
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label2.Location = new Point(126, 184);
+            label2.Location = new Point(182, 273);
             label2.Name = "label2";
             label2.Size = new Size(84, 21);
             label2.TabIndex = 11;
             label2.Text = "Команды";
-            label2.Click += label1_Click;
             // 
             // Form4
             // 
@@ -107,7 +106,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(582, 368);
+            ClientSize = new Size(746, 537);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(checkedListBox2);

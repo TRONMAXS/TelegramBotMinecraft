@@ -22,8 +22,8 @@ namespace TelegramBotMinecraft
             button1.Click += SaveBotToken;
             button2.Click += AddToListBox;
             button3.Click += DeleteItemListBox;
-            button4.Click += button4_Click;
-            checkBox1.CheckedChanged += checkBox1_CheckedChanged;
+            button4.Click += Button4_Click;
+            checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
 
             pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
             json = File.ReadAllText(pathSettings);
@@ -34,7 +34,7 @@ namespace TelegramBotMinecraft
             _ = JsonSettings();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void Button4_Click(object sender, EventArgs e)
         {
             if (form4 == null || form4.IsDisposed)
             {
@@ -112,7 +112,7 @@ namespace TelegramBotMinecraft
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (suppressCheckedChanged) return;
             var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
