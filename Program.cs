@@ -54,7 +54,7 @@ namespace TelegramBotMinecraft
                 };
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = System.Text.Json.JsonSerializer.Serialize(servers, options);
+                string json = JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(pathServers, json);
             }
             if (!File.Exists(pathSettings) || new FileInfo(pathSettings).Length == 0)
@@ -65,6 +65,7 @@ namespace TelegramBotMinecraft
                     {
                         Notifications = true,
                         BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                        AdminPassword = "Admin Password (example:  12345)",
                         ChatIds = new List<ChatId>
                         {
                             new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
@@ -73,7 +74,7 @@ namespace TelegramBotMinecraft
                 };
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = System.Text.Json.JsonSerializer.Serialize(settings, options);
+                string json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, json);
             }
 
@@ -102,6 +103,12 @@ namespace TelegramBotMinecraft
                 if (string.IsNullOrWhiteSpace(config.BotToken))
                 {
                     config.BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)";
+                    changed = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(config.AdminPassword))
+                {
+                    config.AdminPassword = "Admin Password (example:  12345)";
                     changed = true;
                 }
 
@@ -142,6 +149,7 @@ namespace TelegramBotMinecraft
                     {
                         Notifications = true,
                         BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                        AdminPassword = "Admin Password (example:  12345)",
                         ChatIds = new List<ChatId>
                         {
                             new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },

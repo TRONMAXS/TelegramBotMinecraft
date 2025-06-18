@@ -281,6 +281,7 @@ namespace TelegramBotMinecraft
                         {
                             Notifications = true,
                             BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
+                            AdminPassword = "Admin Password (example:  12345)",
                             ChatIds = new List<ChatId>
                             {
                                 new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
@@ -544,31 +545,6 @@ namespace TelegramBotMinecraft
                         }));
                         return false;
                     }
-                    /*int i = 0;
-                    for (int userIndex = 0; userIndex < UserSettings.Count; userIndex++)
-                    {
-                        var User = UserSettings[userIndex];
-                        foreach (var Server in User.AllowedServers)
-                        {
-                            if (Server.Enabled)
-                            {
-                                CheckEnableServer = i;
-                                AppendText($"CheckEnableServer-{CheckEnableServer}");
-
-                                if (rcon != null && !rcon.Connected)
-                                {
-                                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                                    if (newRcon != null)
-                                    {
-                                        rcon = newRcon; // только если подключение удалось
-                                    }
-                                }
-                                break; // выход из внутреннего цикла после первого включенного сервера
-                            }
-                            i++; // увеличиваем счетчик только если сервер не был включен
-                        }
-                    }*/
-
 
                     if (countFalse != servers.Count && MessageShow == false)
                     {
@@ -588,31 +564,6 @@ namespace TelegramBotMinecraft
                             label1.Enabled = true;
                         }));
                     }
-
-                    /*for (int i = 0; i < servers.Count; i++)
-                    {
-                        if (servers[i].Enabled == true)
-                        {
-                            count++;
-                        }
-                    }*/
-
-                    /*if (count > 1)
-                    {
-                        for (int i = 0; i < servers.Count; i++)
-                        {
-                            servers[i].Enabled = false;
-                        }
-                        var options = new JsonSerializerOptions { WriteIndented = true };
-                        string jsonStr = JsonSerializer.Serialize(servers, options);
-                        File.WriteAllText(pathServers, jsonStr);
-
-                        MessageBox.Show("Можно включить только один сервер. Все серверы были отключены. Включите нужный сервер.", "Ошибка в файле Servers.json");
-                        this.Invoke(new Action(() =>
-                        {
-                            textBox3.Text = "";
-                        }));
-                    }*/
 
                     flagStartCheck = false;
                 }
@@ -874,7 +825,7 @@ namespace TelegramBotMinecraft
 
                     if (NoEnableServer == 2)
                     {
-                        if (!text.StartsWith("/select_server admin200910"))
+                        if (!text.StartsWith($"/select_server {Settings[0].AdminPassword}"))
                         {
                             string errorText = "Нету выбранных серверов для использования";
 
@@ -1064,7 +1015,7 @@ namespace TelegramBotMinecraft
                         case "/select_server":
                             chatReply = "Укажите номер сервера:\n/select_server <админ пароль> <номер> .\nМожно переключиться только на один сервер.";
                             break;
-                        case string s when s.StartsWith("/select_server admin200910"):
+                        case string s when s.StartsWith($"/select_server {Settings[0].AdminPassword}"):
                             {
                                 var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                                 if (parts.Length == 3 && int.TryParse(parts[2], out int serverIndex))
@@ -1093,7 +1044,7 @@ namespace TelegramBotMinecraft
                         case "/server_command":
                             chatReply = "Укажите пароль и команду:\n/server_command <админ пароль> <команда> .";
                             break;
-                        case string k when k.StartsWith("/server_command admin200910"):
+                        case string k when k.StartsWith($"/server_command {Settings[0].AdminPassword}"):
                             {
                                 var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                                 if (parts.Length >= 3)
@@ -1148,186 +1099,6 @@ namespace TelegramBotMinecraft
                 }
             }
         }
-
-        /*private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken token)
-        {
-            
-
-
-            if (update.Type != UpdateType.Message || update.Message?.Type != MessageType.Text)
-                return;
-
-            var msg = update.Message;
-            string text = msg.Text.Trim();
-            string chatReply = "";
-
-            AppendText($"Получено сообщение от {msg.Chat.Id}: {msg.Text}{Environment.NewLine}");
-
-
-            if (!AllowedUsers.Contains(msg.Chat.Id))
-            {
-                if (msg.MessageThreadId.HasValue)
-                {
-                    var SendText = await bot.SendMessage(msg.Chat.Id, "У вас нет доступа к этой команде.", cancellationToken: token);
-                    AppendText(SendText.ToString());
-                }
-                else
-                {
-                    var SendText = await bot.SendMessage(msg.Chat.Id, "У вас нет доступа к этой команде.", cancellationToken: token);
-                    AppendText(SendText.ToString());
-                }
-                return;
-            }
-
-            try
-            {
-                switch (text)
-                {
-                    case "/start":
-                        chatReply = "Привет! напиши /help для списка всех команд";
-                        break;
-
-                    case "/help":
-                    case "/help@Xy8zJr4tQBot":
-                        chatReply =
-                            "Доступные команды:\n" +
-                            "/servers_list — показывает список доступных серверов Minecraft\n" +
-                            "/server_enable <админ пароль> <номер> — включает указанный сервер Minecraft\n" +
-                            "/bot_server_start — запускает выбранный сервер\n" +
-                            "/bot_servers_check — проверяет статус серверов\n" +
-                            "/bot_server_list — показывает количество игроков на выбранном сервере\n" +
-                            "/bot_server_stop — останавливает выбранный сервер\n" +
-                            "/bot_server_command <админ пароль> <команда> — выполняет написанную команду на выбранном сервере\n" +
-                            "/bot_world_delete — удаляет мир на выбранном сервере";
-                        break;
-
-                    case "/bot_servers_check":
-                    case "/bot_servers_check@Xy8zJr4tQBot":
-                        _ = Task.Run(() => RconCheckingServersAsync(msg.Chat.Id, msg.MessageThreadId));
-                        break;
-
-                    case "/bot_server_start":
-                    case "/bot_server_start@Xy8zJr4tQBot":
-
-                        if (serversRunning[CheckEnableServer] == false)
-                        {
-                            serversRunning[CheckEnableServer] = true;
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = "start.cmd",
-                                UseShellExecute = false,
-                                WorkingDirectory = @$"{servers[CheckEnableServer].Path}"
-                            });
-                            _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
-                            chatReply = "Сервер запускается...";
-                            await Task.Delay(5000);
-                            _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
-                        }
-                        else
-                        {
-                            chatReply = "Сервер запущен!";
-                        }
-                        break;
-
-                    case "/bot_world_delete":
-                    case "/bot_world_delete@Xy8zJr4tQBot":
-                        try
-                        {
-                            Directory.Delete(@$"{servers[CheckEnableServer].Path}world", true);
-                            chatReply = "Мир успешно удалён!";
-                            _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
-                        }
-                        catch
-                        {
-                            chatReply = "Мир уже удалён!";
-                        }
-                        break;
-
-                    case "/bot_server_list":
-                    case "/bot_server_list@Xy8zJr4tQBot":
-                        chatReply = await RconList();
-                        break;
-
-                    case "/servers_list":
-                    case "/servers_list@Xy8zJr4tQBot":
-                        chatReply = await ServersList();
-                        break;
-                    case "/server_enable@Xy8zJr4tQBot":
-                    case "/server_enable":
-                        chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
-                        break;
-                    case string s when s.StartsWith("/server_enable admin200910"):
-                        {
-                            var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length == 3 && int.TryParse(parts[2], out int serverIndex))
-                            {
-                                chatReply = await ServerEnable(Convert.ToInt32(parts[2]));
-                            }
-                            else
-                            {
-                                chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
-                            }
-                            break;
-                        }
-
-                    case "/bot_server_stop":
-                    case "/bot_server_stop@Xy8zJr4tQBot":
-                        chatReply = await RconServerStop();
-                        _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
-                        break;
-                    case "/bot_server_command@Xy8zJr4tQBot":
-                    case "/bot_server_command":
-                        chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
-                        break;
-                    case string k when k.StartsWith("/bot_server_command admin200910"):
-                        {
-                            var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length >= 3)
-                            {
-                                string runCommand = string.Join(' ', parts.Skip(2));
-                                chatReply = await ServerRunCommand(runCommand);
-                            }
-                            else
-                            {
-                                chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
-                            }
-                            break;
-                        }
-
-                    default:
-                        chatReply = "Неизвестная команда. Напиши /help.";
-                        break;
-                }
-
-                if (!string.IsNullOrWhiteSpace(chatReply))
-                {
-                    if (msg.MessageThreadId.HasValue)
-                    {
-                        var SendText = await bot.SendMessage(msg.Chat.Id, chatReply, messageThreadId: msg.MessageThreadId.Value, cancellationToken: token);
-                        AppendText($"Ответ отправлен: \"{SendText.Text}\" (ID: {SendText.MessageId})");
-                    }
-                    else
-                    {
-                        var SendText = await bot.SendMessage(msg.Chat.Id, chatReply, cancellationToken: token);
-                        AppendText($"Ответ отправлен: \"{SendText.Text}\" (ID: {SendText.MessageId})");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                var errorText = $"Ошибка: {ex.Message}";
-                if (msg.MessageThreadId.HasValue)
-                {
-                    await bot.SendMessage(msg.Chat.Id, errorText, messageThreadId: msg.MessageThreadId.Value, cancellationToken: token);
-                    AppendText(errorText);
-                }
-                else
-                {
-                    await bot.SendMessage(msg.Chat.Id, errorText, cancellationToken: token);
-                    AppendText(errorText);
-                }
-            }
-        }*/
 
         private async Task CheckServerAsync()
         {

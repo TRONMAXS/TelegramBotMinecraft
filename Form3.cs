@@ -9,6 +9,7 @@ namespace TelegramBotMinecraft
         private string BotToken;
         private string pathSettings;
         private string json;
+        private string AdminPassword;
         private bool suppressCheckedChanged = false;
         JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
         public Form3()
@@ -18,11 +19,16 @@ namespace TelegramBotMinecraft
             textBox1.MouseEnter += (s, e) => textBox1.UseSystemPasswordChar = false;
             textBox1.MouseLeave += (s, e) => textBox1.UseSystemPasswordChar = true;
 
+            textBox4.UseSystemPasswordChar = true;
+            textBox4.MouseEnter += (s, e) => textBox4.UseSystemPasswordChar = false;
+            textBox4.MouseLeave += (s, e) => textBox4.UseSystemPasswordChar = true;
+
             this.Load += Form3_Load;
             button1.Click += SaveBotToken;
             button2.Click += AddToListBox;
             button3.Click += DeleteItemListBox;
             button4.Click += Button4_Click;
+            button5.Click += SaveAdminPassword;
             checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
 
             pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
@@ -224,14 +230,21 @@ namespace TelegramBotMinecraft
             {
                 BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)";
                 settings[0].BotToken = BotToken;
-                string json = System.Text.Json.JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(pathSettings, json);
             }
             else
             {
                 textBox1.Text = settings[0].BotToken;
             }
-            for (int i = 0; i< settings[0].ChatIds.Count; i++)
+            if (settings[0].AdminPassword == null)
+            {
+                AdminPassword = "Admin Password (example:  12345)";
+                settings[0].AdminPassword = AdminPassword;
+            }
+            else
+            {
+                textBox4.Text = settings[0].AdminPassword;
+            }
+            for (int i = 0; i < settings[0].ChatIds.Count; i++)
             {
                 if (settings[0].ChatIds[i].Identifier == "example: 646516246" || settings[0].ChatIds[i].Name == "example: Admin")
                 {
@@ -243,6 +256,8 @@ namespace TelegramBotMinecraft
                 }
             }
             suppressCheckedChanged = false;
+            string jsonSettings = JsonSerializer.Serialize(settings, options);
+            File.WriteAllText(pathSettings, json);
         }
 
         private void SaveBotToken(object sender, EventArgs e)
@@ -263,12 +278,34 @@ namespace TelegramBotMinecraft
             }
         }
 
+        private void SaveAdminPassword(object sender, EventArgs e)
+        {
+            var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
+            string input = textBox4.Text;
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                AdminPassword = input;
+                settings[0].AdminPassword = AdminPassword;
+                string jsonStr = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(pathSettings, jsonStr);
+                MessageBox.Show("Пароль успешно сохранён!", "Telegram Bot");
+            }
+            else
+            {
+                MessageBox.Show("Введите пароль перед сохранением.", "Telegram Bot");
+            }
+        }
 
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
     }
     public class SettingsConfig
     {
         public bool? Notifications { get; set; }
         public string BotToken { get; set; }
+        public string AdminPassword { get; set; }
         public List<ChatId> ChatIds { get; set; }
     }
     public class ChatId
