@@ -916,7 +916,6 @@ namespace TelegramBotMinecraft
                                 string response = "";
                                 try
                                 {
-
                                     foreach (var User in UserSettings)
                                     {
                                         for (int i = 0; i < User.AllowedServers.Count; i++)
@@ -954,8 +953,11 @@ namespace TelegramBotMinecraft
                                         });
                                         _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
                                         chatReply = "Сервер запускается...";
+                                        
                                         await Task.Delay(5000);
-                                        _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
+                                        _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId, servers[IndexServer]));
+
+
                                     }
                                     else
                                     {
@@ -994,7 +996,7 @@ namespace TelegramBotMinecraft
                         case "/players_count":
                             if (isCommandAllowed)
                             {
-                                chatReply = await RconList(IndexUser);
+                                chatReply = await RconList(IndexUser, servers[IndexServer]);
                             }
                             else
                             {
@@ -1033,7 +1035,7 @@ namespace TelegramBotMinecraft
                         case "/stop_server":
                             if (isCommandAllowed)
                             {
-                                chatReply = await RconServerStop(IndexUser);
+                                chatReply = await RconServerStop(IndexUser, servers[IndexServer]);
                                 _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
                             }
                             else
@@ -1278,41 +1280,36 @@ namespace TelegramBotMinecraft
 
         }
 
-        private async Task CheckServerReadyAsync(long chatId, int? threadId)
+        private async Task CheckServerReadyAsync(long chatId, int? threadId, ServerConfig serverConfig)
         {
+            RCON? localRcon = null;
             string response = "";
-            _ = Task.Run(() => CheckJsonServers());
-            for (int i = 0; i <= 60; i++) // макс 60 попыток
+            for (int i = 0; i <= 60; i++)
             {
                 try
                 {
-                    if (rcon == null)
+                    if (localRcon == null)
                     {
-                        var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                        if (newRcon != null)
-                        {
-                            rcon = newRcon;
-                        }
+                        localRcon = new RCON(
+                            IPAddress.Parse(serverConfig.Ip),
+                            Convert.ToUInt16(serverConfig.RconPort),
+                            serverConfig.RconPassword
+                        );
+                        await localRcon.ConnectAsync();
+                        await localRcon.AuthenticateAsync();
                     }
-                    else
-                    {
-                        response = await rcon.SendCommandAsync("list");
-                    }
+                    response = await localRcon.SendCommandAsync("list");
                     AppendText($"RCON ответ при проверке сервера(попытка-{i}): " + response);
 
                     var match = Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
-
                     if (match.Success)
                     {
-                        string text = $"✅ Сервер успешно запущен!";
+                        localRcon.Dispose();
+                        string text = $"✅ Сервер {serverConfig.Name} успешно запущен!";
                         if (threadId.HasValue)
-                        {
                             await botClient.SendMessage(chatId, text, messageThreadId: threadId.Value);
-                        }
                         else
-                        {
                             await botClient.SendMessage(chatId, text);
-                        }
                         AppendText("Сервер запущен и пользователь уведомлён.");
                         return;
                     }
@@ -1321,20 +1318,14 @@ namespace TelegramBotMinecraft
                 {
                     AppendText($"Ошибка при попытке подключения к RCON: {ex.Message}");
                 }
-
-                await Task.Delay(5000); // через 5 секунд
+                await Task.Delay(5000);
             }
 
-            // Если не удалось за 5 минут — сообщаем
-            string failText = "⚠️ Не удалось подтвердить запуск сервера. Возможно, он не запустился или RCON не отвечает.";
+            string failText = $"⚠️ Не удалось подтвердить запуск сервера {serverConfig.Name}. Возможно, он не запустился или RCON не отвечает.";
             if (threadId.HasValue)
-            {
                 await botClient.SendMessage(chatId, failText, messageThreadId: threadId.Value);
-            }
             else
-            {
                 await botClient.SendMessage(chatId, failText);
-            }
 
             AppendText("Не удалось подтвердить запуск сервера.");
         }
@@ -1365,13 +1356,15 @@ namespace TelegramBotMinecraft
             return Task.CompletedTask;
         }
 
-        private async Task<string> RconList(int User)
+        private async Task<string> RconList(int User, ServerConfig serverConfig)
         {
             try
             {
                 jsonUserSettings = File.ReadAllText(pathUserSettings);
                 var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
                 string response = "";
+                RCON? localRcon = null;
+
 
                 for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
                 {
@@ -1380,19 +1373,17 @@ namespace TelegramBotMinecraft
                         if (UserSettings[User].AllowedServers.Any(x => x.Enabled == true))
                         {
 
-                            if (rcon == null)
+                            if (localRcon == null)
                             {
-                                var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                                if (newRcon != null)
-                                {
-                                    rcon = newRcon;
-                                }
+                                localRcon = new RCON(
+                                    IPAddress.Parse(serverConfig.Ip),
+                                    Convert.ToUInt16(serverConfig.RconPort),
+                                    serverConfig.RconPassword
+                                );
+                                await localRcon.ConnectAsync();
+                                await localRcon.AuthenticateAsync();
                             }
-                            else
-                            {
-                                response = await rcon.SendCommandAsync("list");
-                            }
-
+                            response = await rcon.SendCommandAsync("list");
                             if (string.IsNullOrEmpty(response))
                             {
                                 response = "Cервер не отвечает. Возможно сервер выключен.";
@@ -1414,6 +1405,7 @@ namespace TelegramBotMinecraft
                 }
                 else
                 {
+                    localRcon.Dispose();
                     response.Trim();
                 }
                 return response;
@@ -1429,7 +1421,6 @@ namespace TelegramBotMinecraft
             string EnabledServer;
             string response = "";
             serverNumber = 1;
-
             try
             {
                 json = File.ReadAllText("Servers.json");
@@ -1519,13 +1510,15 @@ namespace TelegramBotMinecraft
 
         }
 
-        private async Task<string> RconServerStop(int User)
+        private async Task<string> RconServerStop(int User, ServerConfig serverConfig)
         {
             try
             {
                 jsonUserSettings = File.ReadAllText(pathUserSettings);
                 var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
                 string response = "";
+                RCON? localRcon = null;
+
 
                 for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
                 {
@@ -1533,24 +1526,24 @@ namespace TelegramBotMinecraft
                     {
                         if (UserSettings[User].AllowedServers.Any(x => x.Enabled == true))
                         {
-                            if (rcon == null)
+                            if (localRcon == null)
                             {
-                                var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                                if (newRcon != null)
-                                {
-                                    rcon = newRcon;
-                                }
+                                localRcon = new RCON(
+                                    IPAddress.Parse(serverConfig.Ip),
+                                    Convert.ToUInt16(serverConfig.RconPort),
+                                    serverConfig.RconPassword
+                                );
+                                await localRcon.ConnectAsync();
+                                await localRcon.AuthenticateAsync();
                             }
-                            else
-                            {
-                                response = await rcon.SendCommandAsync("stop");
-                            }
+                            response = await localRcon.SendCommandAsync("stop");
                             if (string.IsNullOrEmpty(response))
                             {
                                 response = "Не удалось получить ответ от сервера. Возможно сервер выключен.";
                             }
                             else
                             {
+                                localRcon.Dispose();
                                 response = "Остановка сервера.";
                             }
                         }
