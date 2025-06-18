@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
@@ -34,8 +35,8 @@ namespace TelegramBotMinecraft
         private bool flagStartCheck = true;
         private bool StartCheck = false;
         private static readonly HashSet<long> AllowedUsers = new HashSet<long>{};
-        readonly JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-        
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
         private List<bool> serversRunning;
         private int serverNumber = 0;
         private bool StartBot = true;
@@ -54,12 +55,12 @@ namespace TelegramBotMinecraft
         private readonly Dictionary<string, string> AllowedCommands = new Dictionary<string, string>()
         {
             { "/list_servers", "показывает список доступных серверов Minecraft" },
-            { "/select_server",  " <админ пароль> <номер> переключиться указанный сервер Minecraft" },
+            { "/select_server",  " <password> <number> переключиться указанный сервер Minecraft" },
             { "/start_server", "запускает выбранный сервер" },
             { "/check_servers_status", "проверяет статус серверов" },
             { "/players_count", "показывает количество игроков на выбранном сервере" },
             { "/stop_server", "остановливает выбранный сервер" },
-            { "/server_command", "<админ пароль> <команда> выполняет написанную команду на выбранном сервере" },
+            { "/server_command", "<password> <command> выполняет написанную команду на выбранном сервере" },
             { "/delete_world", "удаляет мир на выбранном сервере" }
         };
 

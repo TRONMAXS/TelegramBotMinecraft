@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Windows.Forms;
 
 namespace TelegramBotMinecraft
 {
@@ -67,7 +64,7 @@ namespace TelegramBotMinecraft
 
         void SaveJson(object sender, EventArgs e)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             string json = JsonSerializer.Serialize(servers, options);
             File.WriteAllText(jsonFilePath, textBox1.Text);
             MessageBox.Show("Файл сохранен");

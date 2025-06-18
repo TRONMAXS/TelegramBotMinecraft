@@ -1,9 +1,5 @@
-﻿using System.Drawing.Printing;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace TelegramBotMinecraft
 {
@@ -16,12 +12,12 @@ namespace TelegramBotMinecraft
         private readonly string pathSettings;
         private string jsonSettings;
 
-        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
         private readonly List<string> AllowedCommands = new List<string>()
-        { "/list_servers", "/select_server <password> <number>",
+        { "/list_servers", "/select_server",
           "/start_server", "/check_servers_status", "/players_count",
-          "/stop_server", "/server_command <password> <command>",
+          "/stop_server", "/server_command",
           "/delete_world", "/help", "/start"
         };
         public Form4()

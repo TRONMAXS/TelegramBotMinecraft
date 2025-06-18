@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace TelegramBotMinecraft
 {
@@ -11,7 +12,7 @@ namespace TelegramBotMinecraft
         private string json;
         private string AdminPassword;
         private bool suppressCheckedChanged = false;
-        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         public Form3()
         {
             InitializeComponent();

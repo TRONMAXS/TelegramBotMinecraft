@@ -1,5 +1,6 @@
-using System.Text.Json;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace TelegramBotMinecraft
 {
@@ -7,6 +8,9 @@ namespace TelegramBotMinecraft
     {
         private static string pathServers;
         private static string pathSettings;
+
+        static JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
         [STAThread]
         static void Main()
         {
@@ -53,7 +57,6 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(pathServers, json);
             }
@@ -73,7 +76,6 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, json);
             }
@@ -136,7 +138,6 @@ namespace TelegramBotMinecraft
 
                 if (changed)
                 {
-                    var options = new JsonSerializerOptions { WriteIndented = true };
                     string newJson = JsonSerializer.Serialize(settings, options);
                     File.WriteAllText(pathSettings, newJson);
                 }
@@ -157,8 +158,7 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonSettings= System.Text.Json.JsonSerializer.Serialize(settings, options);
+                string jsonSettings= JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, jsonSettings);
             }
            
@@ -219,7 +219,6 @@ namespace TelegramBotMinecraft
 
                 if (changed)
                 {
-                    var options = new JsonSerializerOptions { WriteIndented = true };
                     string newJson = JsonSerializer.Serialize(servers, options);
                     File.WriteAllText(pathServers, newJson);
                 }
@@ -241,8 +240,7 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = System.Text.Json.JsonSerializer.Serialize(servers, options);
+                string json = JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(pathServers, json);
             }
         }
