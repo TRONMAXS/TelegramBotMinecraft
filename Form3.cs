@@ -48,6 +48,10 @@ namespace TelegramBotMinecraft
 
         private void AddToListBox(object sender, EventArgs e)
         {
+            var pathUserSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettings.json");
+            var jsonUserSettings = File.ReadAllText(pathUserSettings);
+            var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+
             var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
             string inputName = textBox2.Text;
             string inputId = textBox3.Text;
@@ -73,6 +77,43 @@ namespace TelegramBotMinecraft
 
                 // Обновляем переменную json для дальнейшей работы
                 json = jsonStr;
+
+                foreach (var Setting in settings)
+                {
+                    foreach (var User in Setting.ChatIds)
+                    {
+
+                        if (!UserSettings.Any(s => s.Identifier == User.Identifier) && !UserSettings.Any(s => s.Name == User.Name))
+                        {
+                            UserSettings.Add(new UserSettings
+                            {
+                                Identifier = User.Identifier,
+                                Name = User.Name,
+                                AllowedServers = new List<AllowedServers>(),
+                                AllowedCommands = new List<AllowedCommands>()
+                            });
+                        }
+                        if (UserSettings.Any(s => s.Identifier == User.Identifier) &&
+                            !Setting.ChatIds.Any(s => s.Identifier == User.Identifier))
+                        {
+                            var userToRemove = UserSettings.FirstOrDefault(s => s.Identifier == User.Identifier);
+                            if (userToRemove != null)
+                            {
+                                UserSettings.Remove(userToRemove);
+                            }
+                        }
+                    }
+                }
+
+                var identifiersInSettings = settings
+                    .SelectMany(setting => setting.ChatIds)
+                    .Select(chatId => chatId.Identifier)
+                    .ToHashSet();
+
+                UserSettings.RemoveAll(user => !identifiersInSettings.Contains(user.Identifier));
+
+                string updatedJsonStr = JsonSerializer.Serialize(UserSettings, options);
+                File.WriteAllTextAsync(pathUserSettings, updatedJsonStr);
             }
             else
             {
@@ -83,6 +124,11 @@ namespace TelegramBotMinecraft
         private void DeleteItemListBox(object sender, EventArgs e)
         {
             var settings = JsonSerializer.Deserialize<List<SettingsConfig>>(json);
+
+            var pathUserSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettings.json");
+            var jsonUserSettings = File.ReadAllText(pathUserSettings);
+            var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+
             if (listBox1.SelectedItem != null)
             {
                 int selectedIndex = listBox1.SelectedIndex;
@@ -101,6 +147,43 @@ namespace TelegramBotMinecraft
                     settings[0].ChatIds[0].Identifier = "example: 646516246";
                     settings[0].ChatIds[0].Name = "example: Admin";
                 }
+
+                foreach (var Setting in settings)
+                {
+                    foreach (var User in Setting.ChatIds)
+                    {
+
+                        if (!UserSettings.Any(s => s.Identifier == User.Identifier) && !UserSettings.Any(s => s.Name == User.Name))
+                        {
+                            UserSettings.Add(new UserSettings
+                            {
+                                Identifier = User.Identifier,
+                                Name = User.Name,
+                                AllowedServers = new List<AllowedServers>(),
+                                AllowedCommands = new List<AllowedCommands>()
+                            });
+                        }
+                        if (UserSettings.Any(s => s.Identifier == User.Identifier) &&
+                            !Setting.ChatIds.Any(s => s.Identifier == User.Identifier))
+                        {
+                            var userToRemove = UserSettings.FirstOrDefault(s => s.Identifier == User.Identifier);
+                            if (userToRemove != null)
+                            {
+                                UserSettings.Remove(userToRemove);
+                            }
+                        }
+                    }
+                }
+
+                var identifiersInSettings = settings
+                    .SelectMany(setting => setting.ChatIds)
+                    .Select(chatId => chatId.Identifier)
+                    .ToHashSet();
+
+                UserSettings.RemoveAll(user => !identifiersInSettings.Contains(user.Identifier));
+
+                string updatedJsonStr = JsonSerializer.Serialize(UserSettings, options);
+                File.WriteAllTextAsync(pathUserSettings, updatedJsonStr);
 
                 string jsonStr = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, jsonStr);

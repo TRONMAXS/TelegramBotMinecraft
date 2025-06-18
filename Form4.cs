@@ -9,16 +9,11 @@ namespace TelegramBotMinecraft
 {
     public partial class Form4 : Form
     {
-        private string Identifier;
-        private string Name;
-        private string AllowedServer;
-        private string AllowedCommand;
-
-        private string pathServers;
+        private readonly string pathServers;
         private string jsonServers;
-        private string pathUserSettings;
+        private readonly string pathUserSettings;
         private string jsonUserSettings;
-        private string pathSettings;
+        private readonly string pathSettings;
         private string jsonSettings;
 
         JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
@@ -27,7 +22,8 @@ namespace TelegramBotMinecraft
         { "/servers_list", "/server_enable <password> <number>",
           "/bot_server_start", "/bot_servers_check", "/bot_server_list",
           "/bot_server_stop", "/bot_server_command <password> <command>",
-          "/bot_world_delete", "/help" };
+          "/bot_world_delete", "/help" 
+        };
         public Form4()
         {
             InitializeComponent();
@@ -73,6 +69,7 @@ namespace TelegramBotMinecraft
                 var servers = JsonSerializer.Deserialize<List<ServerConfig>>(jsonServers);
 
                 checkedListBox1.Items.Clear();
+                checkedListBox1.Enabled = false;
                 int indexServer;
                 foreach (var server in servers)
                 {
@@ -91,6 +88,7 @@ namespace TelegramBotMinecraft
             try
             {
                 checkedListBox2.Items.Clear();
+                checkedListBox2.Enabled = false;
                 int indexCommand;
                 foreach (var Command in AllowedCommands)
                 {
@@ -115,6 +113,7 @@ namespace TelegramBotMinecraft
                 var Settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
 
                 listBox1.Items.Clear();
+                
                 int indexUser;
                 foreach (var Setting in Settings)
                 {
@@ -173,10 +172,25 @@ namespace TelegramBotMinecraft
                 var Settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
 
                 int selectedIndex;
+                string selectedIndexStr;
+
+                checkedListBox1.Enabled = true;
+                checkedListBox2.Enabled = true;
 
                 if (listBox1.SelectedItem != null)
                 {
                     selectedIndex = listBox1.SelectedIndex;
+                    selectedIndexStr = listBox1.Items[selectedIndex].ToString();
+                    string[] parts = selectedIndexStr.Split(' ');
+                    foreach (var user in UserSettings.Select((value, index) => new { value, index }))
+                    {
+                        if (user.value.Identifier == parts[4])
+                        {
+                            selectedIndex = user.index;
+                            break;
+                        }
+                    }
+
 
                     for (int i = 0; i < checkedListBox1.Items.Count; i++)
                     {
