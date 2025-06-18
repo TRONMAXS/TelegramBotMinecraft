@@ -34,7 +34,7 @@
             textBox1 = new TextBox();
             button2 = new Button();
             button1 = new Button();
-            checkedListBox1 = new CheckedListBox();
+            listBox1 = new ListBox();
             SuspendLayout();
             // 
             // openFileDialog1
@@ -76,15 +76,16 @@
             button1.Text = "Открыть";
             button1.UseVisualStyleBackColor = true;
             // 
-            // checkedListBox1
+            // listBox1
             // 
-            checkedListBox1.Font = new Font("Segoe UI", 12F);
-            checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.HorizontalScrollbar = true;
-            checkedListBox1.Location = new Point(620, 50);
-            checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(213, 388);
-            checkedListBox1.TabIndex = 7;
+            listBox1.FormattingEnabled = true;
+            listBox1.HorizontalScrollbar = true;
+            listBox1.ItemHeight = 15;
+            listBox1.Location = new Point(620, 44);
+            listBox1.Name = "listBox1";
+            listBox1.ScrollAlwaysVisible = true;
+            listBox1.Size = new Size(213, 394);
+            listBox1.TabIndex = 8;
             // 
             // Form2
             // 
@@ -93,7 +94,7 @@
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(845, 450);
-            Controls.Add(checkedListBox1);
+            Controls.Add(listBox1);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(textBox1);
@@ -113,6 +114,6 @@
         private TextBox textBox1;
         private Button button2;
         private Button button1;
-        private CheckedListBox checkedListBox1;
+        private ListBox listBox1;
     }
 }

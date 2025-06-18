@@ -49,8 +49,7 @@ namespace TelegramBotMinecraft
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
                         ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)",
-                        Enabled = true
+                        Port = "server port (example:  25565)"
                     }
                 };
 
@@ -177,43 +176,36 @@ namespace TelegramBotMinecraft
                     {
                         server.Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)";
                         changed = true;
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.Path))
                     {
                         server.Path = @"Path to the server folder (example:  G:\MinecraftServers\Survival)";
                         changed = true;
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.Ip))
                     {
                         server.Ip = "server ip (example:  127.0.0.1)";
                         changed = true;
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.RconPort))
                     {
                         server.RconPort = "rcon port (example:  25565)";
                         changed = true;
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.RconPassword))
                     {
                         server.RconPassword = "rcon password(example:  12345)";
                         changed = true; 
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.ConnectIp))
                     {
                         server.ConnectIp = "connect ip (example: 127.0.0.1)";
                         changed = true;
-                        server.Enabled = false;
                     }
                     if (string.IsNullOrWhiteSpace(server.Port))
                     {
                         server.Port = "server port (example:  25565)";
                         changed = true;
-                        server.Enabled = false;
                     }
                 }
 
@@ -237,8 +229,7 @@ namespace TelegramBotMinecraft
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
                         ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)",
-                        Enabled = true
+                        Port = "server port (example:  25565)"
                     }
                 };
 

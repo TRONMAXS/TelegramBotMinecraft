@@ -72,6 +72,7 @@
             textBox2.PlaceholderText = "Введите команду";
             textBox2.Size = new Size(787, 23);
             textBox2.TabIndex = 1;
+            textBox2.Visible = false;
             textBox2.WordWrap = false;
             // 
             // notifyIcon1
@@ -124,6 +125,7 @@
             label1.Size = new Size(166, 27);
             label1.TabIndex = 2;
             label1.Text = "Сервер - выключен";
+            label1.Visible = false;
             // 
             // button1
             // 
@@ -164,6 +166,7 @@
             button4.TabIndex = 6;
             button4.Text = "Выполнить команду";
             button4.UseVisualStyleBackColor = true;
+            button4.Visible = false;
             // 
             // label2
             // 
@@ -183,6 +186,7 @@
             textBox3.ReadOnly = true;
             textBox3.Size = new Size(193, 29);
             textBox3.TabIndex = 8;
+            textBox3.Visible = false;
             // 
             // button5
             // 

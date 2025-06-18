@@ -17,7 +17,6 @@ namespace TelegramBotMinecraft
             this.Load += Form2_Load;
             button1.Click += ReadJson;
             button2.Click += SaveJson;
-            checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
             openFileDialog1.Filter = "Json files (*.json)|*.json";
             saveFileDialog1.Filter = "Json files (*.json)|*.json";
         }
@@ -45,8 +44,7 @@ namespace TelegramBotMinecraft
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
                         ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)",
-                        Enabled = true
+                        Port = "server port (example:  25565)"
                     }
                 };
 
@@ -85,15 +83,14 @@ namespace TelegramBotMinecraft
 
                 if (servers[0].Name == "Name Server (example:  Vanilla(Survival) - 1.20.1)")
                 {
-                    checkedListBox1.Items.Clear();
+                    listBox1.Items.Clear();
                     return;
                 }
 
-                checkedListBox1.Items.Clear();
+                listBox1.Items.Clear();
                 foreach (var server in servers)
                 {
-                    int index = checkedListBox1.Items.Add(server.Name);
-                    checkedListBox1.SetItemChecked(index, server.Enabled);
+                    int index = listBox1.Items.Add(server.Name);
                 }
 
                 textBox1.Text = json;
@@ -112,8 +109,7 @@ namespace TelegramBotMinecraft
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
                         ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)",
-                        Enabled = true
+                        Port = "server port (example:  25565)"
                     }
                 };
 
@@ -123,27 +119,6 @@ namespace TelegramBotMinecraft
                 textBox1.Text = json;
                 LoadServersToList();
             }
-        }
-
-        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            if (e.NewValue == CheckState.Checked)
-            {
-                for (int i = 0; i < checkedListBox1.Items.Count; i++)
-                {
-                    if (i != e.Index)
-                        checkedListBox1.SetItemChecked(i, false);
-                }
-            }
-
-            BeginInvoke(new Action(() =>
-            {
-                if (e.Index >= 0 && e.Index < servers.Count)
-                {
-                    servers[e.Index].Enabled = checkedListBox1.GetItemChecked(e.Index);
-                    SaveServersToFile();
-                }
-            }));
         }
 
         private void SaveServersToFile()
@@ -164,6 +139,5 @@ namespace TelegramBotMinecraft
         public string RconPassword { get; set; }
         public string ConnectIp { get; set; }
         public string Port { get; set; }
-        public bool Enabled { get; set; }
     }
 }

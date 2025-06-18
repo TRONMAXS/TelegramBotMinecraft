@@ -19,10 +19,10 @@ namespace TelegramBotMinecraft
         JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
         private readonly List<string> AllowedCommands = new List<string>()
-        { "/servers_list", "/server_enable <password> <number>",
-          "/bot_server_start", "/bot_servers_check", "/bot_server_list",
-          "/bot_server_stop", "/bot_server_command <password> <command>",
-          "/bot_world_delete", "/help" 
+        { "/list_servers", "/select_server <password> <number>",
+          "/start_server", "/check_servers_status", "/players_count",
+          "/stop_server", "/server_command <password> <command>",
+          "/delete_world", "/help", "/start"
         };
         public Form4()
         {
@@ -312,6 +312,7 @@ namespace TelegramBotMinecraft
     public class AllowedServers
     {
         public string Server { get; set; }
+         public bool Enabled { get; set; }
     }
     public class AllowedCommands
     {

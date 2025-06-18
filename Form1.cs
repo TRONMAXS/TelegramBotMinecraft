@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -52,14 +53,14 @@ namespace TelegramBotMinecraft
 
         private readonly Dictionary<string, string> AllowedCommands = new Dictionary<string, string>()
         {
-            { "/servers_list", "показывает список доступных серверов Minecraft" },
-            { "/server_enable <админ пароль> <номер>", "включает указанный сервер Minecraft" },
-            { "/bot_server_start", "запускает выбранный сервер" },
-            { "/bot_servers_check", "проверяет статус серверов" },
-            { "/bot_server_list", "показывает количество игроков на выбранном сервере" },
-            { "/bot_server_stop", "остановливает выбранный сервер" },
-            { "/bot_server_command <админ пароль> <команда>", "выполняет написанную команду на выбранном сервере" },
-            { "/bot_world_delete", "удаляет мир на выбранном сервере" }
+            { "/list_servers", "показывает список доступных серверов Minecraft" },
+            { "/select_server",  " <админ пароль> <номер> переключиться указанный сервер Minecraft" },
+            { "/start_server", "запускает выбранный сервер" },
+            { "/check_servers_status", "проверяет статус серверов" },
+            { "/players_count", "показывает количество игроков на выбранном сервере" },
+            { "/stop_server", "остановливает выбранный сервер" },
+            { "/server_command", "<админ пароль> <команда> выполняет написанную команду на выбранном сервере" },
+            { "/delete_world", "удаляет мир на выбранном сервере" }
         };
 
 
@@ -69,7 +70,6 @@ namespace TelegramBotMinecraft
             pathServers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Servers.json");
             json = File.ReadAllText("Servers.json");
             servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
-            serversRunning = new List<bool>(new bool[servers.Count]);
 
             pathSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
             jsonSettings = File.ReadAllText("Settings.json");
@@ -78,6 +78,8 @@ namespace TelegramBotMinecraft
             pathUserSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettings.json");
             jsonUserSettings = File.ReadAllText(pathUserSettings);
 
+            serversRunning = new List<bool>(new bool[servers.Count]);
+
             this.Load += Form1_Load;
             this.Resize += Form1_Resize;
 
@@ -85,7 +87,7 @@ namespace TelegramBotMinecraft
             button2.Click += button2_Click;
             button3.Click += button3_Click;
             button5.Click += button5_Click;
-            button4.Click += RunСommand;
+            //button4.Click += RunСommand;
 
             // Скрываем окно
             this.WindowState = FormWindowState.Minimized;
@@ -108,7 +110,7 @@ namespace TelegramBotMinecraft
             _ = ShowBalloonTip("Приложение запущено", "Ожидает команд через Telegram.");
 
 
-            AutoCompleteStringCollection source = new AutoCompleteStringCollection()
+            /*AutoCompleteStringCollection source = new AutoCompleteStringCollection()
             {
             "start",
             "stop",
@@ -116,7 +118,7 @@ namespace TelegramBotMinecraft
             };
             textBox2.AutoCompleteCustomSource = source;
             textBox2.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            textBox2.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            textBox2.AutoCompleteSource = AutoCompleteSource.CustomSource;*/
 
 
         }
@@ -250,8 +252,7 @@ namespace TelegramBotMinecraft
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
                         ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)",
-                        Enabled = true
+                        Port = "server port (example:  25565)"
                     }
                 };
                 string json = JsonSerializer.Serialize(servers, options);
@@ -465,6 +466,10 @@ namespace TelegramBotMinecraft
 
                 string json = File.ReadAllText(pathServers);
                 servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
+
+                jsonUserSettings = File.ReadAllText(pathUserSettings);
+                var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+
                 int count = 0;
                 int countFalse = 0;
 
@@ -474,7 +479,7 @@ namespace TelegramBotMinecraft
                     {
                         if (rcon != null && rcon.Connected == true)
                         {
-                            AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
+                            //AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
                             rcon.Dispose();
                             rcon = null;
                         }
@@ -491,14 +496,6 @@ namespace TelegramBotMinecraft
 
                 try
                 {
-
-                    for (int i = 0; i < servers.Count; i++)
-                    {
-                        if (servers[i].Enabled == false)
-                        {
-                            countFalse++;
-                        }
-                    }
 
                     if (servers[0].Path == "Path to the server folder (example:  G:\\MinecraftServers\\Vanilla(Survival) - 1.20.1)" ||
                         countFalse == servers.Count || servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Path)) ||
@@ -520,10 +517,6 @@ namespace TelegramBotMinecraft
                             {
                                 MessageBox.Show($"В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
 
-                            }
-                            if (countFalse == servers.Count)
-                            {
-                                MessageBox.Show($"В файле Servers.json нет включённых серверов. Пожалуйста, включите хотя бы один, чтобы можно было с ним работать.", "Ошибка в файле Servers.json");
                             }
                             if (servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Path)) ||
                                 servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
@@ -551,26 +544,31 @@ namespace TelegramBotMinecraft
                         }));
                         return false;
                     }
-                    for (int i = 0; i < servers.Count; i++)
+                    /*int i = 0;
+                    for (int userIndex = 0; userIndex < UserSettings.Count; userIndex++)
                     {
-                        if (servers[i].Enabled == true)
+                        var User = UserSettings[userIndex];
+                        foreach (var Server in User.AllowedServers)
                         {
-                            CheckEnableServer = i;
-                            this.Invoke(new Action(() =>
+                            if (Server.Enabled)
                             {
-                                textBox3.Text = servers[i].Name;
-                            }));
+                                CheckEnableServer = i;
+                                AppendText($"CheckEnableServer-{CheckEnableServer}");
 
-                            if (rcon != null && rcon.Connected == false)
-                            {
-                                var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                                if (newRcon != null)
+                                if (rcon != null && !rcon.Connected)
                                 {
-                                    rcon = newRcon; // только если подключение удалось
+                                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                                    if (newRcon != null)
+                                    {
+                                        rcon = newRcon; // только если подключение удалось
+                                    }
                                 }
+                                break; // выход из внутреннего цикла после первого включенного сервера
                             }
+                            i++; // увеличиваем счетчик только если сервер не был включен
                         }
-                    }
+                    }*/
+
 
                     if (countFalse != servers.Count && MessageShow == false)
                     {
@@ -591,15 +589,15 @@ namespace TelegramBotMinecraft
                         }));
                     }
 
-                    for (int i = 0; i < servers.Count; i++)
+                    /*for (int i = 0; i < servers.Count; i++)
                     {
                         if (servers[i].Enabled == true)
                         {
                             count++;
                         }
-                    }
+                    }*/
 
-                    if (count > 1)
+                    /*if (count > 1)
                     {
                         for (int i = 0; i < servers.Count; i++)
                         {
@@ -614,9 +612,8 @@ namespace TelegramBotMinecraft
                         {
                             textBox3.Text = "";
                         }));
-                    }
+                    }*/
 
-                    await Task.Delay(2500);
                     flagStartCheck = false;
                 }
                 catch (Exception ex)
@@ -748,7 +745,7 @@ namespace TelegramBotMinecraft
             }
         }
 
-        private void RunСommand(object sender, EventArgs e)
+        /*private void RunСommand(object sender, EventArgs e)
         {
             TextBoxAdmin = textBox2.Text;
             textBox2.Text = null;
@@ -759,9 +756,8 @@ namespace TelegramBotMinecraft
                     switch (TextBoxAdmin)
                     {
                         case "start":
-                            if (serversRunning[CheckEnableServer] == false)
+                            try
                             {
-                                serversRunning[CheckEnableServer] = true;
 
                                 Process.Start(new ProcessStartInfo
                                 {
@@ -772,19 +768,22 @@ namespace TelegramBotMinecraft
                                 AppendText($"Сервер {servers[CheckEnableServer].Name} запущен!");
                                 _ = ShowBalloonTip("Сервер", "Minecraft-сервер успешно запущен!");
                             }
-                            else
+                            catch
                             {
                                 AppendText($"Сервер уже запущен!");
                             }
                             break;
                         case "stop":
-                            if (rcon != null)
+                            try
                             {
-                                _ = Task.Run(() => RconServerAnyAsync("stop"));
-                                _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
-                                AppendText($"Сервер {servers[CheckEnableServer].Name} остановлен!");
+                                if (rcon != null)
+                                {
+                                    _ = Task.Run(() => RconServerAnyAsync("stop"));
+                                    _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
+                                    AppendText($"Сервер {servers[CheckEnableServer].Name} остановлен!");
+                                }
                             }
-                            else
+                            catch
                             {
                                 AppendText($"Сервер уже остановлен!");
                             }
@@ -801,7 +800,7 @@ namespace TelegramBotMinecraft
                 }
                 catch { }
             }
-        }
+        }*/
 
         private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken token)
         {
@@ -822,6 +821,7 @@ namespace TelegramBotMinecraft
             string chatReply = "";
             int IndexUser = -1;
             bool isCommandAllowed = false;
+            int IndexServer = -1;
 
             AppendText($"Получено сообщение от {msg.Chat.Id}: {msg.Text}{Environment.NewLine}");
 
@@ -835,8 +835,6 @@ namespace TelegramBotMinecraft
 
                 if (identifiersInSettings.Contains(Convert.ToString(msg.Chat.Id).Trim()))
                 {
-                    AppendText($"Доступ пользователю {msg.Chat.Id} разрещен.");
-
                     foreach (var user in UserSettings.Select((value, index) => new { value, index }))
                     {
                         if (user.value.Identifier == Convert.ToString(msg.Chat.Id).Trim())
@@ -856,11 +854,67 @@ namespace TelegramBotMinecraft
                         }
                     }
 
+                    int NoEnableServer = 0;
+                    for (int i = 0; i < UserSettings[IndexUser].AllowedServers.Count; i++)
+                    {
+                        if (UserSettings[IndexUser].AllowedServers[i].Enabled)
+                        {
+                            if (servers.Any(c => c.Name == UserSettings[IndexUser].AllowedServers[i].Server))
+                            {
+                                IndexServer = servers.FindIndex(c => c.Name == UserSettings[IndexUser].AllowedServers[i].Server);
+                                CheckEnableServer = IndexServer;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            NoEnableServer++;
+                        }
+                    }
+
+                    if (NoEnableServer == 2)
+                    {
+                        if (!text.StartsWith("/select_server admin200910"))
+                        {
+                            string errorText = "Нету выбранных серверов для использования";
+
+                            if (msg.MessageThreadId.HasValue)
+                            {
+                                await bot.SendMessage(msg.Chat.Id, errorText, messageThreadId: msg.MessageThreadId.Value, cancellationToken: token);
+                                AppendText(errorText);
+                            }
+                            else
+                            {
+                                await bot.SendMessage(msg.Chat.Id, errorText, cancellationToken: token);
+                                AppendText(errorText);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (rcon == null)
+                        {
+                            var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                            if (newRcon != null)
+                            {
+                                rcon = newRcon;
+                            }
+                        }
+                    }
+                    
+
                     switch (text)
                     {
                         case "/start":
-                            chatReply = "Привет! напиши /help для списка всех команд";
-                            break;
+                            if (isCommandAllowed)
+                            {
+                                chatReply = "Привет! напиши /help для списка всех команд";
+                            }
+                            else
+                            {
+                                chatReply = chatReply = "Доступ к команде ограничен";
+                            }
+                        break;
 
                         case "/help":
 
@@ -874,16 +928,23 @@ namespace TelegramBotMinecraft
                                         ChatCommand += $"{command.Command} — {AllowedCommands[command.Command]}\n";
                                     }
                                 }
-                                chatReply = ChatCommand;
+
+                                if (ChatCommand != "")
+                                {
+                                    chatReply = ChatCommand;
+                                }
+                                else
+                                {
+                                    chatReply = "У вас нету разрешенных команд";
+                                }
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
                             break;
 
-                        case "/bot_servers_check":
+                        case "/check_servers_status":
 
                             if (isCommandAllowed)
                             {
@@ -891,47 +952,78 @@ namespace TelegramBotMinecraft
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
                             break;
 
-                        case "/bot_server_start":
+                        case "/start_server":
                             if (isCommandAllowed)
                             {
-                                if (serversRunning[CheckEnableServer] == false)
+                                int IndexServerStart = -1;
+                                bool ServerStart = false;
+                                string response = "";
+                                try
                                 {
-                                    serversRunning[CheckEnableServer] = true;
-                                    Process.Start(new ProcessStartInfo
+
+                                    foreach (var User in UserSettings)
                                     {
-                                        FileName = "start.cmd",
-                                        UseShellExecute = false,
-                                        WorkingDirectory = @$"{servers[CheckEnableServer].Path}"
-                                    });
-                                    _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
-                                    chatReply = "Сервер запускается...";
-                                    await Task.Delay(5000);
-                                    _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
+                                        for (int i = 0; i < User.AllowedServers.Count; i++)
+                                        {
+                                            if (User.AllowedServers[i].Enabled == true)
+                                            {
+                                                IndexServerStart = User.AllowedServers.FindIndex(c => c.Enabled == User.AllowedServers[i].Enabled);
+
+                                                if (rcon != null)
+                                                {
+                                                    response = await rcon.SendCommandAsync("list");
+                                                }
+
+                                                var match = Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
+
+                                                if (match.Success)
+                                                {
+                                                    ServerStart = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                                else
+                                catch { }
+                                finally
                                 {
-                                    chatReply = "Сервер запущен!";
+                                    if (ServerStart == false)
+                                    {
+                                        Process.Start(new ProcessStartInfo
+                                        {
+                                            FileName = "start.cmd",
+                                            UseShellExecute = false,
+                                            WorkingDirectory = @$"{servers[IndexServer].Path}"
+                                        });
+                                        _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
+                                        chatReply = "Сервер запускается...";
+                                        await Task.Delay(5000);
+                                        _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId));
+                                    }
+                                    else
+                                    {
+                                        chatReply = "Сервер запущен!";
+                                    }
                                 }
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
-                            
+
                             break;
 
-                        case "/bot_world_delete":
+                        case "/delete_world":
                             if (isCommandAllowed)
                             {
                                 try
                                 {
-                                    Directory.Delete(@$"{servers[CheckEnableServer].Path}world", true);
+                                    Directory.Delete(@$"{servers[IndexServer].Path}world", true);
                                     chatReply = "Мир успешно удалён!";
                                     _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
                                 }
@@ -942,68 +1034,66 @@ namespace TelegramBotMinecraft
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
-                            
+
                             break;
 
-                        case "/bot_server_list":
+                        case "/players_count":
                             if (isCommandAllowed)
                             {
-                                chatReply = await RconList();
+                                chatReply = await RconList(IndexUser);
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
                             break;
 
-                        case "/servers_list":
+                        case "/list_servers":
                             if (isCommandAllowed)
                             {
                                 chatReply = await ServersList(IndexUser);
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
                             break;
-                        case "/server_enable":
-                                chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
+
+                        case "/select_server":
+                            chatReply = "Укажите номер сервера:\n/select_server <админ пароль> <номер> .\nМожно переключиться только на один сервер.";
                             break;
-                        case string s when s.StartsWith("/server_enable admin200910"):
+                        case string s when s.StartsWith("/select_server admin200910"):
                             {
                                 var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                                 if (parts.Length == 3 && int.TryParse(parts[2], out int serverIndex))
                                 {
-                                    chatReply = await ServerEnable(Convert.ToInt32(parts[2]));
+                                    chatReply = await ServerEnable(Convert.ToInt32(parts[2]), IndexUser);
                                 }
                                 else
                                 {
-                                    chatReply = "Укажите номер сервера:\n/server_enable <админ пароль> <номер> .\nМожно включить только один сервер.";
+                                    chatReply = "Укажите номер сервера:\n/select_server <админ пароль> <номер> .\nМожно переключиться только на один сервер..";
                                 }
                                 break;
                             }
 
-                        case "/bot_server_stop":
+                        case "/stop_server":
                             if (isCommandAllowed)
                             {
-                                chatReply = await RconServerStop();
+                                chatReply = await RconServerStop(IndexUser);
                                 _ = ShowBalloonTip("Сервер", "Minecraft-сервер остановлен!");
                             }
                             else
                             {
-                                AppendText($"Доступ к команде {text} у пользователя {msg.Chat.Id} ограничен.");
                                 chatReply = "Доступ к команде ограничен";
                             }
                             break;
-                        case "/bot_server_command":
-                            chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
+
+                        case "/server_command":
+                            chatReply = "Укажите пароль и команду:\n/server_command <админ пароль> <команда> .";
                             break;
-                        case string k when k.StartsWith("/bot_server_command admin200910"):
+                        case string k when k.StartsWith("/server_command admin200910"):
                             {
                                 var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                                 if (parts.Length >= 3)
@@ -1013,7 +1103,7 @@ namespace TelegramBotMinecraft
                                 }
                                 else
                                 {
-                                    chatReply = "Укажите пароль и команду:\n/bot_server_command <админ пароль> <команда> .";
+                                    chatReply = "Укажите пароль и команду:\n/server_command <админ пароль> <команда> .";
                                 }
                                 break;
                             }
@@ -1245,12 +1335,12 @@ namespace TelegramBotMinecraft
             {
                 try
                 {
-                    if (rcon != null && CheckEnableServer >= 0 && CheckEnableServer < serversRunning.Count)
+                    if (rcon != null && CheckEnableServer >= 0)
                     {
                         string response = await rcon.SendCommandAsync("list");
-                        var match = System.Text.RegularExpressions.Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
+                        var match = Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
 
-                        this.Invoke(new Action(() =>
+                        /*this.Invoke(new Action(() =>
                         {
                             if (match.Success)
                             {
@@ -1264,28 +1354,28 @@ namespace TelegramBotMinecraft
                                 notifyIcon1.Icon = new Icon("Icons/server_stop.ico");
                                 label1.Text = "Сервер - выключен";
                             }
-                        }));
+                        }));*/
                     }
                     else
                     {
-                        this.Invoke(new Action(() =>
+                        /*this.Invoke(new Action(() =>
                         {
                             if (CheckEnableServer >= 0 && CheckEnableServer < serversRunning.Count)
                                 serversRunning[CheckEnableServer] = false;
                             notifyIcon1.Icon = new Icon("Icons/server_stop.ico");
                             label1.Text = "Сервер - выключен";
-                        }));
+                        }));*/
                     }
                 }
                 catch (Exception)
                 {
-                    this.Invoke(new Action(() =>
+                    /*this.Invoke(new Action(() =>
                     {
                         if (CheckEnableServer >= 0 && CheckEnableServer < serversRunning.Count)
                             serversRunning[CheckEnableServer] = false;
                         notifyIcon1.Icon = new Icon("Icons/server_stop.ico");
                         label1.Text = "Сервер - выключен";
-                    }));
+                    }))*/;
                 }
 
                 await Task.Delay(2500);
@@ -1397,6 +1487,13 @@ namespace TelegramBotMinecraft
 
                 }
             }
+
+
+            if (text == "")
+            {
+                text = "У вас нету доступных серверов";
+            }
+
             if (threadId.HasValue)
             {
                 await botClient.SendMessage(chatId, text, messageThreadId: threadId.Value);
@@ -1404,7 +1501,7 @@ namespace TelegramBotMinecraft
             else
             {
                 
-                await botClient.SendMessage(chatId, "У вас нету доступных серверов");
+                await botClient.SendMessage(chatId, text);
             }
 
         }
@@ -1413,18 +1510,25 @@ namespace TelegramBotMinecraft
         {
             string response = "";
             _ = Task.Run(() => CheckJsonServers());
-            for (int i = 0; i <= 15; i++) // макс 15 попыток
+            for (int i = 0; i <= 60; i++) // макс 60 попыток
             {
                 try
                 {
-                    if (rcon != null)
+                    if (rcon == null)
+                    {
+                        var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                        if (newRcon != null)
+                        {
+                            rcon = newRcon;
+                        }
+                    }
+                    else
                     {
                         response = await rcon.SendCommandAsync("list");
                     }
-
                     AppendText($"RCON ответ при проверке сервера(попытка-{i}): " + response);
 
-                    var match = System.Text.RegularExpressions.Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
+                    var match = Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
 
                     if (match.Success)
                     {
@@ -1437,7 +1541,6 @@ namespace TelegramBotMinecraft
                         {
                             await botClient.SendMessage(chatId, text);
                         }
-
                         AppendText("Сервер запущен и пользователь уведомлён.");
                         return;
                     }
@@ -1447,10 +1550,10 @@ namespace TelegramBotMinecraft
                     AppendText($"Ошибка при попытке подключения к RCON: {ex.Message}");
                 }
 
-                await Task.Delay(1500); // подождать 1,5 секунды перед повтором
+                await Task.Delay(5000); // через 5 секунд
             }
 
-            // Если не удалось за 90 секунд — сообщаем
+            // Если не удалось за 5 минут — сообщаем
             string failText = "⚠️ Не удалось подтвердить запуск сервера. Возможно, он не запустился или RCON не отвечает.";
             if (threadId.HasValue)
             {
@@ -1490,26 +1593,63 @@ namespace TelegramBotMinecraft
             return Task.CompletedTask;
         }
 
-        private async Task<string> RconList()
+        private async Task<string> RconList(int User)
         {
-            string response = "";
-            if (rcon != null)
+            try
             {
-                 response = await rcon.SendCommandAsync("list");
-            }
+                jsonUserSettings = File.ReadAllText(pathUserSettings);
+                var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+                string response = "";
 
-            if (string.IsNullOrEmpty(response))
-            {
-                response = "Cервер не отвечает. Возможно сервер выключен.";
+                for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
+                {
+                    if (UserSettings[User].AllowedServers[i].Enabled == true)
+                    {
+                        if (UserSettings[User].AllowedServers.Any(x => x.Enabled == true))
+                        {
+
+                            if (rcon == null)
+                            {
+                                var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                                if (newRcon != null)
+                                {
+                                    rcon = newRcon;
+                                }
+                            }
+                            else
+                            {
+                                response = await rcon.SendCommandAsync("list");
+                            }
+
+                            if (string.IsNullOrEmpty(response))
+                            {
+                                response = "Cервер не отвечает. Возможно сервер выключен.";
+                            }
+                            else
+                            {
+                                string pattern = @"There are (\d+) of a max of (\d+) players online(:.*)";
+                                response = System.Text.RegularExpressions.Regex.Replace(response, pattern, m =>
+                                    $"Сейчас онлайн {m.Groups[1].Value} из {m.Groups[2].Value} игроков{m.Groups[3].Value}"
+                                );
+                            }
+                        }
+                    }
+                }
+
+                if (response.Trim() == "")
+                {
+                    response = "У вас нету доступных серверов";
+                }
+                else
+                {
+                    response.Trim();
+                }
+                return response;
             }
-            else
+            catch
             {
-                string pattern = @"There are (\d+) of a max of (\d+) players online(:.*)";
-                response = System.Text.RegularExpressions.Regex.Replace(response, pattern, m =>
-                    $"Сейчас онлайн {m.Groups[1].Value} из {m.Groups[2].Value} игроков{m.Groups[3].Value}"
-                );
+                return "Не удалось получить ответ от сервера. Возможно сервер выключен."; ;
             }
-            return response.Trim();
         }
 
         private async Task<string> ServersList(int User)
@@ -1533,7 +1673,7 @@ namespace TelegramBotMinecraft
                         {
                             if (servers.Count != null)
                             {
-                                if (server.Enabled == true) { EnabledServer = "Выбран"; }
+                                if (UserSettings[User].AllowedServers[i].Enabled == true) { EnabledServer = "Выбран"; }
                                 else { EnabledServer = "Не выбран"; }
                                 response += $"\n{serverNumber}) {server.Name} - {EnabledServer}";
                                 serverNumber++;
@@ -1552,49 +1692,49 @@ namespace TelegramBotMinecraft
                 }
                 return response;
             }
-            catch (Exception ex)
+            catch
             {
-                response = "Ошибка: " + ex;
-                return response;
+                return "Не удалось получить ответ от сервера. Возможно сервер выключен."; ;
             }
 
         }
 
-        private async Task<string> ServerEnable(int Number)
+        private async Task<string> ServerEnable(int Number, int User)
         {
-           // await ServersList();
             string EnabledServer;
             string response = "";
             serverNumber = 1;
-            if(Number > servers.Count || Number <= 0)
+            if (Number > servers.Count || Number <= 0)
             {
                 response = "Ошибка: Неверный номер сервера.";
                 return response;
             }
             try
             {
-                json = File.ReadAllText("Servers.json");
-                servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
 
-                if (servers.Count != null)
+                jsonUserSettings = File.ReadAllText(pathUserSettings);
+                var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+
+                if (UserSettings[User].AllowedServers.Count != null)
                 {
-                    foreach (ServerConfig server in servers)
+                    for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
                     {
-                        if(serverNumber == Number) 
+                        if (serverNumber == Number)
                         {
+                            UserSettings[User].AllowedServers[serverNumber - 1].Enabled = true;
                             EnabledServer = "Выбран";
-                            servers[serverNumber - 1].Enabled = true;
                         }
                         else
                         {
-                            servers[serverNumber - 1].Enabled = false;
+                            UserSettings[User].AllowedServers[serverNumber - 1].Enabled = false;
                             EnabledServer = "Не выбран";
                         }
-                        response += $"\n{serverNumber}) {server.Name} - {EnabledServer}";
+                        response += $"\n{serverNumber}) {UserSettings[User].AllowedServers[i].Server} - {EnabledServer}";
                         serverNumber++;
                     }
-                    string json = JsonSerializer.Serialize(servers, options);
-                    File.WriteAllText(pathServers, json);
+
+                    string updatedJsonStr = JsonSerializer.Serialize(UserSettings, options);
+                    await File.WriteAllTextAsync(pathUserSettings, updatedJsonStr);
                 }
                 _ = Task.Run(() => CheckRconAsync());
                 return response.Trim();
@@ -1607,44 +1747,102 @@ namespace TelegramBotMinecraft
 
         }
 
-        private async Task<string> RconServerStop()
+        private async Task<string> RconServerStop(int User)
         {
-            string response = "";
-            if (rcon != null)
+            try
             {
-                response = await rcon.SendCommandAsync("stop");
+                jsonUserSettings = File.ReadAllText(pathUserSettings);
+                var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
+                string response = "";
+
+                for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
+                {
+                    if (UserSettings[User].AllowedServers[i].Enabled == true)
+                    {
+                        if (UserSettings[User].AllowedServers.Any(x => x.Enabled == true))
+                        {
+                            if (rcon == null)
+                            {
+                                var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                                if (newRcon != null)
+                                {
+                                    rcon = newRcon;
+                                }
+                            }
+                            else
+                            {
+                                response = await rcon.SendCommandAsync("stop");
+                            }
+                            if (string.IsNullOrEmpty(response))
+                            {
+                                response = "Не удалось получить ответ от сервера. Возможно сервер выключен.";
+                            }
+                            else
+                            {
+                                response = "Остановка сервера.";
+                            }
+                        }
+                    }
+                }
+                if (response.Trim() == "")
+                {
+                    response = "У вас нету доступных серверов";
+                }
+                else
+                {
+                    response.Trim();
+                }
+                return response;
             }
-            if (string.IsNullOrEmpty(response))
+            catch
             {
-                response = "Не удалось получить ответ от сервера. Возможно сервер выключен.";
+                return "Не удалось получить ответ от сервера. Возможно сервер выключен.";
             }
-            else
-            {
-                response = "Остановка сервера.";
-            }
-            return response.Trim();
         }
 
         private async Task<string> ServerRunCommand(string command)
         {
-            string response = "";
-            if (rcon != null)
+            try
             {
-                response = await rcon.SendCommandAsync(command);
+                string response = "";
+                if (rcon == null)
+                {
+                    var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
+                    if (newRcon != null)
+                    {
+                        rcon = newRcon;
+                    }
+                }
+                else
+                {
+                    response = await rcon.SendCommandAsync(command);
+                }
+                if (string.IsNullOrEmpty(response))
+                {
+                    response = "Не удалось получить ответ от сервера. Возможно неправильная команда.";
+                    AppendText($"Команда ({command}): {response}");
+                }
+                else
+                {
+                    AppendText($"Команда ({command}) выполнена: {response}");
+                }
+                if (response.Trim() == "")
+                {
+                    response = "У вас нету доступных серверов";
+                }
+                else
+                {
+                    response.Trim();
+                }
+                return response;
             }
-            if (string.IsNullOrEmpty(response))
+            catch
             {
-                response = "Не удалось получить ответ от сервера. Возможно неправильная команда.";
-                AppendText($"Команда ({command}): {response}");
+                return "Не удалось получить ответ от сервера. Возможно сервер выключен."; ;
             }
-            else
-            {
-                AppendText($"Команда ({command}) выполнена: {response}");
-            }
-            return response.Trim();
         }
 
-        private async Task RconServerAnyAsync(string command)
+        /*private async Task RconServerAnyAsync(string command)
         {
             string response = "";
             if (rcon != null)
@@ -1660,6 +1858,6 @@ namespace TelegramBotMinecraft
             {
                 AppendText($"Команда ({command}) выполнена: {response}");
             }
-        }
+        }*/
     }
 }
