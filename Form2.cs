@@ -8,6 +8,8 @@ namespace TelegramBotMinecraft
         private List<ServerConfig> servers = new List<ServerConfig>();
         private string jsonFilePath;
 
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
         public Form2()
         {
             InitializeComponent();
@@ -36,7 +38,8 @@ namespace TelegramBotMinecraft
                     new ServerConfig
                     {
                         Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        Path = @"Path to the server folder (example:  G:\MinecraftServers\Vanilla(Survival) - 1.20.1)",
+                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
+                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
                         Ip = "server ip (example:  127.0.0.1)",
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
@@ -45,7 +48,6 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(jsonFilePath, textBox1.Text);
                 LoadServersToList();
@@ -64,7 +66,6 @@ namespace TelegramBotMinecraft
 
         void SaveJson(object sender, EventArgs e)
         {
-            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             string json = JsonSerializer.Serialize(servers, options);
             File.WriteAllText(jsonFilePath, textBox1.Text);
             MessageBox.Show("Файл сохранен");
@@ -101,7 +102,8 @@ namespace TelegramBotMinecraft
                     new ServerConfig
                     {
                         Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        Path = @"Path to the server folder (example:  G:\MinecraftServers\Vanilla(Survival) - 1.20.1)",
+                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
+                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
                         Ip = "server ip (example:  127.0.0.1)",
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
@@ -110,27 +112,19 @@ namespace TelegramBotMinecraft
                     }
                 };
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(servers, options);
                 File.WriteAllText(jsonFilePath, json);
                 textBox1.Text = json;
                 LoadServersToList();
             }
         }
-
-        private void SaveServersToFile()
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(servers, options);
-            File.WriteAllText(jsonFilePath, json);
-            textBox1.Text = json;
-        }
     }
 
     public class ServerConfig
     {
         public string Name { get; set; }
-        public string Path { get; set; }
+        public string StartupPath { get; set; }
+        public string FolderPath { get; set; }
         public string Ip { get; set; }
         public string RconPort { get; set; }
         public string RconPassword { get; set; }

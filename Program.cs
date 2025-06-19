@@ -48,7 +48,8 @@ namespace TelegramBotMinecraft
                     new ServerConfig
                     {
                         Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        Path = @"Path to the server folder (example:  G:\MinecraftServers\Vanilla(Survival) - 1.20.1)",
+                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
+                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
                         Ip = "server ip (example:  127.0.0.1)",
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
@@ -185,9 +186,14 @@ namespace TelegramBotMinecraft
                         server.Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)";
                         changed = true;
                     }
-                    if (string.IsNullOrWhiteSpace(server.Path))
+                    if (string.IsNullOrWhiteSpace(server.StartupPath))
                     {
-                        server.Path = @"Path to the server folder (example:  G:\MinecraftServers\Survival)";
+                        server.StartupPath = @"Path to the startup file (example:  G:\\MinecraftServers\Survival\\srart.bat)";
+                        changed = true;
+                    }
+                    if (string.IsNullOrWhiteSpace(server.FolderPath))
+                    {
+                        server.FolderPath = @"Path to the server folder (example:  G:\\MinecraftServers\Survival\\)";
                         changed = true;
                     }
                     if (string.IsNullOrWhiteSpace(server.Ip))
@@ -231,7 +237,8 @@ namespace TelegramBotMinecraft
                     new ServerConfig
                     {
                         Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        Path = @"Path to the server folder (example:  G:\MinecraftServers\Vanilla(Survival) - 1.20.1)",
+                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
+                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
                         Ip = "server ip (example:  127.0.0.1)",
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",

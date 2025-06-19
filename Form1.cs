@@ -64,6 +64,8 @@ namespace TelegramBotMinecraft
             { "/delete_world", "удаляет мир на выбранном сервере" }
         };
 
+        private Dictionary<int, bool> serverStarting = new Dictionary<int, bool>();
+
 
         public Form1()
         {
@@ -248,7 +250,8 @@ namespace TelegramBotMinecraft
                     new ServerConfig
                     {
                         Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        Path = @"Path to the server folder (example:  G:\MinecraftServers\Vanilla(Survival) - 1.20.1)",
+                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
+                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
                         Ip = "server ip (example:  127.0.0.1)",
                         RconPort = "rcon port (example:  25565)",
                         RconPassword = "rcon password(example:  12345)",
@@ -499,8 +502,10 @@ namespace TelegramBotMinecraft
                 try
                 {
 
-                    if (servers[0].Path == "Path to the server folder (example:  G:\\MinecraftServers\\Vanilla(Survival) - 1.20.1)" ||
-                        countFalse == servers.Count || servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Path)) ||
+                    if (servers[0].StartupPath == @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)" ||
+                        servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)" ||
+                        countFalse == servers.Count || servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
+                        servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) || 
                         servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
                         servers.Any(c => string.IsNullOrEmpty(c.RconPassword) || string.IsNullOrEmpty(c.ConnectIp)) ||
                         servers.Any(c => string.IsNullOrEmpty(c.Port)))
@@ -515,12 +520,16 @@ namespace TelegramBotMinecraft
                                 cts.Dispose();
                                 cts = null;
                             }
-                            if (servers[0].Path == "Path to the server folder (example:  G:\\MinecraftServers\\Vanilla(Survival) - 1.20.1)")
+                            if (servers[0].StartupPath == @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)")
                             {
                                 MessageBox.Show($"В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
-
                             }
-                            if (servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.Path)) ||
+                            if (servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)")
+                            {
+                                MessageBox.Show($"В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
+                            }
+                            if (servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
+                                servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.FolderPath)) ||
                                 servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
                                 servers.Any(c => string.IsNullOrEmpty(c.RconPassword) || string.IsNullOrEmpty(c.ConnectIp)) ||
                                 servers.Any(c => string.IsNullOrEmpty(c.Port)))
@@ -824,7 +833,7 @@ namespace TelegramBotMinecraft
                         }
                     }
 
-                    if (NoEnableServer == 2)
+                    if (NoEnableServer >= UserSettings[IndexUser].AllowedServers.Count)
                     {
                         if (!text.StartsWith($"/select_server {Settings[0].AdminPassword}"))
                         {
@@ -911,6 +920,12 @@ namespace TelegramBotMinecraft
                         case "/start_server":
                             if (isCommandAllowed)
                             {
+                                if (serverStarting.ContainsKey(IndexServer) && serverStarting[IndexServer])
+                                {
+                                    chatReply = "Сервер уже запускается. Пожалуйста, подождите.";
+                                    break;
+                                }
+                                serverStarting[IndexServer] = true;
                                 int IndexServerStart = -1;
                                 bool ServerStart = false;
                                 string response = "";
@@ -947,21 +962,22 @@ namespace TelegramBotMinecraft
                                     {
                                         Process.Start(new ProcessStartInfo
                                         {
-                                            FileName = "start.cmd",
+                                            FileName = $@"{servers[IndexServer].StartupPath}",
                                             UseShellExecute = false,
-                                            WorkingDirectory = @$"{servers[IndexServer].Path}"
+                                            WorkingDirectory = @$"{servers[IndexServer].FolderPath}"
                                         });
                                         _ = ShowBalloonTip("Сервер", "Minecraft - сервер запускается!");
                                         chatReply = "Сервер запускается...";
-                                        
-                                        await Task.Delay(5000);
-                                        _ = Task.Run(() => CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId, servers[IndexServer]));
-
-
+                                        _ = Task.Run(async () =>
+                                        {
+                                            await CheckServerReadyAsync(msg.Chat.Id, msg.MessageThreadId, servers[IndexServer]);
+                                            serverStarting[IndexServer] = false;
+                                        });
                                     }
                                     else
                                     {
                                         chatReply = "Сервер запущен!";
+                                        serverStarting[IndexServer] = false;
                                     }
                                 }
                             }
@@ -977,14 +993,20 @@ namespace TelegramBotMinecraft
                             {
                                 try
                                 {
-                                    Directory.Delete(@$"{servers[IndexServer].Path}world", true);
-                                    chatReply = "Мир успешно удалён!";
-                                    _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
+                                    string folderPath = @$"{servers[IndexServer].FolderPath}world";
+
+                                    if (Directory.Exists(folderPath))
+                                    {
+                                        Directory.Delete(folderPath, true);
+                                        chatReply = "Мир успешно удалён!";
+                                        _ = ShowBalloonTip("Сервер", "Мир успешно удалён!");
+                                    }
+                                    else
+                                    {
+                                        chatReply = "Мир для удаления не найден. Возможно, он уже был удалён. ";
+                                    }
                                 }
-                                catch
-                                {
-                                    chatReply = "Мир уже удалён!";
-                                }
+                                catch{}
                             }
                             else
                             {
@@ -1299,7 +1321,6 @@ namespace TelegramBotMinecraft
                         await localRcon.AuthenticateAsync();
                     }
                     response = await localRcon.SendCommandAsync("list");
-                    AppendText($"RCON ответ при проверке сервера(попытка-{i}): " + response);
 
                     var match = Regex.Match(response, @"There are (\d+) of a max of (\d+) players online");
                     if (match.Success)
@@ -1314,10 +1335,7 @@ namespace TelegramBotMinecraft
                         return;
                     }
                 }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при попытке подключения к RCON: {ex.Message}");
-                }
+                catch { }
                 await Task.Delay(5000);
             }
 
@@ -1327,7 +1345,7 @@ namespace TelegramBotMinecraft
             else
                 await botClient.SendMessage(chatId, failText);
 
-            AppendText("Не удалось подтвердить запуск сервера.");
+            AppendText($"Не удалось подтвердить запуск сервера {serverConfig.Name} .");
         }
 
         private void AppendText(string text)
