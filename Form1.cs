@@ -18,10 +18,14 @@ namespace TelegramBotMinecraft
     {
         private TelegramBotClient botClient;
         private CancellationTokenSource cts = new CancellationTokenSource();
-        private string TextBoxAdmin;
+        //private string TextBoxAdmin;
 
         private readonly string pathUserSettings;
         private string jsonUserSettings;
+
+        private readonly string pathServersBackup;
+        private readonly string pathSettingsBackup;
+        private readonly string pathUserSettingsBackup;
 
         private readonly string pathServers;
         private string json;
@@ -78,6 +82,10 @@ namespace TelegramBotMinecraft
             jsonSettings = File.ReadAllText("Settings.json");
             settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
 
+            pathServersBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ServersBackup.json");
+            pathSettingsBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SettingsBackup.json");
+            pathUserSettingsBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettingsBackup.json");
+
             pathUserSettings = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettings.json");
             jsonUserSettings = File.ReadAllText(pathUserSettings);
 
@@ -105,7 +113,7 @@ namespace TelegramBotMinecraft
                 this.ShowInTaskbar = true;
                 this.BringToFront();
             });
-            contextMenu.Items.Add("Выход", null, (s, e) => Application.Exit());
+            contextMenu.Items.Add("Выход", null, (s, e) => ExitMenuItem_Click(s, e));
             notifyIcon1.ContextMenuStrip = contextMenu;
 
 
@@ -122,15 +130,14 @@ namespace TelegramBotMinecraft
             textBox2.AutoCompleteCustomSource = source;
             textBox2.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             textBox2.AutoCompleteSource = AutoCompleteSource.CustomSource;*/
-
-
         }
 
-        private void ExitMenuItem_Click(object sender, EventArgs e)
+        private async void ExitMenuItem_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show("Вы действительно хотите выйти?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
+                await SaveJsonFiles();
                 Application.Exit();
             }
         }
@@ -141,13 +148,36 @@ namespace TelegramBotMinecraft
             this.FormClosing += Form1_FormClosing;
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             var result = MessageBox.Show("Вы действительно хотите выйти?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result != DialogResult.Yes)
             {
                 e.Cancel = true;
+                return;
             }
+
+            e.Cancel = true;
+
+            await SaveJsonFiles();
+
+            this.FormClosing -= Form1_FormClosing;
+            this.Close();
+        }
+
+        private async Task SaveJsonFiles()
+        {
+            try
+            {
+                File.Copy(pathServers, pathServersBackup, true);
+                File.Copy(pathSettings, pathSettingsBackup, true);
+                File.Copy(pathUserSettings, pathUserSettingsBackup, true);
+
+                File.Delete(pathServers);
+                File.Delete(pathSettings);
+                File.Delete(pathUserSettings);
+            }
+            catch{}
         }
 
         private async Task ShowBalloonTip(string title, string text)

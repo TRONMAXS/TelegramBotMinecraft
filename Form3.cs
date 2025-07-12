@@ -296,12 +296,8 @@ namespace TelegramBotMinecraft
                 MessageBox.Show("Введите пароль перед сохранением.", "Telegram Bot");
             }
         }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
     }
+
     public class SettingsConfig
     {
         public bool? Notifications { get; set; }
@@ -309,6 +305,7 @@ namespace TelegramBotMinecraft
         public string AdminPassword { get; set; }
         public List<ChatId> ChatIds { get; set; }
     }
+
     public class ChatId
     {
         public string Identifier { get; set; }

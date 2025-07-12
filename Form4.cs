@@ -109,7 +109,7 @@ namespace TelegramBotMinecraft
                 var Settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
 
                 listBox1.Items.Clear();
-                
+
                 int indexUser;
                 foreach (var Setting in Settings)
                 {
@@ -206,7 +206,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                
+
                 MessageBox.Show("Ошибка при загрузки настроек пользователей: " + ex.Message, "Ошибка");
             }
             await Task.Delay(1000);

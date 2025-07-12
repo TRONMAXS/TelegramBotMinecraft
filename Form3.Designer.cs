@@ -154,7 +154,6 @@
             label2.Size = new Size(137, 21);
             label2.TabIndex = 12;
             label2.Text = "Admin Password";
-            label2.Click += label2_Click;
             // 
             // textBox4
             // 
