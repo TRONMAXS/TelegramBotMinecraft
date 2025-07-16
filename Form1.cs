@@ -20,6 +20,11 @@ namespace TelegramBotMinecraft
         private CancellationTokenSource cts = new CancellationTokenSource();
         //private string TextBoxAdmin;
 
+        private bool errorSettingsJson = false;
+        private bool errorServersJson = false;
+        private bool errorUserSettingsJson = false;
+        private bool errorReloadReconnect = false;
+
         private readonly string pathUserSettings;
         private string jsonUserSettings;
 
@@ -27,10 +32,19 @@ namespace TelegramBotMinecraft
         private readonly string pathSettingsBackup;
         private readonly string pathUserSettingsBackup;
 
+        private bool SendErrorMessageJsonSettings = false;
+        private bool CheckTokenJsonSettings = false;
+        private bool CheckChatIdsJsonSettings = false;
+        private bool SendErrorMessageJsonServers = false;
+        private bool CheckErrorJsonServers = false;
+
+        private bool fatalJsonFilesError = false;
+
         private readonly string pathServers;
         private string json;
         private readonly string pathSettings;
         private string jsonSettings;
+        private string jsonServers;
         private List<SettingsConfig> settings = new List<SettingsConfig>();
         private List<ServerConfig> servers = new List<ServerConfig>();
         //private bool isServerRunning = false;
@@ -70,7 +84,6 @@ namespace TelegramBotMinecraft
 
         private Dictionary<int, bool> serverStarting = new Dictionary<int, bool>();
 
-
         public Form1()
         {
             InitializeComponent();
@@ -94,10 +107,12 @@ namespace TelegramBotMinecraft
             this.Load += Form1_Load;
             this.Resize += Form1_Resize;
 
-            button1.Click += button1_Click;
-            button2.Click += button2_Click;
-            button3.Click += button3_Click;
-            button5.Click += button5_Click;
+            button1.Click += ButtonSettingsForm;
+            button2.Click += ButtonServersForm;
+            button3.Click += ButtonReloadReconnect;
+            button6.Click += ButtonRestoreFileServers;
+            button7.Click += ButtonRestoreFileUserSettings;
+            button8.Click += ButtonRestoreFileSettings;
             //button4.Click += RunСommand;
 
             // Скрываем окно
@@ -159,25 +174,98 @@ namespace TelegramBotMinecraft
 
             e.Cancel = true;
 
-            await SaveJsonFiles();
+            
+            bool Closing = await SaveJsonFiles();
 
             this.FormClosing -= Form1_FormClosing;
             this.Close();
         }
 
-        private async Task SaveJsonFiles()
+        private async Task<bool> SaveJsonFiles()
         {
+            int completed = 0;
+            int notCompleted = 0;
+
             try
             {
-                File.Copy(pathServers, pathServersBackup, true);
-                File.Copy(pathSettings, pathSettingsBackup, true);
-                File.Copy(pathUserSettings, pathUserSettingsBackup, true);
+                try
+                {
+                    string jsonTestSave = File.ReadAllText(pathServers);
+                    var objTestSave = JsonSerializer.Deserialize<List<ServerConfig>>(jsonTestSave);
+                    File.Copy(pathServers, pathServersBackup, true);
 
+                    if (File.Exists(pathServersBackup) && new FileInfo(pathServersBackup).Length != 0)
+                    {
+                        completed++;
+                    }
+                    else
+                    {
+                        notCompleted++;
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении файла Servers.json: {ex.Message}", "Ошибка при сохранении файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    notCompleted++;
+                }
+
+                try
+                {
+                    string jsonTestSave = File.ReadAllText(pathSettings);
+                    var objTestSave = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonTestSave);
+                    File.Copy(pathSettings, pathSettingsBackup, true);
+
+                    if (File.Exists(pathSettingsBackup) && new FileInfo(pathSettingsBackup).Length != 0)
+                    {
+                        completed++;
+                    }
+                    else
+                    {
+                        notCompleted++;
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении файла Settings.json: {ex.Message}", "Ошибка при сохранении файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    notCompleted++;
+                }
+
+                try
+                {
+                    string jsonTestSave = File.ReadAllText(pathUserSettings);
+                    var objTestSave = JsonSerializer.Deserialize<List<UserSettings>>(jsonTestSave);
+                    File.Copy(pathUserSettings, pathUserSettingsBackup, true);
+
+                    if (File.Exists(pathUserSettingsBackup) && new FileInfo(pathUserSettingsBackup).Length != 0)
+                    {
+                        completed++;
+                    }
+                    else
+                    {
+                        notCompleted++;
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении файла UserSettings.json: {ex.Message}", "Ошибка при сохранении файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    notCompleted++;
+                }
+            }
+            catch { }
+            if (completed > 0 && notCompleted == 0)
+            {
                 File.Delete(pathServers);
                 File.Delete(pathSettings);
                 File.Delete(pathUserSettings);
+                return true;
             }
-            catch{}
+            else if (notCompleted > 0)
+            {
+                AppendText($"Не удалось сохранить некоторые файлы. Проверьте наличие файлов и их содержимое.");
+                await ShowBalloonTip("Ошибка сохранения файлов", "Не удалось сохранить некоторые файлы. Проверьте наличие файлов и их содержимое.");
+                return false;
+            }
+            return false;
         }
 
         private async Task ShowBalloonTip(string title, string text)
@@ -201,7 +289,7 @@ namespace TelegramBotMinecraft
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void ButtonSettingsForm(object sender, EventArgs e)
         {
             if (form3 == null || form3.IsDisposed)
             {
@@ -213,7 +301,7 @@ namespace TelegramBotMinecraft
             form3.Update();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void ButtonServersForm(object sender, EventArgs e)
         {
             if (form2 == null || form2.IsDisposed)
             {
@@ -225,191 +313,84 @@ namespace TelegramBotMinecraft
             form2.Update();
         }
 
-        private async void button3_Click(object sender, EventArgs e)
+        private async void ButtonReloadReconnect(object sender, EventArgs e)
         {
-            try
-            {
-                jsonSettings = File.ReadAllText("Settings.json");
-                settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-
-            }
-            catch
-            {
-                settings = new List<SettingsConfig>
-                    {
-                        new SettingsConfig
-                        {
-                            Notifications = true,
-                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
-                            ChatIds = new List<ChatId>
-                            {
-                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
-                            }
-                        }
-                    };
-                string jsonStr = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(pathSettings, jsonStr);
-                AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки.");
-            }
-            try
-            {
-                if (cts != null)
-                {
-                    cts.Cancel();
-                    cts.Dispose();
-                    cts = null;
-                }
-                Form1_Load(this, EventArgs.Empty);
-
-            }
-            catch { Form1_Load(this, EventArgs.Empty); }
+            fatalJsonFilesError = false;
+            Form1_Load(this, EventArgs.Empty);
         }
 
-        private async void button5_Click(object sender, EventArgs e)
+        private async void ButtonRestoreFileSettings(object sender, EventArgs e)
         {
-            try
+            await LoadBackupJson(DialogResult.Yes, "Settings.json");
+        }
+
+        private async void ButtonRestoreFileServers(object sender, EventArgs e)
+        {
+            await LoadBackupJson(DialogResult.Yes, "Servers.json");
+        }
+
+        private async void ButtonRestoreFileUserSettings(object sender, EventArgs e)
+        {
+            await LoadBackupJson(DialogResult.Yes, "UserSettings.json");
+        }
+
+        private void UpdateErrorButtons()
+        {
+            this.Invoke(new Action(() =>
             {
-                string json = File.ReadAllText(pathServers);
-                servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
-                AppendText("В файле Servers.json нет включённых серверов. Пожалуйста, включите хотя бы один, чтобы можно было с ним работать.");
-            }
-            catch
-            {
-                servers = new List<ServerConfig>
-                {
-                    new ServerConfig
-                    {
-                        Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
-                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
-                        Ip = "server ip (example:  127.0.0.1)",
-                        RconPort = "rcon port (example:  25565)",
-                        RconPassword = "rcon password(example:  12345)",
-                        ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)"
-                    }
-                };
-                string json = JsonSerializer.Serialize(servers, options);
-                File.WriteAllText(pathServers, json);
-                AppendText($"Servers.json был перезаписан из-за ошибки. Проверьте настройки.");
-            }
-            try
-            {
-                Form1_Load(this, EventArgs.Empty);
-            }
-            catch { Form1_Load(this, EventArgs.Empty); }
+                button3.Enabled = errorReloadReconnect;// Проверить и перезапустить
+                button3.Visible = errorReloadReconnect;
+
+
+                button6.Enabled = errorServersJson;// Восстановить файл Servers.json
+                button6.Visible = errorServersJson;
+
+                button7.Enabled = errorUserSettingsJson;// Восстановить файл UserSettings.json
+                button7.Visible = errorUserSettingsJson;
+
+                button8.Enabled = errorSettingsJson;// Восстановить файл Settings.json
+                button8.Visible = errorSettingsJson;
+
+            }));
+
         }
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+
             try
             {
-                jsonSettings = File.ReadAllText("Settings.json");
-                settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-            }
-            catch (Exception ex) 
-            {
-                settings = new List<SettingsConfig>
-                    {
-                        new SettingsConfig
-                        {
-                            Notifications = true,
-                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
-                            AdminPassword = "Admin Password (example:  12345)",
-                            ChatIds = new List<ChatId>
-                            {
-                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
-                            }
-                        }
-                    };
-                string jsonStr = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(pathSettings, jsonStr);
-                AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки."); 
-            }
-            if (settings[0].BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)" || string.IsNullOrWhiteSpace(settings[0].BotToken))
-            {
-                AppendText($"Перейдите в настройки и введите токен бота");
-                MessageBox.Show("Не указан токен бота в файле Settings.json!", "Ошибка в файле Settings.json");
-                this.Invoke(new Action(() =>
-                {
-                    button3.Enabled = true;
-                    button3.Visible = true;
 
-                }));
-                return;
-            }
-
-            if (settings[0].ChatIds == null ||
-                settings[0].ChatIds.Any(c => c.Identifier == "example: 646516246" || c.Name == "example: Admin") ||
-                settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)) ||
-                settings[0].ChatIds.Count == 0)
-            {
-                if (settings[0].ChatIds.Count == 0)
-                {
-                    BotToken = settings[0].BotToken;
-                    bool? Notifications = settings[0].Notifications;
-                    settings = new List<SettingsConfig>
-                    {
-                        new SettingsConfig
-                        {
-                            Notifications = Notifications,
-                            BotToken = BotToken,
-                            ChatIds = new List<ChatId>
-                            {
-                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
-                            }
-                        }
-                    };
-                }
-                string jsonStr = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(pathSettings, jsonStr);
-                AppendText($"Перейдите в настройки и введите ID нужных групп или чатов.");
-                MessageBox.Show("Не указаны ID групп или чатов в файле Settings.json!", "Ошибка в файле Settings.json");
-
-                this.Invoke(new Action(() =>
-                {
-                    button3.Enabled = true;
-                    button3.Visible = true;
-
-                }));
-                return;
-            }
-            try
-            {
-                StartBot = true;
                 for (int i = 0; i < settings[0].ChatIds.Count; i++)
                 {
-
                     if (long.TryParse(settings[0].ChatIds[i].Identifier, out long chatId))
                     {
                         AllowedUsers.Add(chatId);
                     }
                 }
 
-                this.Invoke(new Action(() =>
-                {
-                    button1.Enabled = true;
-                    button2.Enabled = true;
-                    button3.Enabled = false;
-                    button3.Visible = false;
-                    button4.Enabled = true;
-                    button5.Enabled = false;
-                    button5.Visible = false;
-                    textBox1.Enabled = true;
-                    textBox2.Enabled = true;
-                    textBox3.Enabled = true;
-                    label1.Enabled = true;
-                }));
+                errorServersJson = false;
+                errorSettingsJson = false;
+                errorUserSettingsJson = false;
+                errorReloadReconnect = false;
+                UpdateErrorButtons();
+
                 bool CheckSettings = false;
                 bool CheckServers = false;
-                while (true)
+                while (!fatalJsonFilesError)
                 {
                     CheckSettings = await CheckJsonSettings();
                     CheckServers = await CheckJsonServers();
                     if (CheckSettings == true && CheckServers == true)
                     {
+                        CheckTokenJsonSettings = false;
+                        CheckChatIdsJsonSettings = false;
+                        CheckErrorJsonServers = false;
+
                         if (!botStartedForm1_Load)
                         {
+                            fatalJsonFilesError = false;
+                            StartCheck = true;
                             StartBot = true;
                             botStartedForm1_Load = true;
                             _ = RunBotLoopAsync();
@@ -418,6 +399,7 @@ namespace TelegramBotMinecraft
                     }
                     else
                     {
+                        fatalJsonFilesError = true;
                         StartCheck = false;
                         StartBot = false;
                         await Task.Delay(1000);
@@ -432,7 +414,7 @@ namespace TelegramBotMinecraft
                         rcon = newRcon;
                     }
                 }
-                StartCheck = true;
+
                 _ = Task.Run(() => CheckJson());
                 _ = Task.Run(() => CheckServerAsync());
                 _ = Task.Run(() => CheckRconAsync());
@@ -455,17 +437,18 @@ namespace TelegramBotMinecraft
 
         private async Task RunBotLoopAsync()
         {
-            while (true)
+            while (!fatalJsonFilesError)
             {
                 try
                 {
                     await StartBotAsync();
-                    // Если StartBotAsync завершился без ошибок — выходим из цикла
                     break;
                 }
                 catch (Exception ex)
                 {
                     AppendText($"Бот завершил работу: {ex.Message}.");
+                    fatalJsonFilesError = true;
+                    botStartedForm1_Load = false;
                     await Task.Delay(5000);
                 }
             }
@@ -487,210 +470,267 @@ namespace TelegramBotMinecraft
                     cancellationToken: cts.Token
                 );
                 StartBot = false;
-                
-            }
 
-            // Можно добавить ожидание завершения работы, если нужно
+            }
             await Task.Delay(Timeout.Infinite, cts.Token);
+        }
+
+        private async Task LoadBackupJson(DialogResult result, string jsonName)
+        {
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    if (jsonName == "Servers.json")
+                    {
+                        File.Copy(pathServersBackup, pathServers, true);
+                        json = File.ReadAllText(pathServers);
+                        servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
+                        AppendText($"Файл Servers.json был восстановлен из резервной копии.");
+                    }
+                    else if (jsonName == "Settings.json")
+                    {
+                        File.Copy(pathSettingsBackup, pathSettings, true);
+                        jsonSettings = File.ReadAllText(pathSettings);
+                        settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+                        AppendText($"Файл Settings.json был восстановлен из резервной копии.");
+                    }
+                    else if (jsonName == "UserSettings.json")
+                    {
+                        File.Copy(pathUserSettingsBackup, pathUserSettings, true);
+                        jsonUserSettings = File.ReadAllText(pathUserSettings);
+                        AppendText($"Файл UserSettings.json был восстановлен из резервной копии.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppendText($"Ошибка при восстановлении файла {jsonName}: {ex.Message}");
+                }
+            }
         }
 
         private async Task<bool> CheckJsonServers()
         {
-            while (true)
+            int countFalse = 0;
+
+            try
             {
+                jsonServers = File.ReadAllText(pathServers);
+                servers = JsonSerializer.Deserialize<List<ServerConfig>>(jsonServers);
+                SendErrorMessageJsonServers = false;
+            }
+            catch (Exception ex)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
 
-                string json = File.ReadAllText(pathServers);
-                servers = JsonSerializer.Deserialize<List<ServerConfig>>(json);
-
-                jsonUserSettings = File.ReadAllText(pathUserSettings);
-                var UserSettings = JsonSerializer.Deserialize<List<UserSettings>>(jsonUserSettings);
-
-                int count = 0;
-                int countFalse = 0;
-
-                if (rcon != null)
+                if (!SendErrorMessageJsonServers)
                 {
-                    if (flagStartCheck == false && servers[CheckEnableServer].RconPort != Convert.ToString(rcon.Port))
-                    {
-                        if (rcon != null && rcon.Connected == true)
-                        {
-                            //AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
-                            rcon.Dispose();
-                            rcon = null;
-                        }
-                        if (CheckEnableServer != -1)
-                        {
-                            var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
-                            if (newRcon != null)
-                            {
-                                rcon = newRcon; // только если подключение удалось
-                            }
-                        }
-                    }
+                    SendErrorMessageJsonServers = true;
+                    AppendText("Проверьте файл Servers.json на наличие ошибок.");
+                    var result = MessageBox.Show(
+                        $"Ошибка в чтении файла Servers.json: \n{ex.Message}\n\nПерезаписать файл, используя старую рабочую версию?",
+                        "Ошибка в файле Servers.json",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Error);
+                    await LoadBackupJson(result, "Servers.json");
                 }
 
-                try
-                {
+                errorServersJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
 
+                fatalJsonFilesError = true;
+                return false;
+            }
+
+            if (servers == null || servers.Count == 0)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
+
+                errorServersJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+                AppendText("Файл Servers.json пуст или повреждён.");
+                fatalJsonFilesError = true;
+                return false;
+            }
+
+            bool hasCriticalError =
+                servers[0].StartupPath == @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)" ||
+                servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)" ||
+                countFalse == servers.Count ||
+                servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
+                servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
+                servers.Any(c => string.IsNullOrEmpty(c.RconPassword) || string.IsNullOrEmpty(c.ConnectIp)) ||
+                servers.Any(c => string.IsNullOrEmpty(c.Port));
+
+            if (hasCriticalError)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
+
+                if (MessageShow)
+                {
+                    MessageShow = false;
                     if (servers[0].StartupPath == @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)" ||
-                        servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)" ||
-                        countFalse == servers.Count || servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
-                        servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) || 
+                        servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)")
+                    {
+                        MessageBox.Show("В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
+                    }
+                    if (servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
+                        servers.Any(c => string.IsNullOrEmpty(c.FolderPath)) ||
                         servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
                         servers.Any(c => string.IsNullOrEmpty(c.RconPassword) || string.IsNullOrEmpty(c.ConnectIp)) ||
                         servers.Any(c => string.IsNullOrEmpty(c.Port)))
                     {
-                        
-                        if (MessageShow == true)
-                        {
-                            MessageShow = false;
-                            if (cts != null)
-                            {
-                                cts.Cancel();
-                                cts.Dispose();
-                                cts = null;
-                            }
-                            if (servers[0].StartupPath == @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)")
-                            {
-                                MessageBox.Show($"В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
-                            }
-                            if (servers[0].FolderPath == @"Path to the server folder (example:  G:\MinecraftServers\Survival\)")
-                            {
-                                MessageBox.Show($"В файле Servers.json присутсвует неправильный путь. Пожалуйста, измените на правильный.", "Ошибка в файле Servers.json");
-                            }
-                            if (servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.StartupPath)) ||
-                                servers.Any(c => string.IsNullOrEmpty(c.Name) || string.IsNullOrEmpty(c.FolderPath)) ||
-                                servers.Any(c => string.IsNullOrEmpty(c.Ip) || string.IsNullOrEmpty(c.RconPort)) ||
-                                servers.Any(c => string.IsNullOrEmpty(c.RconPassword) || string.IsNullOrEmpty(c.ConnectIp)) ||
-                                servers.Any(c => string.IsNullOrEmpty(c.Port)))
-                            {
-                                MessageBox.Show($"В файле Servers.json присутствуют пустые поля. Пожалуйста, измените на правильные.", "Ошибка в файле Servers.json");
-                            }
-                        }
-
-                        StartBot = false;
-                        this.Invoke(new Action(() =>
-                        {
-                            button1.Enabled = false;
-                            button2.Enabled = true;
-                            button3.Enabled = false;
-                            button3.Visible = false;
-                            button4.Enabled = false;
-                            button5.Enabled = true;
-                            button5.Visible = true;
-                            textBox1.Enabled = true;
-                            textBox2.Enabled = false;
-                            textBox3.Enabled = false;
-                            label1.Enabled = false;
-                        }));
-                        return false;
+                        MessageBox.Show("В файле Servers.json присутствуют пустые поля. Пожалуйста, измените на правильные.", "Ошибка в файле Servers.json");
                     }
-
-                    if (countFalse != servers.Count && MessageShow == false)
-                    {
-                        MessageShow = true;
-                        this.Invoke(new Action(() =>
-                        {
-                            button1.Enabled = true;
-                            button2.Enabled = true;
-                            button3.Enabled = false;
-                            button3.Visible = false;
-                            button5.Enabled = false;
-                            button5.Visible = false;
-                            button4.Enabled = true;
-                            textBox1.Enabled = true;
-                            textBox2.Enabled = true;
-                            textBox3.Enabled = true;
-                            label1.Enabled = true;
-                        }));
-                    }
-
-                    flagStartCheck = false;
                 }
-                catch (Exception ex)
-                {
-                    AppendText($"Ошибка при проверке серверов: {ex.Message}");
-                    return false;
-                }
-                await Task.Delay(2500);
-                return true;
+
+                errorServersJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+                fatalJsonFilesError = true;
+                return false;
             }
+
+            if (MessageShow == false)
+            {
+                MessageShow = true;
+
+                errorServersJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+            }
+
+            flagStartCheck = false;
+            return true;
         }
 
         private async Task<bool> CheckJsonSettings()
         {
-            while (true)
+            try
             {
-                try
-                {
-                    settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-                    if (settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)))
-                    {
-                        settings[0].ChatIds.RemoveAll(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name));
-                        string jsonStr = JsonSerializer.Serialize(settings, options);
-                        File.WriteAllText(pathSettings, jsonStr);
-                    }
+                jsonSettings = File.ReadAllText(pathSettings);
+                settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
+                SendErrorMessageJsonSettings = false;
+            }
+            catch (Exception ex)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
 
-                    if (settings[0].ChatIds == null ||
-                        settings[0].ChatIds.Any(c => c.Identifier == "example: 646516246" || c.Name == "example: Admin") ||
-                        settings[0].ChatIds.Any(c => string.IsNullOrEmpty(c.Identifier) || string.IsNullOrEmpty(c.Name)) ||
-                        settings[0].ChatIds.Count == 0)
-                    {
-                        this.Invoke(new Action(() =>
-                        {
-                            button1.Enabled = true;
-                            button2.Enabled = false;
-                            button3.Enabled = true;
-                            button3.Visible = true;
-                            button4.Enabled = false;
-                            textBox2.Enabled = false;
-                            textBox3.Enabled = false;
-                            label1.Enabled = false;
-                        }));
+                if (!SendErrorMessageJsonSettings)
+                {
+                    SendErrorMessageJsonSettings = true;
+                    AppendText("Проверьте файл Settings.json на наличие ошибок.");
+                    var result = MessageBox.Show(
+                        $"Ошибка в чтении файла Settings.json: \n{ex.Message}\n\nПерезаписать файл, используя старую рабочую версию?",
+                        "Ошибка в файле Settings.json",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Error);
+                    LoadBackupJson(result, "Settings.json");
+                }
 
-                        if (cts != null)
-                        {
-                            cts.Cancel();
-                            cts.Dispose();
-                            cts = null;
-                        }
-                        Form1_Load(this, EventArgs.Empty);
-                        return true;
-                    }
-                }
-                catch{}
-                try
+                errorSettingsJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+
+                fatalJsonFilesError = true;
+                return false;
+            }
+
+
+            var config = settings.FirstOrDefault();
+            if (config == null)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
+
+                errorSettingsJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+                AppendText("Файл Settings.json пуст или повреждён.");
+                fatalJsonFilesError = true;
+                return false;
+            }
+
+            bool needRewrite = false;
+
+            if (string.IsNullOrWhiteSpace(config.BotToken) ||
+                config.BotToken == "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)")
+            {
+
+                if (CheckTokenJsonSettings) AppendText("Перейдите в настройки и введите токен бота");
+                fatalJsonFilesError = true;
+                CheckTokenJsonSettings = false;
+            }
+            else { CheckTokenJsonSettings = true; }
+
+            if (config.ChatIds == null || config.ChatIds.Count == 0 ||
+                config.ChatIds.Any(c => string.IsNullOrWhiteSpace(c.Identifier) || string.IsNullOrWhiteSpace(c.Name)) ||
+                config.ChatIds.Any(c => c.Identifier == "example: 646516246" || c.Name == "example: Admin"))
+            {
+                if (config.ChatIds == null || config.ChatIds.Count == 0)
                 {
-                    jsonSettings = File.ReadAllText("Settings.json");
-                    settings = JsonSerializer.Deserialize<List<SettingsConfig>>(jsonSettings);
-                }
-                catch (Exception ex)
-                {
-                    settings = new List<SettingsConfig>
+                    config.ChatIds = new List<ChatId>
                     {
-                        new SettingsConfig
-                        {
-                            Notifications = true,
-                            BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
-                            ChatIds = new List<ChatId>
-                            {
-                                new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
-                            }
-                        }
+                        new ChatId { Identifier = "example: 646516246", Name = "example: Admin" }
                     };
-                    string jsonStr = JsonSerializer.Serialize(settings, options);
-                    File.WriteAllText(pathSettings, jsonStr);
-                    AppendText($"Settings.json был перезаписан из-за ошибки. Проверьте настройки.");
-                    if (cts != null)
-                    {
-                        cts.Cancel();
-                        cts.Dispose();
-                        cts = null;
-                    }
-                    return false;
+                    needRewrite = true;
                 }
+                else
+                {
+                    config.ChatIds.RemoveAll(c =>
+                        string.IsNullOrWhiteSpace(c.Identifier) ||
+                        string.IsNullOrWhiteSpace(c.Name) ||
+                        c.Identifier == "example: 646516246" ||
+                        c.Name == "example: Admin");
+                    if (config.ChatIds.Count == 0)
+                    {
+                        config.ChatIds.Add(new ChatId { Identifier = "example: 646516246", Name = "example: Admin" });
+                    }
+                    needRewrite = true;
+                }
+                if (CheckChatIdsJsonSettings)  AppendText("Перейдите в настройки и введите ID нужных групп или чатов.");
+                fatalJsonFilesError = true;
+                CheckChatIdsJsonSettings = false;
+            }
+            else { CheckChatIdsJsonSettings = true; }
+
+            if (needRewrite)
+            {
+                string jsonStr = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(pathSettings, jsonStr);
+            }
+
+            if (config.ChatIds == null || config.ChatIds.Count == 0)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+                cts = null;
+
+                errorSettingsJson = true;
+                errorReloadReconnect = true;
+                UpdateErrorButtons();
+
+                Form1_Load(this, EventArgs.Empty);
                 return true;
             }
+
+            return true;
         }
 
         public static bool IsValidJson(string json)
