@@ -42,7 +42,7 @@
             labelVersion.Name = "labelVersion";
             labelVersion.Size = new Size(97, 19);
             labelVersion.TabIndex = 0;
-            labelVersion.Text = "Версия: v0.4.1";
+            labelVersion.Text = "Версия: v0.4.4";
             // 
             // labelBuild
             // 

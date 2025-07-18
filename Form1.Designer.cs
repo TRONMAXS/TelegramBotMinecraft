@@ -172,7 +172,7 @@
             label1.Name = "label1";
             label1.Size = new Size(34, 18);
             label1.TabIndex = 2;
-            label1.Text = "v0.4.1";
+            label1.Text = "v0.4.4";
             label1.UseCompatibleTextRendering = true;
             label1.UseMnemonic = false;
             // 
