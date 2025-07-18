@@ -52,7 +52,7 @@ namespace TelegramBotMinecraft
         private int CheckEnableServer = -1;
         private bool flagStartCheck = true;
         private bool StartCheck = false;
-        private static readonly HashSet<long> AllowedUsers = new HashSet<long>{};
+        private static readonly HashSet<long> AllowedUsers = new HashSet<long> { };
         JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
         private List<bool> serversRunning;
@@ -64,8 +64,11 @@ namespace TelegramBotMinecraft
         RCON rcon;
         RCON rconCheckingServers;
 
+
         private Form2 form2;
         private Form3 form3;
+        private Form5 form5;
+
 
         private ContextMenuStrip notifyIconMenu;
         private ToolStripMenuItem exitMenuItem;
@@ -110,10 +113,10 @@ namespace TelegramBotMinecraft
             button1.Click += ButtonSettingsForm;
             button2.Click += ButtonServersForm;
             button3.Click += ButtonReloadReconnect;
-            button6.Click += ButtonRestoreFileServers;
-            button7.Click += ButtonRestoreFileUserSettings;
-            button8.Click += ButtonRestoreFileSettings;
-            //button4.Click += RunСommand;
+            button4.Click += ButtonRestoreFileSettings;
+            button5.Click += ButtonRestoreFileServers;
+            button6.Click += ButtonRestoreFileUserSettings;
+            label1.Click += LabelInfo;
 
             // Скрываем окно
             this.WindowState = FormWindowState.Minimized;
@@ -174,7 +177,7 @@ namespace TelegramBotMinecraft
 
             e.Cancel = true;
 
-            
+
             bool Closing = await SaveJsonFiles();
 
             this.FormClosing -= Form1_FormClosing;
@@ -289,6 +292,18 @@ namespace TelegramBotMinecraft
             }
         }
 
+        private void LabelInfo(object sender, EventArgs e)
+        {
+            if (form5 == null || form5.IsDisposed)
+            {
+                form5 = new Form5();
+            }
+            form5.Show();
+            form5.BringToFront();
+            form5.WindowState = FormWindowState.Normal;
+            form5.Update();
+        }
+
         private void ButtonSettingsForm(object sender, EventArgs e)
         {
             if (form3 == null || form3.IsDisposed)
@@ -342,14 +357,14 @@ namespace TelegramBotMinecraft
                 button3.Visible = errorReloadReconnect;
 
 
-                button6.Enabled = errorServersJson;// Восстановить файл Servers.json
-                button6.Visible = errorServersJson;
+                button5.Enabled = errorServersJson;// Восстановить файл Servers.json
+                button5.Visible = errorServersJson;
 
-                button7.Enabled = errorUserSettingsJson;// Восстановить файл UserSettings.json
-                button7.Visible = errorUserSettingsJson;
+                button5.Enabled = errorUserSettingsJson;// Восстановить файл UserSettings.json
+                button5.Visible = errorUserSettingsJson;
 
-                button8.Enabled = errorSettingsJson;// Восстановить файл Settings.json
-                button8.Visible = errorSettingsJson;
+                button4.Enabled = errorSettingsJson;// Восстановить файл Settings.json
+                button4.Visible = errorSettingsJson;
 
             }));
 
@@ -425,7 +440,7 @@ namespace TelegramBotMinecraft
         }
 
         private async Task CheckJson()
-        { 
+        {
             while (StartCheck)
             {
                 _ = Task.Run(() => CheckJsonSettings());
@@ -704,7 +719,7 @@ namespace TelegramBotMinecraft
                     }
                     needRewrite = true;
                 }
-                if (CheckChatIdsJsonSettings)  AppendText("Перейдите в настройки и введите ID нужных групп или чатов.");
+                if (CheckChatIdsJsonSettings) AppendText("Перейдите в настройки и введите ID нужных групп или чатов.");
                 fatalJsonFilesError = true;
                 CheckChatIdsJsonSettings = false;
             }
@@ -750,7 +765,7 @@ namespace TelegramBotMinecraft
 
         private async Task<RCON?> ConnectToRconAsync(ServerConfig config)
         {
-            if (rcon != null && rcon.Connected == true) 
+            if (rcon != null && rcon.Connected == true)
             {
                 AppendText($"Связь с сервером {servers[CheckEnableServer].Name} ({rcon.IPAddress}:{rcon.Port}) разорвана.");
                 rcon.Dispose();
@@ -932,7 +947,7 @@ namespace TelegramBotMinecraft
                             }
                         }
                     }
-                    
+
 
                     switch (text)
                     {
@@ -945,7 +960,7 @@ namespace TelegramBotMinecraft
                             {
                                 chatReply = chatReply = "Доступ к команде ограничен";
                             }
-                        break;
+                            break;
 
                         case "/help":
 
@@ -1076,7 +1091,7 @@ namespace TelegramBotMinecraft
                                         chatReply = "Мир для удаления не найден. Возможно, он уже был удалён. ";
                                     }
                                 }
-                                catch{}
+                                catch { }
                             }
                             else
                             {
@@ -1241,7 +1256,8 @@ namespace TelegramBotMinecraft
                             serversRunning[CheckEnableServer] = false;
                         notifyIcon1.Icon = new Icon("Icons/server_stop.ico");
                         label1.Text = "Сервер - выключен";
-                    }))*/;
+                    }))*/
+                    ;
                 }
 
                 await Task.Delay(2500);
@@ -1273,7 +1289,7 @@ namespace TelegramBotMinecraft
                     var newRcon = await ConnectToRconAsync(servers[CheckEnableServer]);
                     if (newRcon != null)
                     {
-                        rcon = newRcon; 
+                        rcon = newRcon;
                     }
                 }
 
@@ -1320,7 +1336,7 @@ namespace TelegramBotMinecraft
             string text = "Статус серверов:\n";
             foreach (ServerConfig server in servers)
             {
-                for(int i = 0; i< UserSettings[User].AllowedServers.Count; i++)
+                for (int i = 0; i < UserSettings[User].AllowedServers.Count; i++)
                 {
                     if (server.Name == UserSettings[User].AllowedServers[i].Server)
                     {
@@ -1366,7 +1382,7 @@ namespace TelegramBotMinecraft
             }
             else
             {
-                
+
                 await botClient.SendMessage(chatId, text);
             }
 

@@ -30,8 +30,6 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            TextBox textBox2;
-            Button button4;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             textBox1 = new TextBox();
             notifyIcon1 = new NotifyIcon(components);
@@ -41,48 +39,15 @@
             toolStripMenuItem1 = new ToolStripMenuItem();
             toolStripComboBox1 = new ToolStripComboBox();
             toolStripTextBox1 = new ToolStripTextBox();
-            label1 = new Label();
             button1 = new Button();
             button2 = new Button();
             button3 = new Button();
-            label2 = new Label();
-            textBox3 = new TextBox();
-            button6 = new Button();
-            button7 = new Button();
-            button8 = new Button();
-            textBox2 = new TextBox();
             button4 = new Button();
+            button5 = new Button();
+            button6 = new Button();
+            label1 = new Label();
             notifyIconMenu.SuspendLayout();
             SuspendLayout();
-            // 
-            // textBox2
-            // 
-            textBox2.CausesValidation = false;
-            textBox2.Enabled = false;
-            textBox2.HideSelection = false;
-            textBox2.Location = new Point(7, 336);
-            textBox2.Name = "textBox2";
-            textBox2.PlaceholderText = "Введите команду";
-            textBox2.ShortcutsEnabled = false;
-            textBox2.Size = new Size(193, 23);
-            textBox2.TabIndex = 1;
-            textBox2.TabStop = false;
-            textBox2.Visible = false;
-            textBox2.WordWrap = false;
-            // 
-            // button4
-            // 
-            button4.CausesValidation = false;
-            button4.Enabled = false;
-            button4.Location = new Point(7, 365);
-            button4.Name = "button4";
-            button4.Size = new Size(133, 27);
-            button4.TabIndex = 6;
-            button4.TabStop = false;
-            button4.Text = "Выполнить команду";
-            button4.UseMnemonic = false;
-            button4.UseVisualStyleBackColor = true;
-            button4.Visible = false;
             // 
             // textBox1
             // 
@@ -101,7 +66,7 @@
             // 
             notifyIcon1.ContextMenuStrip = notifyIconMenu;
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-            notifyIcon1.Text = "TelegramBotMinecraft";
+            notifyIcon1.Text = "TelegramBotMinecraft v0.4.1";
             notifyIcon1.Visible = true;
             // 
             // notifyIconMenu
@@ -138,19 +103,6 @@
             toolStripTextBox1.Name = "toolStripTextBox1";
             toolStripTextBox1.Size = new Size(100, 23);
             // 
-            // label1
-            // 
-            label1.CausesValidation = false;
-            label1.Enabled = false;
-            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label1.Location = new Point(7, 395);
-            label1.Name = "label1";
-            label1.Size = new Size(166, 27);
-            label1.TabIndex = 2;
-            label1.Text = "Сервер - выключен";
-            label1.UseMnemonic = false;
-            label1.Visible = false;
-            // 
             // button1
             // 
             button1.Location = new Point(713, 336);
@@ -162,7 +114,7 @@
             // 
             // button2
             // 
-            button2.Location = new Point(626, 336);
+            button2.Location = new Point(713, 369);
             button2.Name = "button2";
             button2.Size = new Size(81, 27);
             button2.TabIndex = 4;
@@ -172,89 +124,70 @@
             // button3
             // 
             button3.Enabled = false;
-            button3.Location = new Point(645, 369);
+            button3.Location = new Point(662, 402);
             button3.Name = "button3";
-            button3.Size = new Size(132, 60);
+            button3.Size = new Size(132, 39);
             button3.TabIndex = 5;
             button3.Text = "Проверить и перезапустить";
             button3.UseVisualStyleBackColor = true;
             button3.Visible = false;
             // 
-            // label2
+            // button4
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 12F);
-            label2.Location = new Point(12, 422);
-            label2.Name = "label2";
-            label2.Size = new Size(0, 21);
-            label2.TabIndex = 7;
+            button4.Enabled = false;
+            button4.Location = new Point(12, 336);
+            button4.Name = "button4";
+            button4.Size = new Size(132, 40);
+            button4.TabIndex = 12;
+            button4.Text = "Восстановить файл Settings.json";
+            button4.UseVisualStyleBackColor = true;
+            button4.Visible = false;
             // 
-            // textBox3
+            // button5
             // 
-            textBox3.CausesValidation = false;
-            textBox3.Enabled = false;
-            textBox3.Font = new Font("Segoe UI", 12F);
-            textBox3.HideSelection = false;
-            textBox3.Location = new Point(7, 420);
-            textBox3.Name = "textBox3";
-            textBox3.ReadOnly = true;
-            textBox3.ShortcutsEnabled = false;
-            textBox3.Size = new Size(193, 29);
-            textBox3.TabIndex = 8;
-            textBox3.TabStop = false;
-            textBox3.Visible = false;
-            textBox3.WordWrap = false;
+            button5.Enabled = false;
+            button5.Location = new Point(150, 337);
+            button5.Name = "button5";
+            button5.Size = new Size(132, 39);
+            button5.TabIndex = 10;
+            button5.Text = "Восстановить файл Servers.json";
+            button5.UseVisualStyleBackColor = true;
+            button5.Visible = false;
             // 
             // button6
             // 
             button6.Enabled = false;
-            button6.Location = new Point(458, 377);
+            button6.Location = new Point(288, 337);
             button6.Name = "button6";
             button6.Size = new Size(132, 39);
-            button6.TabIndex = 10;
-            button6.Text = "Восстановить файл Servers.json";
+            button6.TabIndex = 11;
+            button6.Text = "Восстановить файл UserSettings.json";
             button6.UseVisualStyleBackColor = true;
             button6.Visible = false;
             // 
-            // button7
+            // label1
             // 
-            button7.Enabled = false;
-            button7.Location = new Point(458, 422);
-            button7.Name = "button7";
-            button7.Size = new Size(132, 39);
-            button7.TabIndex = 11;
-            button7.Text = "Восстановить файл UserSettings.json";
-            button7.UseVisualStyleBackColor = true;
-            button7.Visible = false;
-            // 
-            // button8
-            // 
-            button8.Enabled = false;
-            button8.Location = new Point(458, 331);
-            button8.Name = "button8";
-            button8.Size = new Size(132, 40);
-            button8.TabIndex = 12;
-            button8.Text = "Восстановить файл Settings.json";
-            button8.UseVisualStyleBackColor = true;
-            button8.Visible = false;
+            label1.Font = new Font("Segoe UI Light", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            label1.Location = new Point(7, 423);
+            label1.Name = "label1";
+            label1.Size = new Size(34, 18);
+            label1.TabIndex = 2;
+            label1.Text = "v0.4.1";
+            label1.UseCompatibleTextRendering = true;
+            label1.UseMnemonic = false;
             // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.None;
-            AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(803, 465);
-            Controls.Add(button8);
-            Controls.Add(button7);
+            ClientSize = new Size(803, 450);
             Controls.Add(button6);
-            Controls.Add(textBox3);
-            Controls.Add(label2);
+            Controls.Add(button5);
             Controls.Add(button4);
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(label1);
-            Controls.Add(textBox2);
             Controls.Add(textBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -272,21 +205,17 @@
         #endregion
 
         public TextBox textBox1;
-        public TextBox textBox2;
         public NotifyIcon notifyIcon1;
-        private Label label1;
         private Button button1;
         private Button button2;
         private Button button3;
         private Button button4;
-        private Label label2;
-        private TextBox textBox3;
+        private Button button5;
+        private Button button6;
+        private Label label1;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem toolStripMenuItem1;
         private ToolStripComboBox toolStripComboBox1;
         private ToolStripTextBox toolStripTextBox1;
-        private Button button6;
-        private Button button7;
-        private Button button8;
     }
 }
