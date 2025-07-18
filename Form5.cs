@@ -7,7 +7,7 @@ namespace TelegramBotMinecraft
         public Form5()
         {
             InitializeComponent();
-            labelVersion.Text = "Версия: v0.4.1";
+            labelVersion.Text = "Версия: v0.4.4";
             labelBuild.Text = "Дата сборки: 18.07.2025";
         }
 
