@@ -65,24 +65,19 @@ namespace TelegramBotMinecraft
 
             if (!string.IsNullOrWhiteSpace(inputName) && !string.IsNullOrWhiteSpace(inputId))
             {
-                // Удаляем пример из списка ChatIds, если он есть
                 settings[0].ChatIds.RemoveAll(c =>
                     c.Identifier == "example: 646516246" || c.Name == "example: Admin");
 
-                // Добавляем новый ChatId
                 settings[0].ChatIds.Add(new ChatId { Name = inputName, Identifier = inputId });
 
-                // Обновляем listBox1
                 listBox1.Items.Remove("Пример <Имя: 646516246 ; ID: Admin>");
                 listBox1.Items.Add($"Имя: {inputName} ; ID: {inputId}");
                 textBox3.Clear();
                 textBox2.Clear();
 
-                // Сохраняем изменения в JSON
                 string jsonStr = System.Text.Json.JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(pathSettings, jsonStr);
 
-                // Обновляем переменную json для дальнейшей работы
                 json = jsonStr;
 
                 foreach (var Setting in settings)

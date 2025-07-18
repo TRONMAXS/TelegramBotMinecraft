@@ -68,7 +68,7 @@ namespace TelegramBotMinecraft
         {
             string json = JsonSerializer.Serialize(servers, options);
             File.WriteAllText(jsonFilePath, textBox1.Text);
-            MessageBox.Show("Файл сохранен");
+            MessageBox.Show("Файл сохранен", "Сохранение", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LoadServersToList();
         }
 
@@ -95,7 +95,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 servers = new List<ServerConfig>
                 {

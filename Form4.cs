@@ -75,7 +75,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при загрузке серверов: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -94,7 +94,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке команд: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при загрузке команд: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -152,7 +152,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке пользователей: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при загрузке пользователей: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -207,7 +207,7 @@ namespace TelegramBotMinecraft
             catch (Exception ex)
             {
 
-                MessageBox.Show("Ошибка при загрузки настроек пользователей: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при загрузки настроек пользователей: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             await Task.Delay(1000);
 
@@ -251,7 +251,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при сохранении данных пользователей: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при сохранении данных пользователей: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -293,7 +293,7 @@ namespace TelegramBotMinecraft
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при сохранении данных пользователей: " + ex.Message, "Ошибка");
+                MessageBox.Show("Ошибка при сохранении данных пользователей: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

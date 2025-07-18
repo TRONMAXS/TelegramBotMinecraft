@@ -33,13 +33,13 @@ namespace TelegramBotMinecraft
             pathUserSettingsBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserSettingsBackup.json");
 
 
-            LoadJsons(); // Загружаем JSON файлы при запуске программы
-            CheckAndFixSettingsJson(); // Проверяем и исправляем JSON файл настроек
-            CheckAndFixServersJson(); // Проверяем и исправляем JSON файл серверов
+            LoadJsons();
+            CheckAndFixSettingsJson();
+            CheckAndFixServersJson();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1()); // Бот стартует из Form1
+            Application.Run(new Form1());
         }
 
         public static bool IsAppAlreadyRunning(string appName)
@@ -178,25 +178,7 @@ namespace TelegramBotMinecraft
                     File.WriteAllText(pathSettings, newJson);
                 }
             }
-            catch
-            {
-                /*var settings = new List<SettingsConfig>
-                {
-                    new SettingsConfig
-                    {
-                        Notifications = true,
-                        BotToken = "Your bot token (example:  123456789:ABCdefGHIjklMNOpqrSTUvwxYZ)",
-                        AdminPassword = "Admin Password (example:  12345)",
-                        ChatIds = new List<ChatId>
-                        {
-                            new ChatId { Identifier = "example: 646516246", Name = "example: Admin" },
-                        }
-                    }
-                };
-
-                string jsonSettings= JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(pathSettings, jsonSettings);*/
-            }
+            catch { }
            
         }
         static void CheckAndFixServersJson()
@@ -264,27 +246,7 @@ namespace TelegramBotMinecraft
                     File.WriteAllText(pathServers, newJson);
                 }
             }
-            catch
-            {
-
-                /*var servers = new List<ServerConfig>
-                {
-                    new ServerConfig
-                    {
-                        Name = "Name Server (example:  Vanilla(Survival) - 1.20.1)",
-                        StartupPath = @"Path to the startup file (example:  G:\MinecraftServers\Survival\srart.bat)",
-                        FolderPath = @"Path to the server folder (example:  G:\MinecraftServers\Survival\)",
-                        Ip = "server ip (example:  127.0.0.1)",
-                        RconPort = "rcon port (example:  25565)",
-                        RconPassword = "rcon password(example:  12345)",
-                        ConnectIp = "connect ip (example: 127.0.0.1)",
-                        Port = "server port (example:  25565)"
-                    }
-                };
-
-                string json = JsonSerializer.Serialize(servers, options);
-                File.WriteAllText(pathServers, json);*/
-            }
+            catch { }
         }
     }
 }
