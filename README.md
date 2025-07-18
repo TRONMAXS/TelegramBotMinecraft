@@ -1,4 +1,4 @@
-# Telegram Bot Minecraft v0.4.2
+# Telegram Bot Minecraft v0.4.0
 ![GitHub release](https://img.shields.io/github/v/release/TRONMAXS/TelegramBotMinecraft?include_prereleases&label=release)
 ![GitHub repo size](https://img.shields.io/github/repo-size/TRONMAXS/TelegramBotMinecraft)
 ![GitHub issues](https://img.shields.io/github/issues/TRONMAXS/TelegramBotMinecraft)
@@ -234,6 +234,7 @@
 В следующих версиях планируются:
 
 - Добавление функции автозапуска при включении компьютера
+- Добавление новых функций в интерфейс приложения
 
 Если у вас есть идеи — предлагайте их в разделе [Issues](https://github.com/TRONMAXS/TelegramBotMinecraft/issues).
 
