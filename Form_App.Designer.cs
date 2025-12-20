@@ -279,7 +279,6 @@
             // 
             resources.ApplyResources(label15, "label15");
             label15.Name = "label15";
-            label15.Click += label15_Click;
             // 
             // button8
             // 
@@ -543,7 +542,6 @@
             checkBox3.Name = "checkBox3";
             checkBox3.TabStop = false;
             checkBox3.UseVisualStyleBackColor = true;
-            checkBox3.CheckedChanged += checkBox3_CheckedChanged;
             // 
             // label11
             // 

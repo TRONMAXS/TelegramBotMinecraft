@@ -16,20 +16,5 @@ namespace TelegramBotMinecraft
         {
             InitializeComponent();
         }
-
-        private void groupBox10_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label15_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

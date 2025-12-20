@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace TelegramBotMinecraft
+/*namespace TelegramBotMinecraft
 {
     static class Program_old
     {
@@ -251,3 +251,4 @@ namespace TelegramBotMinecraft
         }
     }
 }
+**/
