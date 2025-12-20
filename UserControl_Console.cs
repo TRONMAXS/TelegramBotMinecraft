@@ -1,9 +1,9 @@
 ﻿
 namespace TelegramBotMinecraft
 {
-    public partial class App : Form
+    public partial class UserControl_Console : UserControl
     {
-        public App()
+        public UserControl_Console()
         {
             InitializeComponent();
         }
