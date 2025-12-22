@@ -8,6 +8,7 @@ namespace TelegramBotMinecraft
         {
             InitializeComponent();
             this.Load += UserControl_Users_Load;
+            listBox1.SelectedIndexChanged += listBox1SelectedItem;
         }
 
         private void UserControl_Users_Load(object sender, EventArgs e)
@@ -17,8 +18,6 @@ namespace TelegramBotMinecraft
 
         private void LoadUserList()
         {
-
-            int selectedIndex = listBox1.SelectedIndex;
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
                 connection.Open();
@@ -26,17 +25,23 @@ namespace TelegramBotMinecraft
                 SqliteDataReader reader = command.ExecuteReader();
 
                 listBox1.Items.Clear();
-                if (Convert.ToInt32(reader["ID"]) == selectedIndex + 1)
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        listBox1.Items.Add(reader["Name"]);
-                        LoadServersListBox();
-                        LoadCommandsListBox();
-                    }
+                    listBox1.Items.Add(reader["Name"]);
+                    LoadServersListBox();
+                    LoadCommandsListBox();
                 }
             }
         }
+
+        private void listBox1SelectedItem(object sender, EventArgs e)
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+
+            //if (Convert.ToInt32(reader["ID"]) == selectedIndex + 1)
+
+        }
+
         private void LoadServersListBox()
         {
             using (var connection = new SqliteConnection("Data Source=Data.db"))
