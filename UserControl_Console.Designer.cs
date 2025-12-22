@@ -28,25 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            groupBox5 = new GroupBox();
+            groupBox2 = new GroupBox();
             listBox1 = new ListBox();
-            groupBox6 = new GroupBox();
+            groupBox1 = new GroupBox();
             richTextBox1 = new RichTextBox();
             button1 = new Button();
             textBox1 = new TextBox();
-            groupBox5.SuspendLayout();
-            groupBox6.SuspendLayout();
+            groupBox2.SuspendLayout();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
-            // groupBox5
+            // groupBox2
             // 
-            groupBox5.Controls.Add(listBox1);
-            groupBox5.Location = new Point(729, 0);
-            groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(240, 527);
-            groupBox5.TabIndex = 6;
-            groupBox5.TabStop = false;
-            groupBox5.Text = "Сервера";
+            groupBox2.Controls.Add(listBox1);
+            groupBox2.Location = new Point(729, 0);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(240, 527);
+            groupBox2.TabIndex = 6;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Сервера";
             // 
             // listBox1
             // 
@@ -58,17 +58,17 @@
             listBox1.Size = new Size(222, 499);
             listBox1.TabIndex = 1;
             // 
-            // groupBox6
+            // groupBox1
             // 
-            groupBox6.Controls.Add(richTextBox1);
-            groupBox6.Controls.Add(button1);
-            groupBox6.Controls.Add(textBox1);
-            groupBox6.Location = new Point(0, 0);
-            groupBox6.Name = "groupBox6";
-            groupBox6.Size = new Size(723, 527);
-            groupBox6.TabIndex = 7;
-            groupBox6.TabStop = false;
-            groupBox6.Text = "Консоль";
+            groupBox1.Controls.Add(richTextBox1);
+            groupBox1.Controls.Add(button1);
+            groupBox1.Controls.Add(textBox1);
+            groupBox1.Location = new Point(0, 0);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(723, 527);
+            groupBox1.TabIndex = 7;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Консоль";
             // 
             // richTextBox1
             // 
@@ -101,22 +101,21 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(groupBox5);
-            Controls.Add(groupBox6);
+            Controls.Add(groupBox2);
+            Controls.Add(groupBox1);
             Name = "UserControl_Console";
             Size = new Size(969, 527);
-            Load += UserControl_Console_Load;
-            groupBox5.ResumeLayout(false);
-            groupBox6.ResumeLayout(false);
-            groupBox6.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private GroupBox groupBox5;
+        private GroupBox groupBox2;
         private ListBox listBox1;
-        private GroupBox groupBox6;
+        private GroupBox groupBox1;
         private RichTextBox richTextBox1;
         private Button button1;
         private TextBox textBox1;

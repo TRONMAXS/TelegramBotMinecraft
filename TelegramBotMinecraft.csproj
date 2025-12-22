@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageIcon>server-icon.png</PackageIcon>
     <ApplicationIcon>Telegram Bot Minecraft.ico</ApplicationIcon>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,7 +26,8 @@
 
   <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
-    <PackageReference Include="Telegram.Bot" Version="22.5.2-dev.6" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Telegram.Bot" Version="22.7.6" />
   </ItemGroup>
 
   <ItemGroup>

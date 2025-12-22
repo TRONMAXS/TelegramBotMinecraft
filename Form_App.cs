@@ -1,5 +1,4 @@
-﻿
-namespace TelegramBotMinecraft
+﻿namespace TelegramBotMinecraft
 {
     public partial class App : Form
     {

@@ -28,225 +28,225 @@
         /// </summary>
         private void InitializeComponent()
         {
-            groupBox13 = new GroupBox();
-            checkBox6 = new CheckBox();
-            label14 = new Label();
+            groupBox2 = new GroupBox();
             checkBox5 = new CheckBox();
-            label13 = new Label();
+            label6 = new Label();
             checkBox4 = new CheckBox();
-            label12 = new Label();
+            label5 = new Label();
             checkBox3 = new CheckBox();
-            label11 = new Label();
-            groupBox12 = new GroupBox();
-            button13 = new Button();
+            label4 = new Label();
             checkBox2 = new CheckBox();
-            label9 = new Label();
-            textBox10 = new TextBox();
-            label8 = new Label();
-            groupBox13.SuspendLayout();
-            groupBox12.SuspendLayout();
+            label3 = new Label();
+            groupBox1 = new GroupBox();
+            button1 = new Button();
+            checkBox1 = new CheckBox();
+            label2 = new Label();
+            textBox1 = new TextBox();
+            label1 = new Label();
+            groupBox2.SuspendLayout();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
-            // groupBox13
+            // groupBox2
             // 
-            groupBox13.Controls.Add(checkBox6);
-            groupBox13.Controls.Add(label14);
-            groupBox13.Controls.Add(checkBox5);
-            groupBox13.Controls.Add(label13);
-            groupBox13.Controls.Add(checkBox4);
-            groupBox13.Controls.Add(label12);
-            groupBox13.Controls.Add(checkBox3);
-            groupBox13.Controls.Add(label11);
-            groupBox13.Location = new Point(491, 0);
-            groupBox13.Name = "groupBox13";
-            groupBox13.Size = new Size(478, 208);
-            groupBox13.TabIndex = 3;
-            groupBox13.TabStop = false;
-            groupBox13.Text = "Основные";
-            // 
-            // checkBox6
-            // 
-            checkBox6.AutoSize = true;
-            checkBox6.ImeMode = ImeMode.NoControl;
-            checkBox6.Location = new Point(352, 96);
-            checkBox6.Name = "checkBox6";
-            checkBox6.Size = new Size(15, 14);
-            checkBox6.TabIndex = 17;
-            checkBox6.TabStop = false;
-            checkBox6.UseVisualStyleBackColor = true;
-            // 
-            // label14
-            // 
-            label14.AutoSize = true;
-            label14.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label14.ImeMode = ImeMode.NoControl;
-            label14.Location = new Point(6, 89);
-            label14.Name = "label14";
-            label14.Size = new Size(340, 21);
-            label14.TabIndex = 16;
-            label14.Text = "Автопереподключение бота при ошибке:";
+            groupBox2.Controls.Add(checkBox5);
+            groupBox2.Controls.Add(label6);
+            groupBox2.Controls.Add(checkBox4);
+            groupBox2.Controls.Add(label5);
+            groupBox2.Controls.Add(checkBox3);
+            groupBox2.Controls.Add(label4);
+            groupBox2.Controls.Add(checkBox2);
+            groupBox2.Controls.Add(label3);
+            groupBox2.Location = new Point(491, 0);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(478, 208);
+            groupBox2.TabIndex = 3;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Основные";
             // 
             // checkBox5
             // 
             checkBox5.AutoSize = true;
             checkBox5.ImeMode = ImeMode.NoControl;
-            checkBox5.Location = new Point(167, 72);
+            checkBox5.Location = new Point(352, 96);
             checkBox5.Name = "checkBox5";
             checkBox5.Size = new Size(15, 14);
-            checkBox5.TabIndex = 15;
+            checkBox5.TabIndex = 17;
             checkBox5.TabStop = false;
             checkBox5.UseVisualStyleBackColor = true;
             // 
-            // label13
+            // label6
             // 
-            label13.AutoSize = true;
-            label13.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label13.ImeMode = ImeMode.NoControl;
-            label13.Location = new Point(6, 66);
-            label13.Name = "label13";
-            label13.Size = new Size(155, 21);
-            label13.TabIndex = 14;
-            label13.Text = "Запуск с Windows:";
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label6.ImeMode = ImeMode.NoControl;
+            label6.Location = new Point(6, 89);
+            label6.Name = "label6";
+            label6.Size = new Size(340, 21);
+            label6.TabIndex = 16;
+            label6.Text = "Автопереподключение бота при ошибке:";
             // 
             // checkBox4
             // 
             checkBox4.AutoSize = true;
             checkBox4.ImeMode = ImeMode.NoControl;
-            checkBox4.Location = new Point(164, 48);
+            checkBox4.Location = new Point(167, 72);
             checkBox4.Name = "checkBox4";
             checkBox4.Size = new Size(15, 14);
-            checkBox4.TabIndex = 13;
+            checkBox4.TabIndex = 15;
             checkBox4.TabStop = false;
             checkBox4.UseVisualStyleBackColor = true;
             // 
-            // label12
+            // label5
             // 
-            label12.AutoSize = true;
-            label12.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label12.ImeMode = ImeMode.NoControl;
-            label12.Location = new Point(6, 42);
-            label12.Name = "label12";
-            label12.Size = new Size(152, 21);
-            label12.TabIndex = 12;
-            label12.Text = "Логи бота в файл:";
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label5.ImeMode = ImeMode.NoControl;
+            label5.Location = new Point(6, 66);
+            label5.Name = "label5";
+            label5.Size = new Size(155, 21);
+            label5.TabIndex = 14;
+            label5.Text = "Запуск с Windows:";
             // 
             // checkBox3
             // 
             checkBox3.AutoSize = true;
             checkBox3.ImeMode = ImeMode.NoControl;
-            checkBox3.Location = new Point(281, 25);
+            checkBox3.Location = new Point(164, 48);
             checkBox3.Name = "checkBox3";
             checkBox3.Size = new Size(15, 14);
-            checkBox3.TabIndex = 11;
+            checkBox3.TabIndex = 13;
             checkBox3.TabStop = false;
             checkBox3.UseVisualStyleBackColor = true;
             // 
-            // label11
+            // label4
             // 
-            label11.AutoSize = true;
-            label11.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label11.ImeMode = ImeMode.NoControl;
-            label11.Location = new Point(6, 19);
-            label11.Name = "label11";
-            label11.Size = new Size(269, 21);
-            label11.TabIndex = 10;
-            label11.Text = "Сворачивать в трей при запуске:";
-            // 
-            // groupBox12
-            // 
-            groupBox12.Controls.Add(button13);
-            groupBox12.Controls.Add(checkBox2);
-            groupBox12.Controls.Add(label9);
-            groupBox12.Controls.Add(textBox10);
-            groupBox12.Controls.Add(label8);
-            groupBox12.Location = new Point(0, 0);
-            groupBox12.Name = "groupBox12";
-            groupBox12.Size = new Size(478, 208);
-            groupBox12.TabIndex = 2;
-            groupBox12.TabStop = false;
-            groupBox12.Text = "Telegram";
-            // 
-            // button13
-            // 
-            button13.ImeMode = ImeMode.NoControl;
-            button13.Location = new Point(118, 179);
-            button13.Name = "button13";
-            button13.Size = new Size(217, 23);
-            button13.TabIndex = 9;
-            button13.Text = "Сохранить и проверить соединение";
-            button13.UseVisualStyleBackColor = true;
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label4.ImeMode = ImeMode.NoControl;
+            label4.Location = new Point(6, 42);
+            label4.Name = "label4";
+            label4.Size = new Size(152, 21);
+            label4.TabIndex = 12;
+            label4.Text = "Логи бота в файл:";
             // 
             // checkBox2
             // 
             checkBox2.AutoSize = true;
             checkBox2.ImeMode = ImeMode.NoControl;
-            checkBox2.Location = new Point(156, 66);
+            checkBox2.Location = new Point(281, 25);
             checkBox2.Name = "checkBox2";
             checkBox2.Size = new Size(15, 14);
-            checkBox2.TabIndex = 8;
+            checkBox2.TabIndex = 11;
+            checkBox2.TabStop = false;
             checkBox2.UseVisualStyleBackColor = true;
             // 
-            // label9
+            // label3
             // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label9.ImeMode = ImeMode.NoControl;
-            label9.Location = new Point(6, 60);
-            label9.Name = "label9";
-            label9.Size = new Size(144, 21);
-            label9.TabIndex = 5;
-            label9.Text = "Автозапуск бота:";
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label3.ImeMode = ImeMode.NoControl;
+            label3.Location = new Point(6, 19);
+            label3.Name = "label3";
+            label3.Size = new Size(269, 21);
+            label3.TabIndex = 10;
+            label3.Text = "Сворачивать в трей при запуске:";
             // 
-            // textBox10
+            // groupBox1
             // 
-            textBox10.Location = new Point(98, 21);
-            textBox10.Name = "textBox10";
-            textBox10.PlaceholderText = "123456789:ABCdefGHIjklMNOpqrSTUvwxYZ";
-            textBox10.Size = new Size(366, 23);
-            textBox10.TabIndex = 4;
+            groupBox1.Controls.Add(button1);
+            groupBox1.Controls.Add(checkBox1);
+            groupBox1.Controls.Add(label2);
+            groupBox1.Controls.Add(textBox1);
+            groupBox1.Controls.Add(label1);
+            groupBox1.Location = new Point(0, 0);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(478, 208);
+            groupBox1.TabIndex = 2;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Telegram";
             // 
-            // label8
+            // button1
             // 
-            label8.AutoSize = true;
-            label8.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label8.ImeMode = ImeMode.NoControl;
-            label8.Location = new Point(6, 19);
-            label8.Name = "label8";
-            label8.Size = new Size(86, 21);
-            label8.TabIndex = 3;
-            label8.Text = "BotToken:";
+            button1.ImeMode = ImeMode.NoControl;
+            button1.Location = new Point(118, 179);
+            button1.Name = "button1";
+            button1.Size = new Size(217, 23);
+            button1.TabIndex = 9;
+            button1.Text = "Сохранить и проверить соединение";
+            button1.UseVisualStyleBackColor = true;
+            // 
+            // checkBox1
+            // 
+            checkBox1.AutoSize = true;
+            checkBox1.ImeMode = ImeMode.NoControl;
+            checkBox1.Location = new Point(156, 66);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(15, 14);
+            checkBox1.TabIndex = 8;
+            checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label2.ImeMode = ImeMode.NoControl;
+            label2.Location = new Point(6, 60);
+            label2.Name = "label2";
+            label2.Size = new Size(144, 21);
+            label2.TabIndex = 5;
+            label2.Text = "Автозапуск бота:";
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(98, 21);
+            textBox1.Name = "textBox1";
+            textBox1.PlaceholderText = "123456789:ABCdefGHIjklMNOpqrSTUvwxYZ";
+            textBox1.Size = new Size(366, 23);
+            textBox1.TabIndex = 4;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label1.ImeMode = ImeMode.NoControl;
+            label1.Location = new Point(6, 19);
+            label1.Name = "label1";
+            label1.Size = new Size(86, 21);
+            label1.TabIndex = 3;
+            label1.Text = "BotToken:";
             // 
             // UserControl_Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(groupBox13);
-            Controls.Add(groupBox12);
+            Controls.Add(groupBox2);
+            Controls.Add(groupBox1);
             Name = "UserControl_Settings";
             Size = new Size(969, 527);
-            groupBox13.ResumeLayout(false);
-            groupBox13.PerformLayout();
-            groupBox12.ResumeLayout(false);
-            groupBox12.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private GroupBox groupBox13;
-        private CheckBox checkBox6;
-        private Label label14;
+        private GroupBox groupBox2;
         private CheckBox checkBox5;
-        private Label label13;
+        private Label label6;
         private CheckBox checkBox4;
-        private Label label12;
+        private Label label5;
         private CheckBox checkBox3;
-        private Label label11;
-        private GroupBox groupBox12;
-        private Button button13;
+        private Label label4;
         private CheckBox checkBox2;
-        private Label label9;
-        private TextBox textBox10;
-        private Label label8;
+        private Label label3;
+        private GroupBox groupBox1;
+        private Button button1;
+        private CheckBox checkBox1;
+        private Label label2;
+        private TextBox textBox1;
+        private Label label1;
     }
 }

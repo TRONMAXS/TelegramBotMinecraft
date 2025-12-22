@@ -28,147 +28,129 @@
         /// </summary>
         private void InitializeComponent()
         {
-            groupBox9 = new GroupBox();
-            label10 = new Label();
-            textBox9 = new TextBox();
-            textBox8 = new TextBox();
-            button11 = new Button();
-            button10 = new Button();
-            button9 = new Button();
-            listBox3 = new ListBox();
-            groupBox8 = new GroupBox();
-            groupBox11 = new GroupBox();
-            checkedListBox1 = new CheckedListBox();
-            groupBox10 = new GroupBox();
+            groupBox4 = new GroupBox();
+            label = new Label();
+            textBox2 = new TextBox();
+            textBox1 = new TextBox();
+            button4 = new Button();
+            button3 = new Button();
+            button2 = new Button();
+            listBox1 = new ListBox();
+            groupBox1 = new GroupBox();
+            groupBox3 = new GroupBox();
             checkedListBox2 = new CheckedListBox();
-            button12 = new Button();
-            groupBox9.SuspendLayout();
-            groupBox8.SuspendLayout();
-            groupBox11.SuspendLayout();
-            groupBox10.SuspendLayout();
+            groupBox2 = new GroupBox();
+            checkedListBox1 = new CheckedListBox();
+            button1 = new Button();
+            groupBox4.SuspendLayout();
+            groupBox1.SuspendLayout();
+            groupBox3.SuspendLayout();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
-            // groupBox9
+            // groupBox4
             // 
-            groupBox9.Controls.Add(label10);
-            groupBox9.Controls.Add(textBox9);
-            groupBox9.Controls.Add(textBox8);
-            groupBox9.Controls.Add(button11);
-            groupBox9.Controls.Add(button10);
-            groupBox9.Controls.Add(button9);
-            groupBox9.Controls.Add(listBox3);
-            groupBox9.Location = new Point(672, 0);
-            groupBox9.Name = "groupBox9";
-            groupBox9.Size = new Size(297, 527);
-            groupBox9.TabIndex = 3;
-            groupBox9.TabStop = false;
-            groupBox9.Text = "Пользователи";
+            groupBox4.Controls.Add(label);
+            groupBox4.Controls.Add(textBox2);
+            groupBox4.Controls.Add(textBox1);
+            groupBox4.Controls.Add(button4);
+            groupBox4.Controls.Add(button3);
+            groupBox4.Controls.Add(button2);
+            groupBox4.Controls.Add(listBox1);
+            groupBox4.Location = new Point(672, 0);
+            groupBox4.Name = "groupBox4";
+            groupBox4.Size = new Size(297, 527);
+            groupBox4.TabIndex = 3;
+            groupBox4.TabStop = false;
+            groupBox4.Text = "Пользователи";
             // 
-            // label10
+            // label
             // 
-            label10.AutoSize = true;
-            label10.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            label10.ImeMode = ImeMode.NoControl;
-            label10.Location = new Point(30, 389);
-            label10.Name = "label10";
-            label10.Size = new Size(235, 42);
-            label10.TabIndex = 8;
-            label10.Text = "               Разрешенные \r\nпользователи, чаты, группы";
+            label.AutoSize = true;
+            label.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label.ImeMode = ImeMode.NoControl;
+            label.Location = new Point(30, 389);
+            label.Name = "label";
+            label.Size = new Size(235, 42);
+            label.TabIndex = 8;
+            label.Text = "               Разрешенные \r\nпользователи, чаты, группы";
             // 
-            // textBox9
+            // textBox2
             // 
-            textBox9.Location = new Point(6, 479);
-            textBox9.Name = "textBox9";
-            textBox9.PlaceholderText = "Id";
-            textBox9.Size = new Size(195, 23);
-            textBox9.TabIndex = 5;
+            textBox2.Location = new Point(6, 479);
+            textBox2.Name = "textBox2";
+            textBox2.PlaceholderText = "Id";
+            textBox2.Size = new Size(195, 23);
+            textBox2.TabIndex = 5;
             // 
-            // textBox8
+            // textBox1
             // 
-            textBox8.Location = new Point(6, 450);
-            textBox8.Name = "textBox8";
-            textBox8.PlaceholderText = "Имя";
-            textBox8.Size = new Size(195, 23);
-            textBox8.TabIndex = 4;
+            textBox1.Location = new Point(6, 450);
+            textBox1.Name = "textBox1";
+            textBox1.PlaceholderText = "Имя";
+            textBox1.Size = new Size(195, 23);
+            textBox1.TabIndex = 4;
             // 
-            // button11
+            // button4
             // 
-            button11.ImeMode = ImeMode.NoControl;
-            button11.Location = new Point(212, 466);
-            button11.Name = "button11";
-            button11.Size = new Size(75, 23);
-            button11.TabIndex = 3;
-            button11.Text = "Добавить";
-            button11.UseVisualStyleBackColor = true;
+            button4.ImeMode = ImeMode.NoControl;
+            button4.Location = new Point(212, 466);
+            button4.Name = "button4";
+            button4.Size = new Size(75, 23);
+            button4.TabIndex = 3;
+            button4.Text = "Добавить";
+            button4.UseVisualStyleBackColor = true;
             // 
-            // button10
+            // button3
             // 
-            button10.ImeMode = ImeMode.NoControl;
-            button10.Location = new Point(212, 347);
-            button10.Name = "button10";
-            button10.Size = new Size(75, 23);
-            button10.TabIndex = 2;
-            button10.Text = "Удалить";
-            button10.UseVisualStyleBackColor = true;
+            button3.ImeMode = ImeMode.NoControl;
+            button3.Location = new Point(212, 347);
+            button3.Name = "button3";
+            button3.Size = new Size(75, 23);
+            button3.TabIndex = 2;
+            button3.Text = "Удалить";
+            button3.UseVisualStyleBackColor = true;
             // 
-            // button9
+            // button2
             // 
-            button9.ImeMode = ImeMode.NoControl;
-            button9.Location = new Point(6, 347);
-            button9.Name = "button9";
-            button9.Size = new Size(75, 23);
-            button9.TabIndex = 1;
-            button9.Text = "Изменить";
-            button9.UseVisualStyleBackColor = true;
+            button2.ImeMode = ImeMode.NoControl;
+            button2.Location = new Point(6, 347);
+            button2.Name = "button2";
+            button2.Size = new Size(75, 23);
+            button2.TabIndex = 1;
+            button2.Text = "Изменить";
+            button2.UseVisualStyleBackColor = true;
             // 
-            // listBox3
+            // listBox1
             // 
-            listBox3.FormattingEnabled = true;
-            listBox3.ItemHeight = 15;
-            listBox3.Location = new Point(6, 22);
-            listBox3.Name = "listBox3";
-            listBox3.Size = new Size(287, 319);
-            listBox3.TabIndex = 0;
+            listBox1.FormattingEnabled = true;
+            listBox1.ItemHeight = 15;
+            listBox1.Location = new Point(6, 22);
+            listBox1.Name = "listBox1";
+            listBox1.Size = new Size(287, 319);
+            listBox1.TabIndex = 0;
             // 
-            // groupBox8
+            // groupBox1
             // 
-            groupBox8.Controls.Add(groupBox11);
-            groupBox8.Controls.Add(groupBox10);
-            groupBox8.Controls.Add(button12);
-            groupBox8.Location = new Point(0, 0);
-            groupBox8.Name = "groupBox8";
-            groupBox8.Size = new Size(666, 527);
-            groupBox8.TabIndex = 2;
-            groupBox8.TabStop = false;
-            groupBox8.Text = "Настройки пользователя";
+            groupBox1.Controls.Add(groupBox3);
+            groupBox1.Controls.Add(groupBox2);
+            groupBox1.Controls.Add(button1);
+            groupBox1.Location = new Point(0, 0);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(666, 527);
+            groupBox1.TabIndex = 2;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Настройки пользователя";
             // 
-            // groupBox11
+            // groupBox3
             // 
-            groupBox11.Controls.Add(checkedListBox1);
-            groupBox11.Location = new Point(341, 22);
-            groupBox11.Name = "groupBox11";
-            groupBox11.Size = new Size(315, 463);
-            groupBox11.TabIndex = 2;
-            groupBox11.TabStop = false;
-            groupBox11.Text = "Команды";
-            // 
-            // checkedListBox1
-            // 
-            checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.Location = new Point(6, 18);
-            checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(303, 436);
-            checkedListBox1.TabIndex = 0;
-            // 
-            // groupBox10
-            // 
-            groupBox10.Controls.Add(checkedListBox2);
-            groupBox10.Location = new Point(6, 22);
-            groupBox10.Name = "groupBox10";
-            groupBox10.Size = new Size(315, 463);
-            groupBox10.TabIndex = 1;
-            groupBox10.TabStop = false;
-            groupBox10.Text = "Сервера";
+            groupBox3.Controls.Add(checkedListBox2);
+            groupBox3.Location = new Point(341, 22);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(315, 463);
+            groupBox3.TabIndex = 2;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Команды";
             // 
             // checkedListBox2
             // 
@@ -178,47 +160,65 @@
             checkedListBox2.Size = new Size(303, 436);
             checkedListBox2.TabIndex = 0;
             // 
-            // button12
+            // groupBox2
             // 
-            button12.ImeMode = ImeMode.NoControl;
-            button12.Location = new Point(290, 491);
-            button12.Name = "button12";
-            button12.Size = new Size(75, 23);
-            button12.TabIndex = 0;
-            button12.Text = "Сохранить ";
-            button12.UseVisualStyleBackColor = true;
+            groupBox2.Controls.Add(checkedListBox1);
+            groupBox2.Location = new Point(6, 22);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(315, 463);
+            groupBox2.TabIndex = 1;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Сервера";
+            // 
+            // checkedListBox1
+            // 
+            checkedListBox1.FormattingEnabled = true;
+            checkedListBox1.Location = new Point(6, 18);
+            checkedListBox1.Name = "checkedListBox1";
+            checkedListBox1.Size = new Size(303, 436);
+            checkedListBox1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            button1.ImeMode = ImeMode.NoControl;
+            button1.Location = new Point(290, 491);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 0;
+            button1.Text = "Сохранить ";
+            button1.UseVisualStyleBackColor = true;
             // 
             // UserControl_Users
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(groupBox9);
-            Controls.Add(groupBox8);
+            Controls.Add(groupBox4);
+            Controls.Add(groupBox1);
             Name = "UserControl_Users";
             Size = new Size(969, 527);
-            groupBox9.ResumeLayout(false);
-            groupBox9.PerformLayout();
-            groupBox8.ResumeLayout(false);
-            groupBox11.ResumeLayout(false);
-            groupBox10.ResumeLayout(false);
+            groupBox4.ResumeLayout(false);
+            groupBox4.PerformLayout();
+            groupBox1.ResumeLayout(false);
+            groupBox3.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private GroupBox groupBox9;
-        private Label label10;
-        private TextBox textBox9;
-        private TextBox textBox8;
-        private Button button11;
-        private Button button10;
-        private Button button9;
-        private ListBox listBox3;
-        private GroupBox groupBox8;
-        private GroupBox groupBox11;
-        private CheckedListBox checkedListBox1;
-        private GroupBox groupBox10;
+        private GroupBox groupBox4;
+        private Label label;
+        private TextBox textBox2;
+        private TextBox textBox1;
+        private Button button4;
+        private Button button3;
+        private Button button2;
+        private ListBox listBox1;
+        private GroupBox groupBox1;
+        private GroupBox groupBox3;
         private CheckedListBox checkedListBox2;
-        private Button button12;
+        private GroupBox groupBox2;
+        private CheckedListBox checkedListBox1;
+        private Button button1;
     }
 }
