@@ -51,8 +51,8 @@ namespace TelegramBotMinecraft
                         textBox4.Text = reader["Java_args"].ToString();
                         textBox5.Text = reader["ID_Process"].ToString();
 
-                        if (Convert.ToInt32(reader["Rcon_Enable"]) == 1) checkBox1.Checked = true;
-                        else checkBox1.Checked = false;
+                        checkBox1.Checked = Convert.ToInt32(reader["Rcon_Enable"]) == 1 ? true : false;
+
                         textBox6.Text = reader["Rcon_Port"].ToString();
                         textBox7.Text = reader["Rcon_Pass"].ToString();
                     }
