@@ -9,6 +9,8 @@ namespace TelegramBotMinecraft
             InitializeComponent();
             this.Load += UserControl_Users_Load;
             listBox1.SelectedIndexChanged += listBox1SelectedItem;
+            //checkedListBox1.ItemCheck += CheckedListBox1_Servers;
+            //checkedListBox2.ItemCheck += CheckedListBox2_Commands;
         }
 
         private void UserControl_Users_Load(object sender, EventArgs e)
@@ -36,10 +38,40 @@ namespace TelegramBotMinecraft
 
         private void listBox1SelectedItem(object sender, EventArgs e)
         {
-            int selectedIndex = listBox1.SelectedIndex;
+            int selectedIndex = listBox1.SelectedIndex + 1;
 
-            //if (Convert.ToInt32(reader["ID"]) == selectedIndex + 1)
+            using (var connection = new SqliteConnection("Data Source=Data.db"))
+            {
+                connection.Open();
+                SqliteCommand commandToLoadServersList = new SqliteCommand($"SELECT ID_Server FROM UserServers WHERE ID_User == {selectedIndex}", connection);
+                SqliteCommand commandToLoadCommandsList = new SqliteCommand($"SELECT ID_Command FROM UserCommands WHERE ID_User == {selectedIndex}", connection);
+                SqliteDataReader readerToLoadServersList = commandToLoadServersList.ExecuteReader();
+                SqliteDataReader readerToLoadCommandsList = commandToLoadCommandsList.ExecuteReader();
 
+                for (int i = 1; i < checkedListBox1.Items.Count+1; i++)
+                {
+                    if (readerToLoadServersList.Read())
+                    {
+                        if (Convert.ToInt32(readerToLoadServersList["ID_Server"]) == i)
+                        {
+                            checkedListBox1.SetItemChecked(i-1, true);
+                        }
+                    }
+                    else checkedListBox1.SetItemChecked(i-1, false);
+                }
+
+                for (int i = 1; i < checkedListBox2.Items.Count+1; i++)
+                {
+                    if (readerToLoadCommandsList.Read())
+                    {
+                        if (Convert.ToInt32(readerToLoadCommandsList["ID_Command"]) == i)
+                        {
+                            checkedListBox2.SetItemChecked(i - 1, true);
+                        }
+                    }
+                    else checkedListBox2.SetItemChecked(i - 1, false);
+                }
+            }
         }
 
         private void LoadServersListBox()

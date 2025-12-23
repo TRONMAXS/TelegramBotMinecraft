@@ -6,7 +6,7 @@ namespace TelegramBotMinecraft
     static class Program
     {
         static string PathMain = "Data.db";
-        static string PathBackup = @"D:\PC\Documents\Visual Studio 2022\Code Snippets\Visual C#\My Code Snippets\TelegramBotMinecraft\bin\Debug\net8.0-windows\";
+        static string PathBackup = @"D:\PC\Documents\Visual Studio 2022\Code Snippets\Visual C#\My Code Snippets\TelegramBotMinecraft\bin\Debug\net8.0-windows7.0\";
         static void Main()
         {
             string appName = "TelegramBotMinecraft";
