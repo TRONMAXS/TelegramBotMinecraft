@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using System.Windows.Forms;
 
 namespace TelegramBotMinecraft
 {
@@ -8,7 +7,6 @@ namespace TelegramBotMinecraft
     {
         DataTable dataTable = new DataTable();
         private bool ToEditMode = false;
-
 
         public UserControl_Users()
         {
@@ -224,6 +222,8 @@ namespace TelegramBotMinecraft
                     dataTable.Rows.Add(reader["Name"], reader["ID_TG"]);
                 }
                 dataGridView1.DataSource = dataTable;
+                dataGridView1.Columns[0].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dataGridView1.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
 
                 LoadServersListBox();
                 LoadCommandsListBox();
