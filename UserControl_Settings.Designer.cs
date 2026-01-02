@@ -43,8 +43,11 @@
             label2 = new Label();
             textBox1 = new TextBox();
             label1 = new Label();
+            groupBox3 = new GroupBox();
+            richTextBox1 = new RichTextBox();
             groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
+            groupBox3.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox2
@@ -216,10 +219,30 @@
             label1.TabIndex = 3;
             label1.Text = "BotToken:";
             // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(richTextBox1);
+            groupBox3.Location = new Point(0, 214);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(478, 313);
+            groupBox3.TabIndex = 8;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Консоль бота";
+            // 
+            // richTextBox1
+            // 
+            richTextBox1.Location = new Point(6, 18);
+            richTextBox1.Name = "richTextBox1";
+            richTextBox1.ReadOnly = true;
+            richTextBox1.Size = new Size(466, 289);
+            richTextBox1.TabIndex = 0;
+            richTextBox1.Text = "";
+            // 
             // UserControl_Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Name = "UserControl_Settings";
@@ -228,6 +251,7 @@
             groupBox2.PerformLayout();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            groupBox3.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -248,5 +272,7 @@
         private Label label2;
         private TextBox textBox1;
         private Label label1;
+        private GroupBox groupBox3;
+        private RichTextBox richTextBox1;
     }
 }

@@ -39,6 +39,7 @@
             label7 = new Label();
             textBox6 = new TextBox();
             groupBox3 = new GroupBox();
+            button5 = new Button();
             textBox5 = new TextBox();
             label5 = new Label();
             button6 = new Button();
@@ -52,10 +53,9 @@
             label2 = new Label();
             textBox2 = new TextBox();
             groupBox5 = new GroupBox();
+            button4 = new Button();
             button3 = new Button();
             listBox1 = new ListBox();
-            button4 = new Button();
-            button5 = new Button();
             groupBox1.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -70,7 +70,7 @@
             button2.Name = "button2";
             button2.Size = new Size(75, 23);
             button2.TabIndex = 15;
-            button2.Text = "Cancle";
+            button2.Text = "Отменить";
             button2.UseVisualStyleBackColor = true;
             // 
             // button1
@@ -80,7 +80,7 @@
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 14;
-            button1.Text = "Save";
+            button1.Text = "Сохранить";
             button1.UseVisualStyleBackColor = true;
             // 
             // groupBox1
@@ -187,6 +187,16 @@
             groupBox3.TabIndex = 11;
             groupBox3.TabStop = false;
             groupBox3.Text = "Запуск";
+            // 
+            // button5
+            // 
+            button5.ImeMode = ImeMode.NoControl;
+            button5.Location = new Point(614, 25);
+            button5.Name = "button5";
+            button5.Size = new Size(75, 23);
+            button5.TabIndex = 10;
+            button5.Text = "Выбрать";
+            button5.UseVisualStyleBackColor = true;
             // 
             // textBox5
             // 
@@ -318,6 +328,16 @@
             groupBox5.TabStop = false;
             groupBox5.Text = "Сервера";
             // 
+            // button4
+            // 
+            button4.ImeMode = ImeMode.NoControl;
+            button4.Location = new Point(169, 463);
+            button4.Name = "button4";
+            button4.Size = new Size(75, 23);
+            button4.TabIndex = 4;
+            button4.Text = "Удалить";
+            button4.UseVisualStyleBackColor = true;
+            // 
             // button3
             // 
             button3.ImeMode = ImeMode.NoControl;
@@ -337,26 +357,6 @@
             listBox1.Name = "listBox1";
             listBox1.Size = new Size(237, 439);
             listBox1.TabIndex = 1;
-            // 
-            // button4
-            // 
-            button4.ImeMode = ImeMode.NoControl;
-            button4.Location = new Point(169, 463);
-            button4.Name = "button4";
-            button4.Size = new Size(75, 23);
-            button4.TabIndex = 4;
-            button4.Text = "Удалить";
-            button4.UseVisualStyleBackColor = true;
-            // 
-            // button5
-            // 
-            button5.ImeMode = ImeMode.NoControl;
-            button5.Location = new Point(614, 25);
-            button5.Name = "button5";
-            button5.Size = new Size(75, 23);
-            button5.TabIndex = 10;
-            button5.Text = "Выбрать";
-            button5.UseVisualStyleBackColor = true;
             // 
             // UserControl_Servers
             // 

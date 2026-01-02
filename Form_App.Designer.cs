@@ -31,12 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(App));
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
-            tabPage2 = new TabPage();
             userControl_Console1 = new UserControl_Console();
-            tabPage3 = new TabPage();
-            tabPage4 = new TabPage();
+            tabPage2 = new TabPage();
             userControl_Servers1 = new UserControl_Servers();
+            tabPage3 = new TabPage();
             userControl_Users1 = new UserControl_Users();
+            tabPage4 = new TabPage();
             userControl_Settings1 = new UserControl_Settings();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -62,6 +62,11 @@
             tabPage1.Name = "tabPage1";
             tabPage1.UseVisualStyleBackColor = true;
             // 
+            // userControl_Console1
+            // 
+            resources.ApplyResources(userControl_Console1, "userControl_Console1");
+            userControl_Console1.Name = "userControl_Console1";
+            // 
             // tabPage2
             // 
             tabPage2.Controls.Add(userControl_Servers1);
@@ -69,10 +74,10 @@
             tabPage2.Name = "tabPage2";
             tabPage2.UseVisualStyleBackColor = true;
             // 
-            // userControl_Console1
+            // userControl_Servers1
             // 
-            resources.ApplyResources(userControl_Console1, "userControl_Console1");
-            userControl_Console1.Name = "userControl_Console1";
+            resources.ApplyResources(userControl_Servers1, "userControl_Servers1");
+            userControl_Servers1.Name = "userControl_Servers1";
             // 
             // tabPage3
             // 
@@ -81,22 +86,17 @@
             tabPage3.Name = "tabPage3";
             tabPage3.UseVisualStyleBackColor = true;
             // 
+            // userControl_Users1
+            // 
+            resources.ApplyResources(userControl_Users1, "userControl_Users1");
+            userControl_Users1.Name = "userControl_Users1";
+            // 
             // tabPage4
             // 
             tabPage4.Controls.Add(userControl_Settings1);
             resources.ApplyResources(tabPage4, "tabPage4");
             tabPage4.Name = "tabPage4";
             tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // userControl_Servers1
-            // 
-            resources.ApplyResources(userControl_Servers1, "userControl_Servers1");
-            userControl_Servers1.Name = "userControl_Servers1";
-            // 
-            // userControl_Users1
-            // 
-            resources.ApplyResources(userControl_Users1, "userControl_Users1");
-            userControl_Users1.Name = "userControl_Users1";
             // 
             // userControl_Settings1
             // 

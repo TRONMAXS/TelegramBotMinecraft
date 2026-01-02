@@ -16,11 +16,12 @@ namespace TelegramBotMinecraft
                 return;
             }
 
-            BackupDataBase();
+            //BackupDataBase();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new App());
+            
         }
 
         private static void  BackupDataBase()

@@ -28,41 +28,76 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             groupBox4 = new GroupBox();
+            button5 = new Button();
+            dataGridView1 = new DataGridView();
             label = new Label();
             textBox2 = new TextBox();
             textBox1 = new TextBox();
             button4 = new Button();
             button3 = new Button();
             button2 = new Button();
-            listBox1 = new ListBox();
             groupBox1 = new GroupBox();
             groupBox3 = new GroupBox();
             checkedListBox2 = new CheckedListBox();
             groupBox2 = new GroupBox();
             checkedListBox1 = new CheckedListBox();
             button1 = new Button();
+            errorProvider1 = new ErrorProvider(components);
             groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             groupBox1.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             SuspendLayout();
             // 
             // groupBox4
             // 
+            groupBox4.Controls.Add(button5);
+            groupBox4.Controls.Add(dataGridView1);
             groupBox4.Controls.Add(label);
             groupBox4.Controls.Add(textBox2);
             groupBox4.Controls.Add(textBox1);
             groupBox4.Controls.Add(button4);
             groupBox4.Controls.Add(button3);
             groupBox4.Controls.Add(button2);
-            groupBox4.Controls.Add(listBox1);
             groupBox4.Location = new Point(672, 0);
             groupBox4.Name = "groupBox4";
             groupBox4.Size = new Size(297, 527);
             groupBox4.TabIndex = 3;
             groupBox4.TabStop = false;
             groupBox4.Text = "Пользователи";
+            // 
+            // button5
+            // 
+            button5.Enabled = false;
+            button5.ImeMode = ImeMode.NoControl;
+            button5.Location = new Point(110, 347);
+            button5.Name = "button5";
+            button5.Size = new Size(75, 23);
+            button5.TabIndex = 9;
+            button5.Text = "Сохранить ";
+            button5.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.AllowUserToResizeColumns = false;
+            dataGridView1.AllowUserToResizeRows = false;
+            dataGridView1.BackgroundColor = SystemColors.ControlLightLight;
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
+            dataGridView1.Location = new Point(6, 22);
+            dataGridView1.MultiSelect = false;
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.ReadOnly = true;
+            dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGridView1.Size = new Size(281, 319);
+            dataGridView1.TabIndex = 1;
             // 
             // label
             // 
@@ -121,20 +156,12 @@
             button2.Text = "Изменить";
             button2.UseVisualStyleBackColor = true;
             // 
-            // listBox1
-            // 
-            listBox1.FormattingEnabled = true;
-            listBox1.ItemHeight = 15;
-            listBox1.Location = new Point(6, 22);
-            listBox1.Name = "listBox1";
-            listBox1.Size = new Size(287, 319);
-            listBox1.TabIndex = 0;
-            // 
             // groupBox1
             // 
             groupBox1.Controls.Add(groupBox3);
             groupBox1.Controls.Add(groupBox2);
             groupBox1.Controls.Add(button1);
+            groupBox1.Enabled = false;
             groupBox1.Location = new Point(0, 0);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(666, 527);
@@ -154,6 +181,7 @@
             // 
             // checkedListBox2
             // 
+            checkedListBox2.CheckOnClick = true;
             checkedListBox2.FormattingEnabled = true;
             checkedListBox2.Location = new Point(6, 18);
             checkedListBox2.Name = "checkedListBox2";
@@ -172,6 +200,7 @@
             // 
             // checkedListBox1
             // 
+            checkedListBox1.CheckOnClick = true;
             checkedListBox1.FormattingEnabled = true;
             checkedListBox1.Location = new Point(6, 18);
             checkedListBox1.Name = "checkedListBox1";
@@ -188,6 +217,10 @@
             button1.Text = "Сохранить ";
             button1.UseVisualStyleBackColor = true;
             // 
+            // errorProvider1
+            // 
+            errorProvider1.ContainerControl = this;
+            // 
             // UserControl_Users
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -198,9 +231,11 @@
             Size = new Size(969, 527);
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox3.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
             ResumeLayout(false);
         }
 
@@ -213,12 +248,14 @@
         private Button button4;
         private Button button3;
         private Button button2;
-        private ListBox listBox1;
         private GroupBox groupBox1;
         private GroupBox groupBox3;
         private CheckedListBox checkedListBox2;
         private GroupBox groupBox2;
         private CheckedListBox checkedListBox1;
         private Button button1;
+        private DataGridView dataGridView1;
+        private Button button5;
+        private ErrorProvider errorProvider1;
     }
 }

@@ -86,7 +86,7 @@
             button1.Name = "button1";
             button1.Size = new Size(87, 23);
             button1.TabIndex = 3;
-            button1.Text = "Enter";
+            button1.Text = "Ввод";
             button1.UseVisualStyleBackColor = true;
             // 
             // textBox1
