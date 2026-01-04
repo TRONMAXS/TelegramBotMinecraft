@@ -65,8 +65,9 @@
             // 
             // button2
             // 
+            button2.Enabled = false;
             button2.ImeMode = ImeMode.NoControl;
-            button2.Location = new Point(81, 504);
+            button2.Location = new Point(87, 498);
             button2.Name = "button2";
             button2.Size = new Size(75, 23);
             button2.TabIndex = 15;
@@ -76,7 +77,7 @@
             // button1
             // 
             button1.ImeMode = ImeMode.NoControl;
-            button1.Location = new Point(0, 504);
+            button1.Location = new Point(6, 498);
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 14;
@@ -85,12 +86,15 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(button1);
+            groupBox1.Controls.Add(button2);
             groupBox1.Controls.Add(groupBox4);
             groupBox1.Controls.Add(groupBox3);
             groupBox1.Controls.Add(groupBox2);
+            groupBox1.Enabled = false;
             groupBox1.Location = new Point(0, 0);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(710, 498);
+            groupBox1.Size = new Size(710, 527);
             groupBox1.TabIndex = 12;
             groupBox1.TabStop = false;
             groupBox1.Text = "Настройки сервера";
@@ -323,7 +327,7 @@
             groupBox5.Controls.Add(listBox1);
             groupBox5.Location = new Point(716, 0);
             groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(253, 498);
+            groupBox5.Size = new Size(253, 527);
             groupBox5.TabIndex = 13;
             groupBox5.TabStop = false;
             groupBox5.Text = "Сервера";
@@ -362,8 +366,6 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(button2);
-            Controls.Add(button1);
             Controls.Add(groupBox1);
             Controls.Add(groupBox5);
             Name = "UserControl_Servers";

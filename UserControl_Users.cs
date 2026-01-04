@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.ComponentModel.Design;
 using System.Data;
 
 namespace TelegramBotMinecraft
@@ -136,12 +137,6 @@ namespace TelegramBotMinecraft
 
         private void SavePermissions(object? sender, EventArgs e)
         {
-            List<string> tableName = new List<string> { "UserServers", "UserCommands" };
-            List<string> columnName = new List<string> { "ID_Server", "ID_Command" };
-
-            string sqlServersList = "SELECT ID_Server FROM UserServers WHERE ID_User = @UserID;";
-            string sqlCommandsList = "SELECT ID_Command FROM UserCommands WHERE ID_User = @UserID;";
-
             int selectedIndex = GetSelectedUserID();
             try
             {
@@ -149,50 +144,89 @@ namespace TelegramBotMinecraft
                 {
                     connection.Open();
 
-                    SqliteCommand commandToLoadServersList = new SqliteCommand(sqlServersList, connection);
-                    commandToLoadServersList.Parameters.AddWithValue("@UserID", selectedIndex);
-
-                    using (var reader = commandToLoadServersList.ExecuteReader())
+                    var userServers = new HashSet<string>();
+                    using (var cmd = new SqliteCommand("SELECT s.Name" +
+                                                   "\r\nFROM Servers s" +
+                                                   "\r\nJOIN UserServers us ON s.ID = us.ID_Server" +
+                                                   "\r\nJOIN Users u ON us.ID_User = u.ID" +
+                                                   "\r\nWHERE u.ID = @UserID;", connection))
                     {
-                        for (int i = 0; i < checkedListBox1.Items.Count; i++)
+                        cmd.Parameters.AddWithValue("@UserID", selectedIndex);
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            if (checkedListBox1.GetItemChecked(i) == true && reader.Read() == false)
-                            {
-                                SqliteCommand commandAddUserPermissions = new SqliteCommand($@"INSERT OR IGNORE INTO [{tableName[0]}] (ID_User, [{columnName[0]}]) VALUES (@UserID, @Value);", connection);
-                                commandAddUserPermissions.Parameters.AddWithValue("@UserID", selectedIndex);
-                                commandAddUserPermissions.Parameters.AddWithValue("@Value", i + 1);
-                                int number = commandAddUserPermissions.ExecuteNonQuery();
-
-                            }
-                            else if (checkedListBox1.GetItemChecked(i) == false && reader.Read() == true)
-                            {
-                                SqliteCommand commandDelUserPermissions = new SqliteCommand($@"DELETE FROM [{tableName[0]}] WHERE ID_User = @UserID;", connection);
-                                commandDelUserPermissions.Parameters.AddWithValue("@UserID", selectedIndex);
-                                int number = commandDelUserPermissions.ExecuteNonQuery();
-                            }
+                            while (reader.Read())
+                                userServers.Add(reader["Name"].ToString());
                         }
                     }
 
-                    SqliteCommand commandToLoadCommandsList = new SqliteCommand(sqlCommandsList, connection);
-                    commandToLoadCommandsList.Parameters.AddWithValue("@UserID", selectedIndex);
-
-                    using (var reader = commandToLoadCommandsList.ExecuteReader())
+                    for (int i = 0; i < checkedListBox1.Items.Count; i++)
                     {
-                        for (int i = 0; i < checkedListBox2.Items.Count; i++)
+                        string serverName = checkedListBox1.Items[i].ToString();
+                        bool isChecked = checkedListBox1.GetItemChecked(i);
+                        bool hasPermission = userServers.Contains(serverName);
+                        int IDServer;
+
+                        using (var GetIDServer = new SqliteCommand("SELECT ID FROM Servers WHERE Name = @ServerName;", connection))
                         {
-                            if (checkedListBox2.GetItemChecked(i) == true && reader.Read() == false)
-                            {
-                                SqliteCommand commandAddUserPermissions = new SqliteCommand($@"INSERT OR IGNORE INTO [{tableName[1]}] (ID_User, [{columnName[1]}]) VALUES (@UserID, @Value);", connection);
-                                commandAddUserPermissions.Parameters.AddWithValue("@UserID", selectedIndex);
-                                commandAddUserPermissions.Parameters.AddWithValue("@Value", i + 1);
-                                int number = commandAddUserPermissions.ExecuteNonQuery();
-                            }
-                            else if (checkedListBox2.GetItemChecked(i) == false && reader.Read() == true)
-                            {
-                                SqliteCommand commandDelUserPermissions = new SqliteCommand($@"DELETE FROM [{tableName[1]}] WHERE ID_User = @UserID;", connection);
-                                commandDelUserPermissions.Parameters.AddWithValue("@UserID", selectedIndex);
-                                int number = commandDelUserPermissions.ExecuteNonQuery();
-                            }
+                            GetIDServer.Parameters.AddWithValue("@ServerName", serverName);
+                            IDServer = Convert.ToInt32(GetIDServer.ExecuteScalar());
+                        }
+
+                        if (isChecked && !hasPermission)
+                        {
+                            using var AddServer = new SqliteCommand("INSERT OR IGNORE INTO UserServers (ID_User, ID_Server) VALUES (@UserID, @ServerID);", connection);
+                            AddServer.Parameters.AddWithValue("@UserID", selectedIndex);
+                            AddServer.Parameters.AddWithValue("@ServerID", IDServer);
+                            AddServer.ExecuteNonQuery();
+                        }
+                        else if (!isChecked && hasPermission)
+                        {
+                            using var DelServer = new SqliteCommand("DELETE FROM UserServers WHERE ID_Server = @ServerID;", connection);
+                            DelServer.Parameters.AddWithValue("@ServerID", IDServer);
+                            DelServer.ExecuteNonQuery();
+                        }
+                    }
+
+                    var userCommands = new HashSet<string>();
+                    using (var cmd = new SqliteCommand("SELECT c.Command" +
+                                                   "\r\nFROM Commands c" +
+                                                   "\r\nJOIN UserCommands uc ON c.ID = uc.ID_Command" +
+                                                   "\r\nJOIN Users u ON uc.ID_User = u.ID" +
+                                                   "\r\nWHERE u.ID = @UserID", connection))
+                    {
+                        cmd.Parameters.AddWithValue("@UserID", selectedIndex);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                                userCommands.Add(reader["Command"].ToString());
+                        }
+                    }
+
+                    for (int i = 0; i < checkedListBox2.Items.Count; i++)
+                    {
+                        string commandName = checkedListBox2.Items[i].ToString();
+                        bool isChecked = checkedListBox2.GetItemChecked(i);
+                        bool hasPermission = userCommands.Contains(commandName);
+                        int IDCommand;
+
+                        using (var GetIDCommand = new SqliteCommand("SELECT ID FROM Commands WHERE Command = @CommandName;", connection))
+                        {
+                            GetIDCommand.Parameters.AddWithValue("@CommandName", commandName);
+                            IDCommand = Convert.ToInt32(GetIDCommand.ExecuteScalar());
+                        }
+
+                        if (isChecked && !hasPermission)
+                        {
+                            using var AddCommand = new SqliteCommand("INSERT OR IGNORE INTO UserCommands (ID_User, ID_Command) VALUES (@UserID, @CommandID);", connection);
+                            AddCommand.Parameters.AddWithValue("@UserID", selectedIndex);
+                            AddCommand.Parameters.AddWithValue("@CommandID", IDCommand);
+                            AddCommand.ExecuteNonQuery();
+                        }
+                        else if (!isChecked && hasPermission)
+                        {
+                            using var DelCommand = new SqliteCommand("DELETE FROM UserCommands WHERE ID_Command = @CommandID;", connection);
+                            DelCommand.Parameters.AddWithValue("@CommandID", IDCommand);
+                            DelCommand.ExecuteNonQuery();
                         }
                     }
                 }
@@ -237,6 +271,12 @@ namespace TelegramBotMinecraft
             groupBox1.Enabled = true;
             string sqlServersList = "SELECT ID_Server FROM UserServers WHERE ID_User = @UserID;";
             string sqlCommandsList = "SELECT ID_Command FROM UserCommands WHERE ID_User = @UserID;";
+
+            string sqlGetNameServer = "SELECT Name FROM Servers WHERE ID = @ServerID;";
+            string sqlGetNameCommand = "SELECT Command FROM Commands WHERE ID = @CommandID;";
+            string selectedNameServer;
+            string selectedNameCommand;
+
             int selectedIndex = GetSelectedUserID();
 
             for (int i = 0; i < checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
@@ -251,7 +291,15 @@ namespace TelegramBotMinecraft
 
                 using (var reader = commandToLoadServersList.ExecuteReader())
                 {
-                    while (reader.Read()) checkedListBox1.SetItemChecked(Convert.ToInt32(reader["ID_Server"]) - 1, true);
+                    while (reader.Read())
+                    {
+                        SqliteCommand commandToGetNameServer = new SqliteCommand(sqlGetNameServer, connection);
+                        commandToGetNameServer.Parameters.AddWithValue("@ServerID", Convert.ToInt32(reader["ID_Server"]));
+                        selectedNameServer = commandToGetNameServer.ExecuteScalar().ToString();
+
+                        int index = checkedListBox1.Items.IndexOf(selectedNameServer);
+                        checkedListBox1.SetItemChecked(index, true);
+                    }
                 }
 
                 SqliteCommand commandToLoadCommandsList = new SqliteCommand(sqlCommandsList, connection);
@@ -259,7 +307,15 @@ namespace TelegramBotMinecraft
 
                 using (var reader = commandToLoadCommandsList.ExecuteReader())
                 {
-                    while (reader.Read()) checkedListBox2.SetItemChecked(Convert.ToInt32(reader["ID_Command"]) - 1, true);
+                    while (reader.Read())
+                    {
+                        SqliteCommand commandToGetNameCommand = new SqliteCommand(sqlGetNameCommand, connection);
+                        commandToGetNameCommand.Parameters.AddWithValue("@CommandID", Convert.ToInt32(reader["ID_Command"]));
+                        selectedNameCommand = commandToGetNameCommand.ExecuteScalar().ToString();
+
+                        int index = checkedListBox2.Items.IndexOf(selectedNameCommand);
+                        checkedListBox2.SetItemChecked(index, true);
+                    }
                 }
             }
         }

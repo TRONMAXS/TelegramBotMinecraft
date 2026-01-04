@@ -5,6 +5,7 @@ namespace TelegramBotMinecraft
     public partial class App : Form
     {
         public static UserControl_Users userControl_Users;
+        public static UserControl_Servers userControl_Servers;
 
 
         public App()
@@ -24,6 +25,10 @@ namespace TelegramBotMinecraft
             if (tabControl1.SelectedTab == tabPage3 && userControl_Users != null)
             {
                 userControl_Users.UserControl_Users_Load(userControl_Users, EventArgs.Empty);
+            }
+            else if (tabControl1.SelectedTab == tabPage2 && userControl_Servers != null)
+            {
+                userControl_Servers.UserControl_Servers_Load(userControl_Servers, EventArgs.Empty);
             }
         }
 
