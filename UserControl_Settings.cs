@@ -42,6 +42,7 @@ namespace TelegramBotMinecraft
                 if (Convert.ToInt32(command.ExecuteScalar()) == 0) return;
 
             }
+            Directory.CreateDirectory(@$"logs\");
             await File.WriteAllTextAsync(@$"logs\latest.log", richTextBox1.Text);
         }
 
