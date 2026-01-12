@@ -31,6 +31,7 @@
             button2 = new Button();
             button1 = new Button();
             groupBox1 = new GroupBox();
+            button8 = new Button();
             groupBox4 = new GroupBox();
             checkBox1 = new CheckBox();
             label6 = new Label();
@@ -76,6 +77,7 @@
             // 
             // button1
             // 
+            button1.Enabled = false;
             button1.ImeMode = ImeMode.NoControl;
             button1.Location = new Point(6, 498);
             button1.Name = "button1";
@@ -86,6 +88,7 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(button8);
             groupBox1.Controls.Add(button1);
             groupBox1.Controls.Add(button2);
             groupBox1.Controls.Add(groupBox4);
@@ -98,6 +101,17 @@
             groupBox1.TabIndex = 12;
             groupBox1.TabStop = false;
             groupBox1.Text = "Настройки сервера";
+            // 
+            // button8
+            // 
+            button8.Enabled = false;
+            button8.ImeMode = ImeMode.NoControl;
+            button8.Location = new Point(6, 469);
+            button8.Name = "button8";
+            button8.Size = new Size(75, 23);
+            button8.TabIndex = 16;
+            button8.Text = "Обновить";
+            button8.UseVisualStyleBackColor = true;
             // 
             // groupBox4
             // 
@@ -207,8 +221,10 @@
             textBox5.Location = new Point(163, 93);
             textBox5.Name = "textBox5";
             textBox5.ReadOnly = true;
+            textBox5.ShortcutsEnabled = false;
             textBox5.Size = new Size(288, 23);
             textBox5.TabIndex = 9;
+            textBox5.WordWrap = false;
             // 
             // label5
             // 
@@ -412,5 +428,6 @@
         private Button button3;
         private ListBox listBox1;
         private Button button5;
+        private Button button8;
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
-using System.ComponentModel.Design;
 using System.Data;
+using System.Windows.Forms;
 
 namespace TelegramBotMinecraft
 {
@@ -31,13 +31,32 @@ namespace TelegramBotMinecraft
         }
         public void UserControl_Users_Load(object? sender, EventArgs e)
         {
+            groupBox1.Enabled = false;
+            button2.Enabled = false;
+            button3.Enabled = false;
+            button5.Enabled = false;
+            button4.Enabled = true;
+
+            LoadUserList();
+        }
+
+        public void UserControl_Load()
+        {
+            groupBox1.Enabled = false;
+            button2.Enabled = false;
+            button3.Enabled = false;
+            button5.Enabled = false;
+            button4.Enabled = true;
+
             LoadUserList();
         }
 
         private void DeleteUser(object? sender, EventArgs e)
         {
-            string sqlDeleteUser = "DELETE FROM Users WHERE ID = @UserID;";
             int selectedIndex = GetSelectedUserID();
+            if (selectedIndex < 0) return;
+
+            string sqlDeleteUser = "DELETE FROM Users WHERE ID = @UserID;";
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
@@ -45,10 +64,10 @@ namespace TelegramBotMinecraft
                     connection.Open();
                     SqliteCommand command = new SqliteCommand(sqlDeleteUser, connection);
                     command.Parameters.AddWithValue("@UserID", selectedIndex);
-                    int number = command.ExecuteNonQuery();
-                    MessageBox.Show("Удаленно пользователей:" + number, "Удаление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Пользователь удален", "Удаление", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                LoadUserList();
+                UserControl_Load();
             }
             catch (Exception ex)
             {
@@ -68,12 +87,12 @@ namespace TelegramBotMinecraft
                     SqliteCommand command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@textBox1, @textBox2);", connection);
                     command.Parameters.AddWithValue("@textBox1", textBox1.Text.Trim());
                     command.Parameters.AddWithValue("@textBox2", Convert.ToInt32(textBox2.Text.Trim()));
-                    int number = command.ExecuteNonQuery();
-                    MessageBox.Show("Добавленно пользователей:" + number, "Добавление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Пользователь добавлен", "Добавление", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 textBox1.Clear();
                 textBox2.Clear();
-                LoadUserList();
+                UserControl_Load();
             }
             catch(Exception ex) 
             {
@@ -83,10 +102,12 @@ namespace TelegramBotMinecraft
 
         private void EditUser(object? sender, EventArgs e)
         {
+            int selectedIndex = GetSelectedUserID();
+            if(selectedIndex < 0) return;
+
             ToEditMode = true;
             button5.Enabled = true;
             button4.Enabled = false;
-            int selectedIndex = GetSelectedUserID();
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
                 connection.Open();
@@ -99,6 +120,7 @@ namespace TelegramBotMinecraft
                     textBox2.Text = reader["ID_TG"].ToString();
                 }
             }
+            UserControl_Load();
         }
 
         private void SaveUser(object? sender, EventArgs e)
@@ -109,6 +131,7 @@ namespace TelegramBotMinecraft
                     return;
                 string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserIDTG WHERE ID = @UserID;";
                 int selectedIndex = GetSelectedUserID();
+                if (selectedIndex == -1) return;
                 try
                 {
                     using (var connection = new SqliteConnection("Data Source=Data.db"))
@@ -118,12 +141,12 @@ namespace TelegramBotMinecraft
                         command.Parameters.AddWithValue("@UserName", textBox1.Text.Trim());
                         command.Parameters.AddWithValue("@UserIDTG", Convert.ToInt32(textBox2.Text.Trim()));
                         command.Parameters.AddWithValue("@UserID", selectedIndex);
-                        int number = command.ExecuteNonQuery();
-                        MessageBox.Show("Обновленно пользователей:" + number, "Обновление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        command.ExecuteNonQuery();
+                        MessageBox.Show("Пользователь обновлен", "Обновление", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     textBox1.Clear();
                     textBox2.Clear();
-                    LoadUserList();
+                    UserControl_Load();
                     ToEditMode = false;
                     button5.Enabled = false;
                     button4.Enabled = true;
@@ -138,6 +161,7 @@ namespace TelegramBotMinecraft
         private void SavePermissions(object? sender, EventArgs e)
         {
             int selectedIndex = GetSelectedUserID();
+            if (selectedIndex == -1) return;
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
@@ -181,8 +205,9 @@ namespace TelegramBotMinecraft
                         }
                         else if (!isChecked && hasPermission)
                         {
-                            using var DelServer = new SqliteCommand("DELETE FROM UserServers WHERE ID_Server = @ServerID;", connection);
+                            using var DelServer = new SqliteCommand("DELETE FROM UserServers WHERE ID_Server = @ServerID AND ID_User = @UserID;", connection);
                             DelServer.Parameters.AddWithValue("@ServerID", IDServer);
+                            DelServer.Parameters.AddWithValue("@UserID", selectedIndex);
                             DelServer.ExecuteNonQuery();
                         }
                     }
@@ -224,15 +249,16 @@ namespace TelegramBotMinecraft
                         }
                         else if (!isChecked && hasPermission)
                         {
-                            using var DelCommand = new SqliteCommand("DELETE FROM UserCommands WHERE ID_Command = @CommandID;", connection);
+                            using var DelCommand = new SqliteCommand("DELETE FROM UserCommands WHERE ID_Command = @CommandID AND ID_User = @UserID;", connection);
                             DelCommand.Parameters.AddWithValue("@CommandID", IDCommand);
+                            DelCommand.Parameters.AddWithValue("@UserID", selectedIndex);
                             DelCommand.ExecuteNonQuery();
                         }
                     }
                 }
                 checkedListBox1.ClearSelected();
                 checkedListBox2.ClearSelected();
-                LoadUserList();
+                UserControl_Load();
                 MessageBox.Show("Разрешения сохранены!", "Сохранение", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -268,7 +294,13 @@ namespace TelegramBotMinecraft
 
         private void DataGridView1SelectedRow(object? sender, EventArgs e)
         {
+            int selectedIndex = GetSelectedUserID();
+            if(selectedIndex == -1) return;
+
             groupBox1.Enabled = true;
+            button2.Enabled = true;
+            button3.Enabled = true;
+
             string sqlServersList = "SELECT ID_Server FROM UserServers WHERE ID_User = @UserID;";
             string sqlCommandsList = "SELECT ID_Command FROM UserCommands WHERE ID_User = @UserID;";
 
@@ -277,7 +309,6 @@ namespace TelegramBotMinecraft
             string selectedNameServer;
             string selectedNameCommand;
 
-            int selectedIndex = GetSelectedUserID();
 
             for (int i = 0; i < checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
             for (int i = 0; i < checkedListBox2.Items.Count; i++) checkedListBox2.SetItemChecked(i, false);
@@ -360,6 +391,7 @@ namespace TelegramBotMinecraft
 
             if (dataGridView1.SelectedRows.Count > 0)
                 SelectedUserNameDataGrid = (dataGridView1.SelectedRows[0].Cells[0].Value).ToString();
+            else return -1;
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {

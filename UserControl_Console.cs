@@ -8,6 +8,8 @@ namespace TelegramBotMinecraft
         {
             InitializeComponent();
             this.Load += UserControl_Console_Load;
+
+            App.userControl_Console = this;
         }
         public void UserControl_Console_Load(object sender, EventArgs e)
         {
@@ -20,7 +22,6 @@ namespace TelegramBotMinecraft
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
                 connection.Open();
-                richTextBox1.Text = "База подлючена \n";
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Servers", connection);
                 SqliteDataReader reader = command.ExecuteReader();
 
