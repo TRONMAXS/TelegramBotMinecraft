@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using Telegram.Bot.Types;
-using Color = System.Drawing.Color;
+
 
 namespace TelegramBotMinecraft
 {
@@ -8,121 +7,141 @@ namespace TelegramBotMinecraft
     {
 
         public static TelegramBot telegramBot;
+        private bool TelegramBotStart = false;
 
         public UserControl_Settings()
         {
             InitializeComponent();
             this.Load += UserControl_Settings_Load;
-            button1.Click += SaveSettingsBOT;
-            button2.Click += SaveSettings;
-            button3.Click += (sender, e) =>
+            btn_SaveAndReconnect.Click += SaveSettingsBOT;
+            btn_SaveMain.Click += SaveSettings;
+            btn_OnBot.Click += (sender, e) =>
             {
                 TelegramBot.StartBotTelegram();
-                button3.Visible = false;
-                button4.Visible = true;
+                TelegramBotStart = true;
+                btn_OnBot.Enabled = false;
+                btn_OffBot.Enabled = true;
 
             };
-            button4.Click += (sender, e) =>
+            btn_OffBot.Click += (sender, e) =>
             {
                 TelegramBot.StopBotTelegram();
-                button4.Visible = false;
-                button3.Visible = true;
+                TelegramBotStart = false;
+                btn_OffBot.Enabled = false;
+                btn_OnBot.Enabled = true;
             };
 
             App.userControl_Settings = this;
             TelegramBot.userControl_Settings = this;
-        }
-
-        public async Task SaveLogBots()
-        {
-            using (var connection = new SqliteConnection("Data Source=Data.db"))
-            {
-                connection.Open();
-                SqliteCommand command = new SqliteCommand("SELECT SaveLogs FROM Settings", connection);
-                if (Convert.ToInt32(command.ExecuteScalar()) == 0) return;
-
-            }
-            Directory.CreateDirectory(@$"logs\");
-            await File.WriteAllTextAsync(@$"logs\latest.log", richTextBox1.Text);
+            LoggerService.ConsoleBot = this.rtb_ConsoleBot;
         }
 
         public void ButtonOnBotTelegram()
         {
-            button3.Visible = true;
-            button4.Visible = false;
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(ButtonOnBotTelegram));
+                return;
+            }
+            TelegramBotStart = false;
+            btn_OnBot.Enabled = true;
+            btn_OffBot.Enabled = false;
         }
 
         public void ButtonOffBotTelegram()
         {
-            button3.Visible = false;
-            button4.Visible = true;
+
+            TelegramBotStart = true;
+            btn_OnBot.Enabled = false;
+            btn_OffBot.Enabled = true;
         }
 
         public void UserControl_Settings_Load(object sender, EventArgs e)
         {
+            if (this.DesignMode)
+            {
+                return;
+            }
+            tb_BotToken.UseSystemPasswordChar = true;
+            tb_ProxyPassword.UseSystemPasswordChar = true;
+            btn_ShowBotToken.Text = "🔒";
+            btn_ShowPassProxy.Text = "🔒";
             LoadAllSettings();
         }
 
-        private void LoadAllSettings()
+        private async void LoadAllSettings()
         {
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Settings", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
-                    textBox1.Text = reader["BotToken"].ToString();
-                    checkBox1.Checked = Convert.ToInt32(reader["Auto_Bot"]) == 1 ? true : false;
-                    checkBox2.Checked = Convert.ToInt32(reader["TrayOnStart"]) == 1 ? true : false;
-                    checkBox3.Checked = Convert.ToInt32(reader["SaveLogs"]) == 1 ? true : false;
-                    checkBox4.Checked = Convert.ToInt32(reader["RunAtStartup"]) == 1 ? true : false;
-                    checkBox5.Checked = Convert.ToInt32(reader["AutoReconnect"]) == 1 ? true : false;
+                    tb_BotToken.Text = reader["BotToken"].ToString();
+                    chk_AutoStartBot.Checked = Convert.ToInt32(reader["Auto_Bot"]) == 1 ? true : false;
+                    chk_StartToTray.Checked = Convert.ToInt32(reader["TrayOnStart"]) == 1 ? true : false;
+                    chk_AutoStartup.Checked = Convert.ToInt32(reader["RunAtStartup"]) == 1 ? true : false;
+                    chk_AutoRestartBot.Checked = Convert.ToInt32(reader["AutoReconnect"]) == 1 ? true : false;
+                    chk_PushNotifications.Checked = Convert.ToInt32(reader["AutoReconnect"]) == 1 ? true : false;
+                    tb_ProxyHost.Text = reader["Proxy_Host"].ToString();
+                    tb_ProxyPort.Text = reader["Proxy_Port"].ToString();
+                    tb_ProxyUsername.Text = reader["Proxy_Username"].ToString();
+                    tb_ProxyPassword.Text = reader["Proxy_Password"].ToString();
                 }
             }
         }
 
-        private void SaveSettingsBOT(object? sender, EventArgs e)
+        private async void SaveSettingsBOT(object? sender, EventArgs e)
         {
             try
             {
+
                 string OldBotToken = "";
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
-                    SqliteCommand command = new SqliteCommand("SELECT BotToken FROM Settings", connection);
-                    OldBotToken = command.ExecuteScalar().ToString();
+                    await connection.OpenAsync();
+                    SqliteCommand getOldTokenCmd = new SqliteCommand("SELECT BotToken FROM Settings", connection);
+                    OldBotToken = getOldTokenCmd.ExecuteScalar().ToString();
+
+                    if (TelegramBotStart == true && OldBotToken != tb_BotToken.Text.Trim())
+                    {
+                        TelegramBot.StopBotTelegram();
+                        TelegramBotStart = false;
+                        btn_OnBot.Enabled = true;
+                        btn_OffBot.Enabled = false;
+                    }
+
+                    SqliteCommand updateCommand = new SqliteCommand("UPDATE Settings SET (BotToken, Auto_Bot, AutoReconnect, Proxy_Host, Proxy_Port, Proxy_Username, Proxy_Password)" +
+                        " = (@BotToken, @Auto_Bot, @AutoReconnect, @Proxy_Host, @Proxy_Port, @Proxy_Username, @Proxy_Password) WHERE ID == 1;", connection);
+                    updateCommand.Parameters.AddWithValue("@BotToken", tb_BotToken.Text.Trim());
+                    updateCommand.Parameters.AddWithValue("@Auto_Bot", Convert.ToInt32(chk_AutoStartBot.Checked));
+                    updateCommand.Parameters.AddWithValue("@AutoReconnect", Convert.ToInt32(chk_AutoRestartBot.Checked));
+                    updateCommand.Parameters.AddWithValue("@Proxy_Host", tb_ProxyHost.Text.Trim());
+                    updateCommand.Parameters.AddWithValue("@Proxy_Port", tb_ProxyPort.Text.Trim());
+                    updateCommand.Parameters.AddWithValue("@Proxy_Username", tb_ProxyUsername.Text.Trim());
+                    updateCommand.Parameters.AddWithValue("@Proxy_Password", tb_ProxyPassword.Text.Trim());
+                    await updateCommand.ExecuteNonQueryAsync();
+
                 }
 
-                using (var connection = new SqliteConnection("Data Source=Data.db"))
-                {
-                    connection.Open();
-                    SqliteCommand command = new SqliteCommand("UPDATE Settings SET (BotToken, Auto_Bot, SaveLogs, AutoReconnect) = (@BotToken, @Auto_Bot, @SaveLogs, @AutoReconnect) WHERE ID == 1;", connection);
-                    command.Parameters.AddWithValue("@BotToken", textBox1.Text.Trim());
-                    command.Parameters.AddWithValue("@Auto_Bot", Convert.ToInt32(checkBox1.Checked));
-                    command.Parameters.AddWithValue("@SaveLogs", Convert.ToInt32(checkBox3.Checked));
-                    command.Parameters.AddWithValue("@AutoReconnect", Convert.ToInt32(checkBox5.Checked));
-                    command.ExecuteNonQuery();
+                LoggerService.MessageAppInfo("Настройки бота обновлены.");
 
-                }
-                textBox1.Clear();
-                checkBox1.Checked = false;
-                checkBox3.Checked = false;
-                checkBox5.Checked = false;
-                MessageBox.Show("Настройки бота обновлены", "Настройки", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadAllSettings();
-
-                if (OldBotToken != textBox1.Text.Trim())
+                if (TelegramBotStart == false && OldBotToken != tb_BotToken.Text.Trim())
                 {
                     TelegramBot.StartBotTelegram();
+                    TelegramBotStart = true;
+                    btn_OnBot.Enabled = false;
+                    btn_OffBot.Enabled = true;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при сохранении настроек бота: {ex.Message}");
             }
+            finally { LoadAllSettings(); }
         }
 
         private void SaveSettings(object? sender, EventArgs e)
@@ -132,96 +151,38 @@ namespace TelegramBotMinecraft
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
                     connection.Open();
-                    SqliteCommand command = new SqliteCommand("UPDATE Settings SET (TrayOnStart, RunAtStartup) = (@TrayOnStart, @RunAtStartup) WHERE ID == 1;", connection);
-                    command.Parameters.AddWithValue("@TrayOnStart", Convert.ToInt32(checkBox2.Checked));
-                    command.Parameters.AddWithValue("@RunAtStartup", Convert.ToInt32(checkBox4.Checked));
+                    SqliteCommand command = new SqliteCommand("UPDATE Settings SET (TrayOnStart, RunAtStartup, Notifications) = (@TrayOnStart, @RunAtStartup, @Notifications) WHERE ID == 1;", connection);
+                    command.Parameters.AddWithValue("@TrayOnStart", Convert.ToInt32(chk_StartToTray.Checked));
+                    command.Parameters.AddWithValue("@RunAtStartup", Convert.ToInt32(chk_AutoStartup.Checked));
+                    command.Parameters.AddWithValue("@Notifications", Convert.ToInt32(chk_PushNotifications.Checked));
                     command.ExecuteNonQuery();
                 }
-                checkBox2.Checked = false;
-                checkBox4.Checked = false;
+                chk_StartToTray.Checked = false;
+                chk_AutoStartup.Checked = false;
                 LoadAllSettings();
-                MessageBox.Show("Настройки сохранены!", "Настройки", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoggerService.MessageAppInfo("Настройки приложения сохранены.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при сохранении настроек приложения: {ex.Message}");
             }
         }
 
-        public async Task MessageChat(Chat chat, string text)
+        private void ShowHideTokenPass_Click(object sender, EventArgs e)
         {
-            if (this.InvokeRequired)
+            if (sender == btn_ShowBotToken)
             {
-                this.Invoke(new Action(() => MessageChat(chat, text)));
-                return;
+                tb_BotToken.UseSystemPasswordChar = !tb_BotToken.UseSystemPasswordChar;
+                if (tb_BotToken.UseSystemPasswordChar) btn_ShowBotToken.Text = "👁";
+                else btn_ShowBotToken.Text = "🔒";
             }
-            AppendTextColored($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
-            AppendTextColored($" [MSG]", Color.Green);
-            AppendTextColored($": Cообщение от ", Color.Black);
-            if (!string.IsNullOrEmpty(chat.Username)) AppendTextColored($"@{chat.Username} [{chat.Id}] ", Color.DarkOrange);
-            else AppendTextColored($"{chat.FirstName} [{chat.Id}] ", Color.DarkOrange);
-            AppendTextColored($": {text}", Color.Black);
-            richTextBox1.AppendText($"{Environment.NewLine}");
-            richTextBox1.ScrollToCaret();
-        }
-
-        public async Task MessageBotInfo(string Message)
-        {
-            if (this.InvokeRequired)
+            else if (sender == btn_ShowPassProxy)
             {
-                this.Invoke(new Action(() => MessageBotInfo(Message)));
-                return;
+                tb_ProxyPassword.UseSystemPasswordChar = !tb_ProxyPassword.UseSystemPasswordChar;
+                if (tb_ProxyPassword.UseSystemPasswordChar) btn_ShowPassProxy.Text = "👁";
+                else btn_ShowPassProxy.Text = "🔒";
             }
-            AppendTextColored($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
-            AppendTextColored($" [INFO]", Color.Blue);
-            AppendTextColored(Message, Color.Black);
-            richTextBox1.AppendText($"{Environment.NewLine}");
-            richTextBox1.ScrollToCaret();
         }
 
-        public async Task StartBotInfo(string FirstNameBot, string UsernameBot)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => StartBotInfo(FirstNameBot, UsernameBot)));
-                return;
-            }
-            AppendTextColored($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
-            AppendTextColored($" [INFO]", Color.Blue);
-            AppendTextColored($": Бот ", Color.Black);
-            AppendTextColored($"{FirstNameBot} [@{UsernameBot}]", Color.DarkOrange);
-            AppendTextColored($" успешно авторизован и запущен.", Color.Black);
-            richTextBox1.AppendText($"{Environment.NewLine}");
-            richTextBox1.ScrollToCaret();
-        }
-
-        public async Task ErrorBotInfo(string Message)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => ErrorBotInfo(Message)));
-                return;
-            }
-            AppendTextColored($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
-            AppendTextColored($" [ERROR]", Color.Red);
-            AppendTextColored($": {Message}", Color.Black);
-            richTextBox1.AppendText($"{Environment.NewLine}");
-            richTextBox1.ScrollToCaret();
-        }
-
-        private void AppendTextColored(string text, Color color, bool bold = false)
-        {
-            richTextBox1.SelectionStart = richTextBox1.TextLength;
-            richTextBox1.SelectionLength = 0;
-            richTextBox1.SelectionColor = color;
-
-            if (bold)
-                richTextBox1.SelectionFont = new Font(richTextBox1.Font, FontStyle.Bold);
-            else
-                richTextBox1.SelectionFont = new Font(richTextBox1.Font, FontStyle.Regular);
-
-            richTextBox1.AppendText(text);
-            richTextBox1.SelectionColor = richTextBox1.ForeColor;
-        }
     }
 }

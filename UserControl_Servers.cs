@@ -4,166 +4,205 @@ namespace TelegramBotMinecraft
 {
     public partial class UserControl_Servers : UserControl
     {
+
+        private bool FlagAddServer = false;
+
         public UserControl_Servers()
         {
             InitializeComponent();
-            listBox1.MouseClick += LoadServersValues;
+            lb_Servers.MouseClick += LoadServersValues;
             this.Load += UserControl_Servers_Load;
-            button4.Click += DeleteUser;
-            button3.Click += AddORCancle;
-            button2.Click += AddORCancle;
-            button1.Click += SaveServer;
-            button8.Click += UpdateServer;
+            btn_DellServer.Click += DeleteServer;
+            btn_AddServer.Click += AddORCancle;
+            btn_CancleServer.Click += AddORCancle;
+            btn_SaveServer.Click += SaveServer;
+            btn_UpdateServer.Click += UpdateServer;
 
-            textBox1.TextChanged += TextBoxAll_TextChanged;
-            textBox2.TextChanged += TextBoxAll_TextChanged;
-            textBox3.TextChanged += TextBoxAll_TextChanged;
-            textBox4.TextChanged += TextBoxAll_TextChanged;
-            textBox5.TextChanged += TextBoxAll_TextChanged;
-            textBox6.TextChanged += TextBoxAll_TextChanged;
-            textBox7.TextChanged += TextBoxAll_TextChanged;
+            tb_NameServer.TextChanged += TextBoxAll_TextChanged;
+            tb_IpAndPortServer.TextChanged += TextBoxAll_TextChanged;
+            tb_PathToServer.TextChanged += TextBoxAll_TextChanged;
+            tb_JavaArgsServer.TextChanged += TextBoxAll_TextChanged;
+            tb_IdProcessServer.TextChanged += TextBoxAll_TextChanged;
+            tb_RconPort.TextChanged += TextBoxAll_TextChanged;
+            tb_RconPassword.TextChanged += TextBoxAll_TextChanged;
 
             App.userControl_Servers = this;
         }
 
         private void TextBoxAll_TextChanged(object? sender, EventArgs e)
         {
-            if(button8.Enabled == true)
-                button2.Enabled = true;
+            if (FlagAddServer == false)
+            {
+                btn_UpdateServer.Enabled = true;
+            }
+            btn_CancleServer.Enabled = true;
         }
 
         public void UserControl_Servers_Load(object sender, EventArgs e)
         {
-            groupBox1.Enabled = false;
-            button8.Enabled = false;
-            button1.Enabled = false;
-            button2.Enabled = false;
-            button3.Enabled = true;
-            button4.Enabled = false;
+            if (this.DesignMode)
+            {
+                return;
+            }
+            FlagAddServer = false;
+            gb_SettingsServer.Enabled = false;
+            btn_UpdateServer.Enabled = false;
+            btn_SaveServer.Enabled = false;
+            btn_CancleServer.Enabled = false;
+            btn_AddServer.Enabled = true;
+            btn_DellServer.Enabled = false;
 
             LoadServersList();
         }
 
         private void AddORCancle(object? sender, EventArgs e)
         {
-            if (sender == button2 && button8.Enabled == true)
+            if (sender == btn_CancleServer && FlagAddServer == false)
             {
                 LoadServersValues(null, null);
                 return;
             }
 
-            textBox1.Clear();
-            textBox2.Clear();
-            textBox3.Clear();
-            textBox4.Clear();
-            textBox5.Clear();
-            checkBox1.Checked = false;
-            textBox6.Clear();
-            textBox7.Clear();
-            listBox1.ClearSelected();
+            tb_NameServer.Clear();
+            tb_IpAndPortServer.Clear();
+            tb_PathToServer.Clear();
+            tb_JavaArgsServer.Clear();
+            tb_IdProcessServer.Clear();
+            btn_OnOffRconSettings.Checked = false;
+            tb_RconPort.Clear();
+            tb_RconPassword.Clear();
+            lb_Servers.ClearSelected();
 
-            if (sender == button3)
+            if (sender == btn_AddServer)
             {
-                groupBox1.Enabled = true;
-                button2.Enabled = true;
-                button3.Enabled = false;
-                button4.Enabled = false;
-                button8.Enabled = false;
-                button1.Enabled = true;
+                FlagAddServer = true;
+                gb_SettingsServer.Enabled = true;
+                btn_CancleServer.Enabled = true;
+                btn_AddServer.Enabled = false;
+                btn_DellServer.Enabled = false;
+                btn_UpdateServer.Enabled = false;
+                btn_SaveServer.Enabled = true;
             }
-            else if (sender == button2)
+            else if (sender == btn_CancleServer)
             {
-                groupBox1.Enabled = false;
-                button2.Enabled = false;
-                button4.Enabled = true;
-                button3.Enabled = true;
-                button8.Enabled = true;
-                button1.Enabled = false;
+                FlagAddServer = false;
+                gb_SettingsServer.Enabled = false;
+                btn_CancleServer.Enabled = false;
+                btn_DellServer.Enabled = false;
+                btn_AddServer.Enabled = true;
+                btn_UpdateServer.Enabled = false;
+                btn_SaveServer.Enabled = false;
             }
         }
 
-        private void SaveServer(object? sender, EventArgs e)
+        private async void SaveServer(object? sender, EventArgs e)
         {
-            if (textBox1.Text == string.Empty)
+            if (tb_NameServer.Text.Trim() == string.Empty)
             {
                 MessageBox.Show("Пажалуйста, укажите имя сервера", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Rcon_Port, Rcon_Pass) " +
-                                  "VALUES (@textBox1, @textBox2, @textBox3, @textBox4, @textBox6, @textBox7);";
+            string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
+                                  "VALUES (@textBox1, @textBox2, @textBox3, @textBox4, @checkBox1, @textBox6, @textBox7);";
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlAddServer, connection);
-                    command.Parameters.AddWithValue("@textBox1", textBox1.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox2", textBox2.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox3", textBox3.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox4", textBox4.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox6", textBox6.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox7", textBox7.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox1", tb_NameServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox2", tb_IpAndPortServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox3", tb_PathToServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox4", tb_JavaArgsServer.Text.Trim());
+                    command.Parameters.AddWithValue("@checkBox1", Convert.ToInt32(btn_OnOffRconSettings.Checked));
+                    command.Parameters.AddWithValue("@textBox6", tb_RconPort.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox7", tb_RconPassword.Text.Trim());
 
-                    int number = command.ExecuteNonQuery();
-                    MessageBox.Show("Добавленно серверов:" + number, "Добавление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    int number = await command.ExecuteNonQueryAsync();
                 }
-                textBox1.Clear();
-                textBox2.Clear();
-                textBox3.Clear();
-                textBox4.Clear();
-                textBox5.Clear();
-                checkBox1.Checked = false;
-                textBox6.Clear();
-                textBox7.Clear();
-                listBox1.ClearSelected();
-                button3.Enabled = true;
+                tb_NameServer.Clear();
+                tb_IpAndPortServer.Clear();
+                tb_PathToServer.Clear();
+                tb_JavaArgsServer.Clear();
+                tb_IdProcessServer.Clear();
+                btn_OnOffRconSettings.Checked = false;
+                tb_RconPort.Clear();
+                tb_RconPassword.Clear();
+                lb_Servers.ClearSelected();
+                btn_AddServer.Enabled = true;
 
+                LoggerService.MessageAppInfo($"Сервер [{tb_NameServer.Text.Trim()}] создан");
                 LoadServersList();
             }
-            catch (Exception ex)
+            catch (SqliteException ex)
             {
-                MessageBox.Show(ex.Message);
+                if (ex.SqliteExtendedErrorCode == 2067)
+                {
+                    MessageBox.Show($"Сервер с таким именем уже существует.\n" +
+                        $"Пожалуйста, выберите другое название.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    LoggerService.ErrorAppInfo($"Ошибка при создании сервера: Сервер с таким именем уже существует.\n" +
+                        $"Пожалуйста, выберите другое название.");
+                }
             }
+
         }
 
         // +  сделать новую кнопку для обновления 
         // +  кнопку сохранени использовать только после нажатия на кнопку добавить 
         // -  сделать новую кнопку для дублирования серверов(SaveServer уже делает дублирование, только надо просить ввести другое имя)
-        // -  попробывать сделать чтобы кнопка сохранить была активной, только после изменения чего либо в настройках сервера
+        // +-  попробывать сделать чтобы кнопка сохранить была активной, только после изменения чего либо в настройках сервера
 
-        private void DeleteUser(object? sender, EventArgs e)
+        private async void DeleteServer(object? sender, EventArgs e)
         {
+            string NameDeletedServer = "";
+            if (lb_Servers.SelectedItems.Count > 0)
+            {
+                NameDeletedServer = lb_Servers.Items[lb_Servers.SelectedIndex].ToString();
+            }
+
             string sqlDeleteServer = "DELETE FROM Servers WHERE ID = @ID;";
-            int selectedIndex = GetSelectedServerIndex();
+            int selectedIndex = await GetSelectedServerIndex();
             if (selectedIndex == -1) return;
+
+            var result = MessageBox.Show($"Вы уверены, что хотите удалить сервер {NameDeletedServer} ?\n" +
+                "Это действие приведет к удалению всех связанных данных и восстановить их будет невозможно.",
+                "Удалить сервер", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if(result == DialogResult.No) return;
+
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlDeleteServer, connection);
                     command.Parameters.AddWithValue("@ID", selectedIndex);
-                    int number = command.ExecuteNonQuery();
-                    MessageBox.Show("Удаленно серверов:" + number, "Удаление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    int number = await command.ExecuteNonQueryAsync();
                 }
+                LoggerService.MessageAppInfo($"Сервер [{NameDeletedServer}] удален");
+                MessageBox.Show($"Сервер {NameDeletedServer} уделён", "Удаление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 LoadServersList();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при удалении сервера [{NameDeletedServer}] : {ex.Message}");
             }
         }
 
-        private void UpdateServer(object? sender, EventArgs e)
+        private async void UpdateServer(object? sender, EventArgs e)
         {
-            int selectedIndex = GetSelectedServerIndex();
+            int selectedIndex = await GetSelectedServerIndex();
             if (selectedIndex == -1) return;
+
+            string NameDeletedServer = "";
 
             string sqlUpdateServer = "UPDATE Servers SET Name = @textBox1, " +
                                              "\r\n    Connected = @textBox2, " +
                                              "\r\n    Path_Server = @textBox3, " +
                                              "\r\n    Java_args = @textBox4, " +
+                                             "\r\n    Rcon_Enable = @checkBox1, " +
                                              "\r\n    Rcon_Port = @textBox6, " +
                                              "\r\n    Rcon_Pass = @textBox7" +
                                              "\r\nWHERE ID = @SelectId;";
@@ -171,119 +210,122 @@ namespace TelegramBotMinecraft
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlUpdateServer, connection);
-                    command.Parameters.AddWithValue("@textBox1", textBox1.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox2", textBox2.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox3", textBox3.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox4", textBox4.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox6", textBox6.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox7", textBox7.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox1", tb_NameServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox2", tb_IpAndPortServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox3", tb_PathToServer.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox4", tb_JavaArgsServer.Text.Trim());
+                    command.Parameters.AddWithValue("@checkBox1", Convert.ToInt32(btn_OnOffRconSettings.Checked));
+                    command.Parameters.AddWithValue("@textBox6", tb_RconPort.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox7", tb_RconPassword.Text.Trim());
                     command.Parameters.AddWithValue("@SelectId", selectedIndex);
 
-                    int number = command.ExecuteNonQuery();
-                    MessageBox.Show("Обновденно серверов:" + number, "Обновление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    int number = await command.ExecuteNonQueryAsync();
                 }
-                textBox1.Clear();
-                textBox2.Clear();
-                textBox3.Clear();
-                textBox4.Clear();
-                textBox5.Clear();
-                checkBox1.Checked = false;
-                textBox6.Clear();
-                textBox7.Clear();
-                listBox1.ClearSelected();
+                NameDeletedServer = tb_NameServer.Text.Trim();
 
+                tb_NameServer.Clear();
+                tb_IpAndPortServer.Clear();
+                tb_PathToServer.Clear();
+                tb_JavaArgsServer.Clear();
+                tb_IdProcessServer.Clear();
+                btn_OnOffRconSettings.Checked = false;
+                tb_RconPort.Clear();
+                tb_RconPassword.Clear();
+                lb_Servers.ClearSelected();
+
+                LoggerService.MessageAppInfo($"Сервер [{NameDeletedServer}] обновлен");
                 LoadServersList();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при обновлении сервера [{NameDeletedServer}] : {ex.Message}");
             }
         }
 
-        private void LoadServersList()
+        private async void LoadServersList()
         {
-            textBox1.Clear();
-            textBox2.Clear();
-            textBox3.Clear();
-            textBox4.Clear();
-            textBox5.Clear();
-            checkBox1.Checked = false;
-            textBox6.Clear();
-            textBox7.Clear();
+            FlagAddServer = false;
+            tb_NameServer.Clear();
+            tb_IpAndPortServer.Clear();
+            tb_PathToServer.Clear();
+            tb_JavaArgsServer.Clear();
+            tb_IdProcessServer.Clear();
+            btn_OnOffRconSettings.Checked = false;
+            tb_RconPort.Clear();
+            tb_RconPassword.Clear();
+            lb_Servers.ClearSelected();
 
-            listBox1.ClearSelected();
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Servers", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
-                listBox1.Items.Clear();
-                while (reader.Read())
+                lb_Servers.Items.Clear();
+                while (await reader.ReadAsync())
                 {
-                    listBox1.Items.Add(reader["Name"]);
+                    lb_Servers.Items.Add(reader["Name"]);
                 }
             }
-            groupBox1.Enabled = false;
+            gb_SettingsServer.Enabled = false;
+            btn_DellServer.Enabled = false;
         }
 
-        private void LoadServersValues(object sender, MouseEventArgs e)
+        private async void LoadServersValues(object sender, EventArgs e)
         {
-            int index = listBox1.IndexFromPoint(e.Location);
-            if (index == -1) return;
-
-            groupBox1.Enabled = true;
-            button8.Enabled = true;
-            button4.Enabled = true;
-
-            int selectedIndex = GetSelectedServerIndex();
+            int selectedIndex = await GetSelectedServerIndex();
             if (selectedIndex == -1) return;
+
+            gb_SettingsServer.Enabled = true;
+            btn_DellServer.Enabled = true;
+            btn_SaveServer.Enabled = false;
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Servers", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     if (Convert.ToInt32(reader["ID"]) == selectedIndex)
                     {
-                        textBox1.Text = reader["Name"].ToString();
-                        textBox2.Text = reader["Connected"].ToString();
-                        textBox3.Text = reader["Path_Server"].ToString();
-                        textBox4.Text = reader["Java_args"].ToString();
-                        textBox5.Text = reader["ID_Process"].ToString();
+                        tb_NameServer.Text = reader["Name"].ToString();
+                        tb_IpAndPortServer.Text = reader["Connected"].ToString();
+                        tb_PathToServer.Text = reader["Path_Server"].ToString();
+                        tb_JavaArgsServer.Text = reader["Java_args"].ToString();
+                        tb_IdProcessServer.Text = reader["ID_Process"].ToString();
 
-                        checkBox1.Checked = Convert.ToInt32(reader["Rcon_Enable"]) == 1 ? true : false;
+                        btn_OnOffRconSettings.Checked = Convert.ToInt32(reader["Rcon_Enable"]) == 1 ? true : false;
 
-                        textBox6.Text = reader["Rcon_Port"].ToString();
-                        textBox7.Text = reader["Rcon_Pass"].ToString();
+                        tb_RconPort.Text = reader["Rcon_Port"].ToString();
+                        tb_RconPassword.Text = reader["Rcon_Pass"].ToString();
                     }
                 }
             }
-            button2.Enabled = false;
+            btn_UpdateServer.Enabled = false;
+            btn_CancleServer.Enabled = false;
         }
 
-        private int GetSelectedServerIndex()
+        private async Task<int> GetSelectedServerIndex()
         {
             string sqlGetIDUsers = "SELECT ID FROM Servers WHERE Name = @ServerName;";
             string SelectedServerNameListBox = "";
             int selectedIndex;
 
-            if (listBox1.SelectedItems.Count > 0)
-                SelectedServerNameListBox = listBox1.Items[listBox1.SelectedIndex].ToString();
+            if (lb_Servers.SelectedItems.Count > 0)
+                SelectedServerNameListBox = lb_Servers.Items[lb_Servers.SelectedIndex].ToString();
             else return -1;
 
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand commandToGetIDUser = new SqliteCommand(sqlGetIDUsers, connection);
                 commandToGetIDUser.Parameters.AddWithValue("@ServerName", SelectedServerNameListBox);
-                selectedIndex = Convert.ToInt32(commandToGetIDUser.ExecuteScalar());
+                selectedIndex = Convert.ToInt32(await commandToGetIDUser.ExecuteScalarAsync());
             }
             return selectedIndex;
         }

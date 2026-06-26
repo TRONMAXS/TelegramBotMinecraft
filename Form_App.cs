@@ -53,10 +53,6 @@ namespace TelegramBotMinecraft
             }
             e.Cancel = true;
 
-            await userControl_Settings.SaveLogBots();
-
-            // реализовать сохрание БД
-
             this.FormClosing -= Form1_FormClosing;
             this.Close();
         }
@@ -65,10 +61,10 @@ namespace TelegramBotMinecraft
         {
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT Auto_Bot FROM Settings", connection);
                 SqliteDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     if (Convert.ToInt32(reader[0]) == 1) TelegramBot.StartBotTelegram();
                     

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using System.Windows.Forms;
 
 namespace TelegramBotMinecraft
 {
@@ -13,160 +12,218 @@ namespace TelegramBotMinecraft
         {
             InitializeComponent();
             this.Load += UserControl_Users_Load;
-            dataGridView1.CellClick += DataGridView1SelectedRow;
-            button4.Click += AddUser;
-            button3.Click += DeleteUser;
-            button2.Click += EditUser;
-            button5.Click += SaveUser;
-            button1.Click += SavePermissions;
+            dgv_Users.CellClick += DataGridView1SelectedRow;
+            btn_AddUsers.Click += AddUser;
+            btn_DellUsers.Click += DeleteUser;
+            btn_EditUsers.Click += EditUser;
+            btn_SaveUsers.Click += SaveUser;
+            btn_SavePerm.Click += SavePermissions;
 
             dataTable.Columns.Add("Имя", typeof(string));
             dataTable.Columns.Add("ID Telegram", typeof(int));
 
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView1.AllowUserToAddRows = false;
+            dgv_Users.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgv_Users.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgv_Users.AllowUserToAddRows = false;
 
             App.userControl_Users = this;
         }
         public void UserControl_Users_Load(object? sender, EventArgs e)
         {
-            groupBox1.Enabled = false;
-            button2.Enabled = false;
-            button3.Enabled = false;
-            button5.Enabled = false;
-            button4.Enabled = true;
+            if (this.DesignMode)
+            {
+                return;
+            }
+
+            gb_PermUsers.Enabled = false;
+            btn_EditUsers.Enabled = false;
+            btn_DellUsers.Enabled = false;
+            btn_SaveUsers.Enabled = false;
+            btn_AddUsers.Enabled = true;
+            dgv_Users.Enabled = true;
+            tb_IdUser.Clear();
+            tb_NameUser.Clear();
 
             LoadUserList();
         }
 
         public void UserControl_Load()
         {
-            groupBox1.Enabled = false;
-            button2.Enabled = false;
-            button3.Enabled = false;
-            button5.Enabled = false;
-            button4.Enabled = true;
+            if (this.DesignMode)
+            {
+                return;
+            }
+
+            gb_PermUsers.Enabled = false;
+            btn_EditUsers.Enabled = false;
+            btn_DellUsers.Enabled = false;
+            btn_SaveUsers.Enabled = false;
+            btn_AddUsers.Enabled = true;
+            dgv_Users.Enabled = true;
 
             LoadUserList();
         }
 
-        private void DeleteUser(object? sender, EventArgs e)
+        private async void DeleteUser(object? sender, EventArgs e)
         {
-            int selectedIndex = GetSelectedUserID();
+            string SelectedUserName = "";
+
+            int selectedIndex = await GetSelectedUserID();
             if (selectedIndex < 0) return;
+
+            if (dgv_Users.SelectedRows.Count > 0)
+            {
+                SelectedUserName = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
+            }
 
             string sqlDeleteUser = "DELETE FROM Users WHERE ID = @UserID;";
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlDeleteUser, connection);
                     command.Parameters.AddWithValue("@UserID", selectedIndex);
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("Пользователь удален", "Удаление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await command.ExecuteNonQueryAsync();
+                    LoggerService.MessageAppInfo($"Пользователь [{SelectedUserName}] удален");
                 }
                 UserControl_Load();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при удалении пользователя [{SelectedUserName}] : {ex.Message}");
             }
         }
 
-        private void AddUser(object? sender, EventArgs e)
+        private async void AddUser(object? sender, EventArgs e)
         {
+            string SelectedUserName = "";
+
+            if (dgv_Users.SelectedRows.Count > 0)
+            {
+                SelectedUserName = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
+            }
+
             if (!ValidateUserInputs())
                 return;
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@textBox1, @textBox2);", connection);
-                    command.Parameters.AddWithValue("@textBox1", textBox1.Text.Trim());
-                    command.Parameters.AddWithValue("@textBox2", Convert.ToInt32(textBox2.Text.Trim()));
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("Пользователь добавлен", "Добавление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    command.Parameters.AddWithValue("@textBox1", tb_NameUser.Text.Trim());
+                    command.Parameters.AddWithValue("@textBox2", Convert.ToInt32(tb_IdUser.Text.Trim()));
+                    await command.ExecuteNonQueryAsync();
+                    LoggerService.MessageAppInfo($"Пользователь [{SelectedUserName}] добавлен");
                 }
-                textBox1.Clear();
-                textBox2.Clear();
+                tb_NameUser.Clear();
+                tb_IdUser.Clear();
                 UserControl_Load();
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при добавлении пользователя [{SelectedUserName}] : {ex.Message}");
             }
         }
 
-        private void EditUser(object? sender, EventArgs e)
+        private async void EditUser(object? sender, EventArgs e)
         {
-            int selectedIndex = GetSelectedUserID();
-            if(selectedIndex < 0) return;
+            string SelectedUserName = "";
+            if (dgv_Users.SelectedRows.Count > 0)
+            {
+                SelectedUserName = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
+            }
+
+            int selectedIndex = await GetSelectedUserID();
+            if (selectedIndex < 0) return;
 
             ToEditMode = true;
-            button5.Enabled = true;
-            button4.Enabled = false;
-            using (var connection = new SqliteConnection("Data Source=Data.db"))
+            btn_DellUsers.Enabled = false;
+            btn_EditUsers.Enabled = false;
+            dgv_Users.Enabled = false;
+            btn_SaveUsers.Enabled = true;
+            btn_AddUsers.Enabled = false;
+            gb_PermUsers.Enabled = false;
+            try
             {
-                connection.Open();
-                SqliteCommand commandToGetUser = new SqliteCommand("SELECT * FROM Users WHERE ID = @UserID;", connection);
-                commandToGetUser.Parameters.AddWithValue("@UserID", selectedIndex);
-                SqliteDataReader reader = commandToGetUser.ExecuteReader();
-                while (reader.Read())
+                using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    textBox1.Text = reader["Name"].ToString();
-                    textBox2.Text = reader["ID_TG"].ToString();
+                    await connection.OpenAsync();
+                    SqliteCommand commandToGetUser = new SqliteCommand("SELECT * FROM Users WHERE ID = @UserID;", connection);
+                    commandToGetUser.Parameters.AddWithValue("@UserID", selectedIndex);
+                    SqliteDataReader reader = await commandToGetUser.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        tb_NameUser.Text = reader["Name"].ToString();
+                        tb_IdUser.Text = reader["ID_TG"].ToString();
+                    }
                 }
+                //UserControl_Load();
             }
-            UserControl_Load();
+            catch (Exception ex)
+            {
+                LoggerService.ErrorAppInfo($"Ошибка при изменении пользователя [{SelectedUserName}] : {ex.Message}");
+            }
         }
 
-        private void SaveUser(object? sender, EventArgs e)
+        private async void SaveUser(object? sender, EventArgs e)
         {
             if (ToEditMode)
             {
                 if (!ValidateUserInputs())
                     return;
                 string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserIDTG WHERE ID = @UserID;";
-                int selectedIndex = GetSelectedUserID();
+                int selectedIndex = await GetSelectedUserID();
                 if (selectedIndex == -1) return;
+
+                string SelectedUserName = "";
+                if (dgv_Users.SelectedRows.Count > 0)
+                {
+                    SelectedUserName = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
+                }
                 try
                 {
                     using (var connection = new SqliteConnection("Data Source=Data.db"))
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
                         SqliteCommand command = new SqliteCommand(sqlUpdateUser, connection);
-                        command.Parameters.AddWithValue("@UserName", textBox1.Text.Trim());
-                        command.Parameters.AddWithValue("@UserIDTG", Convert.ToInt32(textBox2.Text.Trim()));
+                        command.Parameters.AddWithValue("@UserName", tb_NameUser.Text.Trim());
+                        command.Parameters.AddWithValue("@UserIDTG", Convert.ToInt32(tb_IdUser.Text.Trim()));
                         command.Parameters.AddWithValue("@UserID", selectedIndex);
-                        command.ExecuteNonQuery();
-                        MessageBox.Show("Пользователь обновлен", "Обновление", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        await command.ExecuteNonQueryAsync();
                     }
-                    textBox1.Clear();
-                    textBox2.Clear();
-                    UserControl_Load();
+                    tb_NameUser.Clear();
+                    tb_IdUser.Clear();
                     ToEditMode = false;
-                    button5.Enabled = false;
-                    button4.Enabled = true;
+
+                    UserControl_Load();
+
+                    LoggerService.MessageAppInfo($"Пользователь [{SelectedUserName}] обновлен");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    LoggerService.ErrorAppInfo($"Ошибка при обновление пользователя [{SelectedUserName}] : {ex.Message}");
                 }
             }
         }
 
-        private void SavePermissions(object? sender, EventArgs e)
+        private async void SavePermissions(object? sender, EventArgs e)
         {
-            int selectedIndex = GetSelectedUserID();
+            int selectedIndex = await GetSelectedUserID();
             if (selectedIndex == -1) return;
+
+            string SelectedUserName = "";
+            if (dgv_Users.SelectedRows.Count > 0)
+            {
+                SelectedUserName = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
+            }
+
             try
             {
                 using (var connection = new SqliteConnection("Data Source=Data.db"))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     var userServers = new HashSet<string>();
                     using (var cmd = new SqliteCommand("SELECT s.Name" +
@@ -176,24 +233,24 @@ namespace TelegramBotMinecraft
                                                    "\r\nWHERE u.ID = @UserID;", connection))
                     {
                         cmd.Parameters.AddWithValue("@UserID", selectedIndex);
-                        using (var reader = cmd.ExecuteReader())
+                        using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                                 userServers.Add(reader["Name"].ToString());
                         }
                     }
 
-                    for (int i = 0; i < checkedListBox1.Items.Count; i++)
+                    for (int i = 0; i < clb_Servers.Items.Count; i++)
                     {
-                        string serverName = checkedListBox1.Items[i].ToString();
-                        bool isChecked = checkedListBox1.GetItemChecked(i);
+                        string serverName = clb_Servers.Items[i].ToString();
+                        bool isChecked = clb_Servers.GetItemChecked(i);
                         bool hasPermission = userServers.Contains(serverName);
                         int IDServer;
 
                         using (var GetIDServer = new SqliteCommand("SELECT ID FROM Servers WHERE Name = @ServerName;", connection))
                         {
                             GetIDServer.Parameters.AddWithValue("@ServerName", serverName);
-                            IDServer = Convert.ToInt32(GetIDServer.ExecuteScalar());
+                            IDServer = Convert.ToInt32(await GetIDServer.ExecuteScalarAsync());
                         }
 
                         if (isChecked && !hasPermission)
@@ -201,14 +258,14 @@ namespace TelegramBotMinecraft
                             using var AddServer = new SqliteCommand("INSERT OR IGNORE INTO UserServers (ID_User, ID_Server) VALUES (@UserID, @ServerID);", connection);
                             AddServer.Parameters.AddWithValue("@UserID", selectedIndex);
                             AddServer.Parameters.AddWithValue("@ServerID", IDServer);
-                            AddServer.ExecuteNonQuery();
+                            await AddServer.ExecuteNonQueryAsync();
                         }
                         else if (!isChecked && hasPermission)
                         {
                             using var DelServer = new SqliteCommand("DELETE FROM UserServers WHERE ID_Server = @ServerID AND ID_User = @UserID;", connection);
                             DelServer.Parameters.AddWithValue("@ServerID", IDServer);
                             DelServer.Parameters.AddWithValue("@UserID", selectedIndex);
-                            DelServer.ExecuteNonQuery();
+                            await DelServer.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -220,24 +277,24 @@ namespace TelegramBotMinecraft
                                                    "\r\nWHERE u.ID = @UserID", connection))
                     {
                         cmd.Parameters.AddWithValue("@UserID", selectedIndex);
-                        using (var reader = cmd.ExecuteReader())
+                        using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                                 userCommands.Add(reader["Command"].ToString());
                         }
                     }
 
-                    for (int i = 0; i < checkedListBox2.Items.Count; i++)
+                    for (int i = 0; i < clb_Commands.Items.Count; i++)
                     {
-                        string commandName = checkedListBox2.Items[i].ToString();
-                        bool isChecked = checkedListBox2.GetItemChecked(i);
+                        string commandName = clb_Commands.Items[i].ToString();
+                        bool isChecked = clb_Commands.GetItemChecked(i);
                         bool hasPermission = userCommands.Contains(commandName);
                         int IDCommand;
 
                         using (var GetIDCommand = new SqliteCommand("SELECT ID FROM Commands WHERE Command = @CommandName;", connection))
                         {
                             GetIDCommand.Parameters.AddWithValue("@CommandName", commandName);
-                            IDCommand = Convert.ToInt32(GetIDCommand.ExecuteScalar());
+                            IDCommand = Convert.ToInt32(await GetIDCommand.ExecuteScalarAsync());
                         }
 
                         if (isChecked && !hasPermission)
@@ -245,160 +302,172 @@ namespace TelegramBotMinecraft
                             using var AddCommand = new SqliteCommand("INSERT OR IGNORE INTO UserCommands (ID_User, ID_Command) VALUES (@UserID, @CommandID);", connection);
                             AddCommand.Parameters.AddWithValue("@UserID", selectedIndex);
                             AddCommand.Parameters.AddWithValue("@CommandID", IDCommand);
-                            AddCommand.ExecuteNonQuery();
+                            await AddCommand.ExecuteNonQueryAsync();
                         }
                         else if (!isChecked && hasPermission)
                         {
                             using var DelCommand = new SqliteCommand("DELETE FROM UserCommands WHERE ID_Command = @CommandID AND ID_User = @UserID;", connection);
                             DelCommand.Parameters.AddWithValue("@CommandID", IDCommand);
                             DelCommand.Parameters.AddWithValue("@UserID", selectedIndex);
-                            DelCommand.ExecuteNonQuery();
+                            await DelCommand.ExecuteNonQueryAsync();
                         }
                     }
                 }
-                checkedListBox1.ClearSelected();
-                checkedListBox2.ClearSelected();
+                clb_Servers.ClearSelected();
+                clb_Commands.ClearSelected();
                 UserControl_Load();
-                MessageBox.Show("Разрешения сохранены!", "Сохранение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoggerService.MessageAppInfo($"Разрешения пользователя [{SelectedUserName}] сохранены");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LoggerService.ErrorAppInfo($"Ошибка при удалении пользователя [{SelectedUserName}] : {ex.Message}");
             }
         }
 
-        private void LoadUserList()
+        private async void LoadUserList()
         {
             dataTable.Clear();
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Users", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     dataTable.Rows.Add(reader["Name"], reader["ID_TG"]);
                 }
-                dataGridView1.DataSource = dataTable;
-                dataGridView1.Columns[0].SortMode = DataGridViewColumnSortMode.NotSortable;
-                dataGridView1.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgv_Users.DataSource = dataTable;
+                dgv_Users.Columns[0].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgv_Users.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable;
 
                 LoadServersListBox();
                 LoadCommandsListBox();
             }
-            dataGridView1.ClearSelection();
-            groupBox1.Enabled = false;
+            dgv_Users.ClearSelection();
+            gb_PermUsers.Enabled = false;
         }
 
-        private void DataGridView1SelectedRow(object? sender, EventArgs e)
+        private async void DataGridView1SelectedRow(object? sender, EventArgs e)
         {
-            int selectedIndex = GetSelectedUserID();
-            if(selectedIndex == -1) return;
+            int selectedIndex = await GetSelectedUserID();
+            if (selectedIndex == -1) return;
 
-            groupBox1.Enabled = true;
-            button2.Enabled = true;
-            button3.Enabled = true;
+            gb_PermUsers.Enabled = true;
+            btn_EditUsers.Enabled = true;
+            btn_DellUsers.Enabled = true;
 
             string sqlServersList = "SELECT ID_Server FROM UserServers WHERE ID_User = @UserID;";
             string sqlCommandsList = "SELECT ID_Command FROM UserCommands WHERE ID_User = @UserID;";
 
             string sqlGetNameServer = "SELECT Name FROM Servers WHERE ID = @ServerID;";
             string sqlGetNameCommand = "SELECT Command FROM Commands WHERE ID = @CommandID;";
-            string selectedNameServer;
-            string selectedNameCommand;
 
 
-            for (int i = 0; i < checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
-            for (int i = 0; i < checkedListBox2.Items.Count; i++) checkedListBox2.SetItemChecked(i, false);
+            for (int i = 0; i < clb_Servers.Items.Count; i++) clb_Servers.SetItemChecked(i, false);
+            for (int i = 0; i < clb_Commands.Items.Count; i++) clb_Commands.SetItemChecked(i, false);
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 SqliteCommand commandToLoadServersList = new SqliteCommand(sqlServersList, connection);
                 commandToLoadServersList.Parameters.AddWithValue("@UserID", selectedIndex);
 
-                using (var reader = commandToLoadServersList.ExecuteReader())
+                using (var reader = await commandToLoadServersList.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         SqliteCommand commandToGetNameServer = new SqliteCommand(sqlGetNameServer, connection);
                         commandToGetNameServer.Parameters.AddWithValue("@ServerID", Convert.ToInt32(reader["ID_Server"]));
-                        selectedNameServer = commandToGetNameServer.ExecuteScalar().ToString();
+                        var result = await commandToGetNameServer.ExecuteScalarAsync();
 
-                        int index = checkedListBox1.Items.IndexOf(selectedNameServer);
-                        checkedListBox1.SetItemChecked(index, true);
+                        if (result != null && result != DBNull.Value)
+                        {
+                            string selectedNameServer = result.ToString();
+                            int index = clb_Servers.FindStringExact(selectedNameServer);
+                            if (index != -1)
+                            {
+                                clb_Servers.SetItemChecked(index, true);
+                            }
+                        }
                     }
                 }
 
                 SqliteCommand commandToLoadCommandsList = new SqliteCommand(sqlCommandsList, connection);
                 commandToLoadCommandsList.Parameters.AddWithValue("@UserID", selectedIndex);
 
-                using (var reader = commandToLoadCommandsList.ExecuteReader())
+                using (var reader = await commandToLoadCommandsList.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         SqliteCommand commandToGetNameCommand = new SqliteCommand(sqlGetNameCommand, connection);
                         commandToGetNameCommand.Parameters.AddWithValue("@CommandID", Convert.ToInt32(reader["ID_Command"]));
-                        selectedNameCommand = commandToGetNameCommand.ExecuteScalar().ToString();
+                        var result = await commandToGetNameCommand.ExecuteScalarAsync();
 
-                        int index = checkedListBox2.Items.IndexOf(selectedNameCommand);
-                        checkedListBox2.SetItemChecked(index, true);
+                        if (result != null && result != DBNull.Value)
+                        {
+                            string selectedNameCommand = result.ToString();
+                            int index = clb_Commands.FindStringExact(selectedNameCommand);
+                            if (index != -1)
+                            {
+                                clb_Commands.SetItemChecked(index, true);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        private void LoadServersListBox()
+        private async void LoadServersListBox()
         {
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Servers", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
-                checkedListBox1.Items.Clear();
-                while (reader.Read())
+                clb_Servers.Items.Clear();
+                while (await reader.ReadAsync())
                 {
-                    checkedListBox1.Items.Add(reader["Name"]);
+                    clb_Servers.Items.Add(reader["Name"]);
                 }
             }
         }
 
-        private void LoadCommandsListBox()
+        private async void LoadCommandsListBox()
         {
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand command = new SqliteCommand("SELECT * FROM Commands", connection);
-                SqliteDataReader reader = command.ExecuteReader();
+                SqliteDataReader reader = await command.ExecuteReaderAsync();
 
-                checkedListBox2.Items.Clear();
-                while (reader.Read())
+                clb_Commands.Items.Clear();
+                while (await reader.ReadAsync())
                 {
-                    checkedListBox2.Items.Add(reader["Command"]);
+                    clb_Commands.Items.Add(reader["Command"]);
                 }
             }
         }
 
-        private int GetSelectedUserID()
+        private async Task<int> GetSelectedUserID()
         {
             string sqlGetIDUsers = "SELECT ID FROM Users WHERE Name = @UserName;";
             string SelectedUserNameDataGrid = "";
             int selectedIndex;
 
-            if (dataGridView1.SelectedRows.Count > 0)
-                SelectedUserNameDataGrid = (dataGridView1.SelectedRows[0].Cells[0].Value).ToString();
+            if (dgv_Users.SelectedRows.Count > 0)
+                SelectedUserNameDataGrid = (dgv_Users.SelectedRows[0].Cells[0].Value).ToString();
             else return -1;
 
             using (var connection = new SqliteConnection("Data Source=Data.db"))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 SqliteCommand commandToGetIDUser = new SqliteCommand(sqlGetIDUsers, connection);
                 commandToGetIDUser.Parameters.AddWithValue("@UserName", SelectedUserNameDataGrid);
-                selectedIndex = Convert.ToInt32(commandToGetIDUser.ExecuteScalar());
+                selectedIndex = Convert.ToInt32(await commandToGetIDUser.ExecuteScalarAsync());
             }
 
             return selectedIndex;
@@ -406,8 +475,8 @@ namespace TelegramBotMinecraft
 
         private bool ValidateUserInputs()
         {
-            string name = textBox1.Text.Trim();
-            string idText = textBox2.Text.Trim();
+            string name = tb_NameUser.Text.Trim();
+            string idText = tb_IdUser.Text.Trim();
             if (string.IsNullOrWhiteSpace(name))
             {
                 MessageBox.Show("Имя не должно быть пустым.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
