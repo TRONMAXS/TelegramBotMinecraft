@@ -126,7 +126,7 @@
     <value>3, 3</value>
   </data>
   <data name="userControl_Settings1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1190, 657</value>
+    <value>1190, 654</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="userControl_Settings1.TabIndex" type="System.Int32, mscorlib">
@@ -145,14 +145,14 @@
     <value>0</value>
   </data>
   <data name="tabPage4.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 24</value>
+    <value>4, 27</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="tabPage4.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1196, 663</value>
+    <value>1196, 660</value>
   </data>
   <data name="tabPage4.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -179,7 +179,7 @@
     <value>3, 3</value>
   </data>
   <data name="userControl_Users1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1190, 657</value>
+    <value>1190, 654</value>
   </data>
   <data name="userControl_Users1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -197,13 +197,13 @@
     <value>0</value>
   </data>
   <data name="tabPage3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 24</value>
+    <value>4, 27</value>
   </data>
   <data name="tabPage3.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1196, 663</value>
+    <value>1196, 660</value>
   </data>
   <data name="tabPage3.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -230,7 +230,7 @@
     <value>3, 3</value>
   </data>
   <data name="userControl_Servers1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1190, 657</value>
+    <value>1190, 654</value>
   </data>
   <data name="userControl_Servers1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -248,13 +248,13 @@
     <value>0</value>
   </data>
   <data name="tabPage2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 24</value>
+    <value>4, 27</value>
   </data>
   <data name="tabPage2.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1196, 663</value>
+    <value>1196, 660</value>
   </data>
   <data name="tabPage2.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -281,7 +281,7 @@
     <value>3, 3</value>
   </data>
   <data name="userControl_Console1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1190, 657</value>
+    <value>1190, 654</value>
   </data>
   <data name="userControl_Console1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -299,13 +299,13 @@
     <value>0</value>
   </data>
   <data name="tabPage1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 24</value>
+    <value>4, 27</value>
   </data>
   <data name="tabPage1.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
   <data name="tabPage1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>1196, 663</value>
+    <value>1196, 660</value>
   </data>
   <data name="tabPage1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -324,6 +324,9 @@
   </data>
   <data name="&gt;&gt;tabPage1.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="tabControl1.Appearance" type="System.Windows.Forms.TabAppearance, System.Windows.Forms">
+    <value>FlatButtons</value>
   </data>
   <data name="tabControl1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>

@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             gb_Main = new GroupBox();
+            btn_ControlJava = new Button();
+            chk_AutoJavaSelected = new CheckBox();
+            checkBox1 = new CheckBox();
+            lbl_AutoJavaSelected = new Label();
             chk_PushNotifications = new CheckBox();
             lbl_PushNotifications = new Label();
             btn_SaveMain = new Button();
@@ -69,6 +73,10 @@
             // 
             // gb_Main
             // 
+            gb_Main.Controls.Add(btn_ControlJava);
+            gb_Main.Controls.Add(chk_AutoJavaSelected);
+            gb_Main.Controls.Add(checkBox1);
+            gb_Main.Controls.Add(lbl_AutoJavaSelected);
             gb_Main.Controls.Add(chk_PushNotifications);
             gb_Main.Controls.Add(lbl_PushNotifications);
             gb_Main.Controls.Add(btn_SaveMain);
@@ -83,6 +91,51 @@
             gb_Main.TabIndex = 3;
             gb_Main.TabStop = false;
             gb_Main.Text = "Основные";
+            // 
+            // btn_ControlJava
+            // 
+            btn_ControlJava.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btn_ControlJava.Enabled = false;
+            btn_ControlJava.ImeMode = ImeMode.NoControl;
+            btn_ControlJava.Location = new Point(6, 174);
+            btn_ControlJava.Name = "btn_ControlJava";
+            btn_ControlJava.Size = new Size(109, 23);
+            btn_ControlJava.TabIndex = 22;
+            btn_ControlJava.Text = "Управление Java";
+            btn_ControlJava.UseVisualStyleBackColor = true;
+            // 
+            // chk_AutoJavaSelected
+            // 
+            chk_AutoJavaSelected.AutoSize = true;
+            chk_AutoJavaSelected.ImeMode = ImeMode.NoControl;
+            chk_AutoJavaSelected.Location = new Point(10, 108);
+            chk_AutoJavaSelected.Name = "chk_AutoJavaSelected";
+            chk_AutoJavaSelected.Size = new Size(15, 14);
+            chk_AutoJavaSelected.TabIndex = 21;
+            chk_AutoJavaSelected.TabStop = false;
+            chk_AutoJavaSelected.UseVisualStyleBackColor = true;
+            // 
+            // checkBox1
+            // 
+            checkBox1.AutoSize = true;
+            checkBox1.ImeMode = ImeMode.NoControl;
+            checkBox1.Location = new Point(10, 108);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(15, 14);
+            checkBox1.TabIndex = 21;
+            checkBox1.TabStop = false;
+            checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // lbl_AutoJavaSelected
+            // 
+            lbl_AutoJavaSelected.AutoSize = true;
+            lbl_AutoJavaSelected.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lbl_AutoJavaSelected.ImeMode = ImeMode.NoControl;
+            lbl_AutoJavaSelected.Location = new Point(31, 102);
+            lbl_AutoJavaSelected.Name = "lbl_AutoJavaSelected";
+            lbl_AutoJavaSelected.Size = new Size(235, 21);
+            lbl_AutoJavaSelected.TabIndex = 20;
+            lbl_AutoJavaSelected.Text = "Автоматический выбор Java";
             // 
             // chk_PushNotifications
             // 
@@ -485,5 +538,9 @@
         private RichTextBox rtb_ConsoleBot;
         private Button btn_ShowBotToken;
         private Button btn_ShowPassProxy;
+        private CheckBox chk_AutoJavaSelected;
+        private CheckBox checkBox1;
+        private Label lbl_AutoJavaSelected;
+        private Button btn_ControlJava;
     }
 }

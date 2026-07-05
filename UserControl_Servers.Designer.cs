@@ -31,6 +31,14 @@
             btn_CancleServer = new Button();
             btn_SaveServer = new Button();
             gb_SettingsServer = new GroupBox();
+            groupBox1 = new GroupBox();
+            button3 = new Button();
+            comboBox2 = new ComboBox();
+            label2 = new Label();
+            comboBox1 = new ComboBox();
+            button1 = new Button();
+            button2 = new Button();
+            label3 = new Label();
             btn_UpdateServer = new Button();
             gb_RconSettings = new GroupBox();
             lbl_RconSettings = new Label();
@@ -58,6 +66,7 @@
             btn_AddServer = new Button();
             lb_Servers = new ListBox();
             gb_SettingsServer.SuspendLayout();
+            groupBox1.SuspendLayout();
             gb_RconSettings.SuspendLayout();
             gb_StartSettings.SuspendLayout();
             gb_MainSettings.SuspendLayout();
@@ -91,6 +100,7 @@
             // gb_SettingsServer
             // 
             gb_SettingsServer.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            gb_SettingsServer.Controls.Add(groupBox1);
             gb_SettingsServer.Controls.Add(btn_UpdateServer);
             gb_SettingsServer.Controls.Add(btn_SaveServer);
             gb_SettingsServer.Controls.Add(btn_CancleServer);
@@ -104,6 +114,98 @@
             gb_SettingsServer.TabIndex = 12;
             gb_SettingsServer.TabStop = false;
             gb_SettingsServer.Text = "Настройки сервера";
+            // 
+            // groupBox1
+            // 
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            groupBox1.Controls.Add(button3);
+            groupBox1.Controls.Add(comboBox2);
+            groupBox1.Controls.Add(label2);
+            groupBox1.Controls.Add(comboBox1);
+            groupBox1.Controls.Add(button1);
+            groupBox1.Controls.Add(button2);
+            groupBox1.Controls.Add(label3);
+            groupBox1.Location = new Point(5, 264);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(852, 86);
+            groupBox1.TabIndex = 12;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Java";
+            // 
+            // button3
+            // 
+            button3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            button3.Enabled = false;
+            button3.ImeMode = ImeMode.NoControl;
+            button3.Location = new Point(511, 52);
+            button3.Name = "button3";
+            button3.Size = new Size(84, 23);
+            button3.TabIndex = 17;
+            button3.Text = "Управление";
+            button3.UseVisualStyleBackColor = true;
+            // 
+            // comboBox2
+            // 
+            comboBox2.FormattingEnabled = true;
+            comboBox2.Location = new Point(218, 17);
+            comboBox2.Name = "comboBox2";
+            comboBox2.Size = new Size(288, 23);
+            comboBox2.TabIndex = 17;
+            // 
+            // label2
+            // 
+            label2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            label2.ImeMode = ImeMode.NoControl;
+            label2.Location = new Point(6, 19);
+            label2.Name = "label2";
+            label2.Size = new Size(145, 21);
+            label2.TabIndex = 16;
+            label2.Text = "Версия Minecraft:";
+            // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(218, 52);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(287, 23);
+            comboBox1.TabIndex = 13;
+            // 
+            // button1
+            // 
+            button1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            button1.ImeMode = ImeMode.NoControl;
+            button1.Location = new Point(1423, 25);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 10;
+            button1.Text = "Выбрать";
+            button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            button2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            button2.ImeMode = ImeMode.NoControl;
+            button2.Location = new Point(1423, 56);
+            button2.Name = "button2";
+            button2.Size = new Size(75, 23);
+            button2.TabIndex = 6;
+            button2.Text = "Настроить";
+            button2.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            label3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            label3.ImeMode = ImeMode.NoControl;
+            label3.Location = new Point(6, 54);
+            label3.Name = "label3";
+            label3.Size = new Size(104, 21);
+            label3.TabIndex = 0;
+            label3.Text = "Версия Java:";
             // 
             // btn_UpdateServer
             // 
@@ -127,7 +229,7 @@
             gb_RconSettings.Controls.Add(tb_RconPassword);
             gb_RconSettings.Controls.Add(lbl_RconPort);
             gb_RconSettings.Controls.Add(tb_RconPort);
-            gb_RconSettings.Location = new Point(5, 280);
+            gb_RconSettings.Location = new Point(6, 396);
             gb_RconSettings.Name = "gb_RconSettings";
             gb_RconSettings.Size = new Size(852, 104);
             gb_RconSettings.TabIndex = 11;
@@ -209,7 +311,7 @@
             gb_StartSettings.Controls.Add(tb_JavaArgsServer);
             gb_StartSettings.Controls.Add(lbl_PathToServer);
             gb_StartSettings.Controls.Add(tb_PathToServer);
-            gb_StartSettings.Location = new Point(5, 135);
+            gb_StartSettings.Location = new Point(5, 122);
             gb_StartSettings.Name = "gb_StartSettings";
             gb_StartSettings.Size = new Size(852, 136);
             gb_StartSettings.TabIndex = 11;
@@ -313,7 +415,7 @@
             gb_MainSettings.Controls.Add(tb_IpAndPortServer);
             gb_MainSettings.Location = new Point(5, 25);
             gb_MainSettings.Name = "gb_MainSettings";
-            gb_MainSettings.Size = new Size(852, 104);
+            gb_MainSettings.Size = new Size(852, 91);
             gb_MainSettings.TabIndex = 10;
             gb_MainSettings.TabStop = false;
             gb_MainSettings.Text = "Основное";
@@ -333,10 +435,10 @@
             // tb_NameServer
             // 
             tb_NameServer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            tb_NameServer.Location = new Point(217, 21);
+            tb_NameServer.Location = new Point(218, 21);
             tb_NameServer.Name = "tb_NameServer";
             tb_NameServer.PlaceholderText = "Survival - 1.20.1";
-            tb_NameServer.Size = new Size(288, 23);
+            tb_NameServer.Size = new Size(287, 23);
             tb_NameServer.TabIndex = 1;
             // 
             // lbl_IpAndPortServer
@@ -354,10 +456,10 @@
             // tb_IpAndPortServer
             // 
             tb_IpAndPortServer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            tb_IpAndPortServer.Location = new Point(217, 52);
+            tb_IpAndPortServer.Location = new Point(218, 52);
             tb_IpAndPortServer.Name = "tb_IpAndPortServer";
             tb_IpAndPortServer.PlaceholderText = "127.0.0.1:25565";
-            tb_IpAndPortServer.Size = new Size(288, 23);
+            tb_IpAndPortServer.Size = new Size(287, 23);
             tb_IpAndPortServer.TabIndex = 1;
             // 
             // gb_Servers
@@ -417,6 +519,8 @@
             Name = "UserControl_Servers";
             Size = new Size(1190, 660);
             gb_SettingsServer.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             gb_RconSettings.ResumeLayout(false);
             gb_RconSettings.PerformLayout();
             gb_StartSettings.ResumeLayout(false);
@@ -459,5 +563,13 @@
         private Button button5;
         private Button btn_UpdateServer;
         private Label lbl_RconSettings;
+        private GroupBox groupBox1;
+        private Button button1;
+        private Button button2;
+        private Label label3;
+        private ComboBox comboBox1;
+        private ComboBox comboBox2;
+        private Label label2;
+        private Button button3;
     }
 }

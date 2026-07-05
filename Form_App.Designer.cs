@@ -95,11 +95,11 @@
             // 
             // tabControl1
             // 
+            resources.ApplyResources(tabControl1, "tabControl1");
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
             tabControl1.Controls.Add(tabPage4);
-            resources.ApplyResources(tabControl1, "tabControl1");
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
             // 

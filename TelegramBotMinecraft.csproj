@@ -27,8 +27,8 @@
   <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
     <PackageReference Include="HttpToSocks5Proxy" Version="1.4.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0-preview.4.26230.115" />
-    <PackageReference Include="Telegram.Bot" Version="22.10.0.2-dev.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0-preview.5.26302.115" />
+    <PackageReference Include="Telegram.Bot" Version="22.10.1.1-dev.4" />
   </ItemGroup>
 
   <ItemGroup>
