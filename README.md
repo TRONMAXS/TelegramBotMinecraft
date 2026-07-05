@@ -1,25 +1,58 @@
 # Telegram Bot Minecraft
-> [!WARNING]
-> This branch is archived.
-> Development continues in the `avalonia` branch.
+
+> ⚠️ **This project is currently under active development / Проект находится в активной разработке**
+
+A cross-platform application for managing Minecraft servers through a Telegram bot.
+
+Кроссплатформенное приложение для управления Minecraft-серверами через Telegram-бота.
+
+The project is being rewritten from **Windows Forms** to **Avalonia UI** with a modern architecture based on a shared Core library.
+
+Проект полностью переписывается с **Windows Forms** на **Avalonia UI** с современной архитектурой, основанной на общей Core-библиотеке.
 
 ---
 
-## 🇷🇺 Информация
+## Project Status / Статус проекта
 
-⚠️ **Ветка разработки**
+Current development branch / Текущая ветка разработки: avalonia
 
-Данная ветка содержит последнюю версию приложения на **Windows Forms** с новой логикой и новыми функциями.
+---
 
-Разработка на **Windows Forms прекращена**. Проект переносится на **Avalonia UI** с использованием архитектуры **MVVM**.
+## Technologies / Технологии
 
-### Текущее состояние
+- .NET 10
+- Avalonia UI
+- CommunityToolkit.Mvvm
+- SQLite
+- Telegram.Bot
+- CoreRCON
 
-- ✅ Реализована новая логика приложения.
-- ✅ Добавлены новые функции.
-- ⚠️ Интерфейс Windows Forms не был полностью завершён.
+---
 
-> Для использования последней стабильной версии переключитесь на ветку **`main`**.
+## Goals / Цели проекта
 
-> Дальнейшая разработка ведётся в ветке **`avalonia`**.
+- Cross-platform support / Кроссплатформенная поддержка
+- Modern MVVM architecture / Современная MVVM-архитектура
+- Better maintainability / Улучшенная поддерживаемость кода
+- Cleaner project structure / Чистая и модульная структура проекта
+- Improved performance / Повышение производительности
 
+---
+
+## Legacy Version / Легаси-версия
+
+The previous Windows Forms implementation is kept only as a reference while the new application is being developed.
+
+Старая реализация на Windows Forms сохраняется только как справочный вариант.
+
+All new features will be implemented only in the Avalonia version.
+
+Все новые функции разрабатываются исключительно в версии на Avalonia.
+
+---
+
+## License / Лицензия
+
+This project is licensed under the MIT License.
+
+Проект распространяется под лицензией MIT.
