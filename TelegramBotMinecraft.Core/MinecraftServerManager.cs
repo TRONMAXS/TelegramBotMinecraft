@@ -9,7 +9,7 @@ namespace TelegramBotMinecraft
     {
         private static MinecraftServerManager _currentInstance;
 
-        public static UserControl_Console userControl_Console;
+        //public static UserControl_Console userControl_Console;
 
         private Process? process = null;
         private int processId = -1;
@@ -63,10 +63,10 @@ namespace TelegramBotMinecraft
                         command.Parameters.AddWithValue("@ServerName", ServerName);
                         await command.ExecuteNonQueryAsync();
                     }
-                    userControl_Console.TriggerServerInfoRefresh(ServerName, 1);
+                    //userControl_Console.TriggerServerInfoRefresh(ServerName, 1);
                     return true;
                 }
-                catch (Exception ex) { MessageBox.Show($"Ошибка при запуске: {ex.Message}"); return false; }
+                catch (Exception ex) { /*MessageBox.Show($"Ошибка при запуске: {ex.Message}");*/ return false; }
             }
             return false;
         }
@@ -97,7 +97,7 @@ namespace TelegramBotMinecraft
                     command.Parameters.AddWithValue("@ServerName", ServerName);
                     await command.ExecuteNonQueryAsync();
                 }
-                userControl_Console.TriggerServerInfoRefresh(ServerName, 0);
+                //userControl_Console.TriggerServerInfoRefresh(ServerName, 0);
                 return true;
             }
             catch { return false; }

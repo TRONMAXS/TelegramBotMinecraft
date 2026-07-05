@@ -15,7 +15,7 @@ namespace TelegramBotMinecraft
 
         private static TelegramBot _currentInstance;
 
-        public static UserControl_Settings userControl_Settings;
+       // public static UserControl_Settings userControl_Settings;
 
         private HttpToSocks5Proxy proxy;
 
@@ -53,7 +53,7 @@ namespace TelegramBotMinecraft
                 _currentInstance.cts?.Cancel();
                 _currentInstance = null;
                 LoggerService.MessageBotInfo("Telegram бот остановлен!");
-                userControl_Settings.ButtonOnBotTelegram();
+                //userControl_Settings.ButtonOnBotTelegram();
             }
         }
 
@@ -109,7 +109,7 @@ namespace TelegramBotMinecraft
 
                 LoggerService.StartBotInfo(me.FirstName, me.Username);
 
-                userControl_Settings.ButtonOffBotTelegram();
+                //userControl_Settings.ButtonOffBotTelegram();
 
                 await Task.Delay(Timeout.Infinite, cts.Token);
             }
@@ -145,7 +145,7 @@ namespace TelegramBotMinecraft
                 _currentInstance.cts?.Cancel();
                 _currentInstance.cts?.Dispose();
                 _currentInstance = null;
-                userControl_Settings.ButtonOnBotTelegram();
+                //userControl_Settings.ButtonOnBotTelegram();
             }
         }
 
