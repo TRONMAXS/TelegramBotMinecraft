@@ -9,6 +9,7 @@
 
 <ItemGroup>
   <ProjectReference Include="..\TelegramBotMinecraft.Core\TelegramBotMinecraft.Core.csproj" />
+  <AvaloniaResource Include="Assets\**" />
 </ItemGroup>
 
   <ItemGroup>
@@ -20,5 +21,9 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Semi.Avalonia" Version="12.0.3" />
+    <PackageReference Include="Semi.Avalonia.DataGrid" Version="12.0.0" />
+    <PackageReference Include="Semi.Avalonia.Dock" Version="12.0.0.2" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,146 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+        x:Class="TelegramBotMinecraft.Avalonia.ServersView"
+        x:DataType="vm:ServersViewModel">
+
+    <Grid ColumnDefinitions="*,Auto,275">
+        <Grid Grid.Column="0" RowDefinitions="*">
+            <GroupBox Grid.Row="0"
+                      Header="Настройки сервера"
+                      Margin="3"
+                      FontSize="15"
+                      FontFamily="Default"
+                      Padding="0"
+                      VerticalAlignment="Stretch">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch">
+                    <StackPanel Spacing="10" Margin="10">
+
+                        <GroupBox Grid.Row="0" Header="Основное" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                            <StackPanel Spacing="8">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Название:"/>
+                                    <TextBox PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
+                                </DockPanel>
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="IP : Port:"/>
+                                    <TextBox PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="1" Header="Запуск" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                            <StackPanel Spacing="8">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Путь к серверу:"/>
+                                    <Button Content="Выбрать" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
+                                    <TextBox PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
+                                </DockPanel>
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Аргументы Java:"/>
+                                    <Button Content="Настроить" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
+                                    <TextBox PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="2" Header="Java" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                            <StackPanel Spacing="8">
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Версия Minecraft:"/>
+                                    <ComboBox PlaceholderText="Minecraft" Padding="5,4" MaxDropDownHeight="300" Width="300">
+                                        <ComboBoxItem>Text Item 1</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 2</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 3</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 4</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 5</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 6</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 7</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 8</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 9</ComboBoxItem>
+                                    </ComboBox>
+                                </DockPanel>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Версия Java:"/>
+                                    <ComboBox PlaceholderText="Java" Padding="5,4" MaxDropDownHeight="300" Width="300">
+                                        <ComboBoxItem>Text Item 1</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 2</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 3</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 4</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 5</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 6</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 7</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 8</ComboBoxItem>
+                                        <ComboBoxItem>Text Item 9</ComboBoxItem>
+                                    </ComboBox>
+                                    <Button Content="Управление" Width="111" Margin="10,0,0,0" Padding="15,4"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="3" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                            <GroupBox.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <!--<TextBlock VerticalAlignment="Center" Text="Rcon:"/>-->
+                                    <!--<ToggleButton x:Name="ToggleButtonRcon" IsChecked="False" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Выкл" Margin="10,0,0,0" Padding="15,4"/>-->
+                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="False" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
+                                </StackPanel>
+                            </GroupBox.Header>
+
+                            <StackPanel Spacing="8">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Порт:"/>
+                                    <TextBox PlaceholderText="25575" Padding="5,4"/>
+                                </DockPanel>
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
+                                    <TextBox PlaceholderText="12345" Padding="5,4"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="10,10,0,0">
+                            <Button Content="Сохранить"/>
+                            <Button Content="Отмена" />
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>
+
+
+        <Grid Grid.Column="2">
+            <GroupBox Header="Сервера"  Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
+                <Grid RowDefinitions="*, Auto">
+                    <DataGrid x:Name="ServersGridServers"
+                              Grid.Row="0"
+                              Margin="0,0,0,10"
+                              Width=" 250"
+                              ItemsSource="{Binding People}"
+                              AutoGenerateColumns="False"
+                              CanUserResizeColumns="False"
+                              SelectionMode="Extended"
+                              HorizontalScrollBarVisibility="Disabled"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              BorderThickness="1"
+                              BorderBrush="Gray">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Название" Binding="{Binding FirstName}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" Width="250" LastChildFill="False">
+                        <Button Content="Добавить" MinWidth="90" DockPanel.Dock="Left"/>
+                        <Button Content="Удалить"  MinWidth="90" DockPanel.Dock="Right"/>
+                    </DockPanel>
+
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

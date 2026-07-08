@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+        x:Class="TelegramBotMinecraft.Avalonia.ConsoleView"
+        x:DataType="vm:ConsoleViewModel">
+
+    <Grid ColumnDefinitions="*, Auto, 275">
+        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+            <GroupBox Grid.Row="0" Header="Консоль" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
+                <Grid RowDefinitions="*,Auto">
+                    <TextBox Grid.Row="0" HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             VerticalContentAlignment="Top"
+                             Margin="0"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             IsReadOnly="True"/>
+
+                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="True" Margin="0,5,0,0">
+                        <Button Content="Ввод" DockPanel.Dock="Right"  Margin="5,0,0,0"/>
+                        <TextBox HorizontalAlignment="Stretch" PlaceholderText="Поле команд"/>
+                    </DockPanel>
+                </Grid>
+            </GroupBox>
+        </Grid>
+
+        <Grid Grid.Column="2">
+            <GroupBox Header="Сервера" Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
+                <Grid RowDefinitions="*, Auto, Auto">
+                    <DataGrid x:Name="ServersGridConsole"
+                              Grid.Row="0"
+                              Width=" 250"
+                              Margin="0,0,0,10"
+                              ItemsSource="{Binding People}"
+                              AutoGenerateColumns="False"
+                              CanUserResizeColumns="False"
+                              SelectionMode="Extended"
+                              HorizontalScrollBarVisibility="Disabled"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              BorderThickness="1"
+                              BorderBrush="Gray">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Название" Binding="{Binding FirstName}" Width="2*"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding LastName}" Width="*" CanUserSort="False"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="False" Width="250">
+                        <Button Content="Вкл" Command="{Binding StartServerCommand}" MinWidth="61" DockPanel.Dock="Left"/>
+                        <Button Content="Выкл" Command="{Binding StopServerCommand}" MinWidth="61"  DockPanel.Dock="Right"/>
+                    </DockPanel>
+
+                    <GroupBox Grid.Row="2" Header="Информация" Margin="5,10,5,0" FontSize="15" FontFamily="Default" Width="250" Padding="0">
+                        <StackPanel>
+                            <TextBlock Text="Название:" HorizontalAlignment="Center"/>
+                            <TextBox IsReadOnly="True" HorizontalAlignment="Stretch"/>
+
+                            <TextBlock Text="Статус:" HorizontalAlignment="Center"/>
+                            <TextBox IsReadOnly="True" Text="{Binding Status}" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

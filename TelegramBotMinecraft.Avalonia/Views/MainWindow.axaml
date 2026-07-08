@@ -1,9 +1,43 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="TelegramBotMinecraft.Avalonia.MainWindow"
-        Title="TelegramBotMinecraft.Avalonia">
-    Welcome to Avalonia!
+        xmlns:views="using:TelegramBotMinecraft.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1220" d:DesignHeight="730"
+        x:Class="TelegramBotMinecraft.Avalonia.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        CanResize="False"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Test">
+
+    <Design.DataContext>
+        <vm:MainViewModel/>
+    </Design.DataContext>
+
+    <TabControl Theme="{DynamicResource CardTabControl}" Margin="3 3 3 3" SelectedIndex="0">
+
+        <TabControl.Styles>
+            <Style Selector="TabItem">
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+        </TabControl.Styles>
+
+        <TabItem x:Name="Console" Header="Консоль">
+            <views:ConsoleView/>
+        </TabItem>
+
+        <TabItem x:Name="Servers" Header="Сервера">
+            <views:ServersView/>
+        </TabItem>
+
+        <TabItem x:Name="Users" Header="Пользователи">
+            <views:UsersView/>
+        </TabItem>
+
+        <TabItem x:Name="Settings" Header="Настройки">
+            <views:SettingsView/>
+        </TabItem>
+    </TabControl>
+
 </Window>
