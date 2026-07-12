@@ -242,11 +242,6 @@
 
 ---
 
-## 👤 Обо мне
-
-Привет! Меня зовут Максим, мне 16 лет — изучаю C# и разработку игр на Unity.  
-Этот проект — моя практика в разработке приложений на Windows Forms, создании Telegram-ботов и работе с Minecraft-серверами через RCON.
-
-Если хочешь связаться — пиши на: popik.maxim@gmail.com  
-[Мои проекты на GitHub](https://github.com/TRONMAXS)
+📩 Связаться со мной: **popik.maxim@gmail.com**  
+🌐 [Мои проекты на GitHub](https://github.com/TRONMAXS)
 
