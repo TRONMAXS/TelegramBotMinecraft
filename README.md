@@ -14,7 +14,13 @@ The project is being rewritten from **Windows Forms** to **Avalonia UI** with a 
 
 ## Project Status / Статус проекта
 
-Current development branch / Текущая ветка разработки: avalonia
+The Avalonia version is the primary development branch.
+
+Версия на Avalonia является основной веткой разработки.
+
+The legacy Windows Forms version is available in the [`main`](https://github.com/TRONMAXS/TelegramBotMinecraft/tree/master) branch.
+
+Предыдущая версия на Windows Forms доступна в ветке [`main`](https://github.com/TRONMAXS/TelegramBotMinecraft/tree/master).
 
 ---
 
