@@ -5,11 +5,17 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <StartupObject>TelegramBotMinecraft.Avalonia.Program</StartupObject>
+    <ApplicationIcon>Assets\TelegramBotMinecraft-logo.ico</ApplicationIcon>
   </PropertyGroup>
 
 <ItemGroup>
   <ProjectReference Include="..\TelegramBotMinecraft.Core\TelegramBotMinecraft.Core.csproj" />
   <AvaloniaResource Include="Assets\**" />
+</ItemGroup>
+
+<ItemGroup>
+  <Content Include="Assets\TelegramBotMinecraft-logo.ico" />
 </ItemGroup>
 
   <ItemGroup>
