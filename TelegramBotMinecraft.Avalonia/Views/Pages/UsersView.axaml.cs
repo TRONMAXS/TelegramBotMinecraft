@@ -9,6 +9,6 @@ public partial class UsersView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new UsersViewModel();
+        DataContext = new UsersViewModel(new Core.Database.ServerRepository(), new Core.Database.UserRepository(), new Core.Database.CommandRepository());
     }
 }

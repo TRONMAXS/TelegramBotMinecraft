@@ -1,8 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-        x:Class="TelegramBotMinecraft.Avalonia.ServersView"
-        x:DataType="vm:ServersViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1220" d:DesignHeight="730"
+             x:Class="TelegramBotMinecraft.Avalonia.ServersView"
+             x:DataType="vm:ServersViewModel">
 
     <Grid ColumnDefinitions="*,Auto,275">
         <Grid Grid.Column="0" RowDefinitions="*">
@@ -84,8 +88,6 @@
                         <GroupBox Grid.Row="3" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
                             <GroupBox.Header>
                                 <StackPanel Orientation="Horizontal">
-                                    <!--<TextBlock VerticalAlignment="Center" Text="Rcon:"/>-->
-                                    <!--<ToggleButton x:Name="ToggleButtonRcon" IsChecked="False" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Выкл" Margin="10,0,0,0" Padding="15,4"/>-->
                                     <ToggleButton x:Name="ToggleButtonRcon" IsChecked="False" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
                                 </StackPanel>
                             </GroupBox.Header>
@@ -97,7 +99,7 @@
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                    <TextBox PlaceholderText="12345" Padding="5,4"/>
+                                    <TextBox PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -118,9 +120,10 @@
                 <Grid RowDefinitions="*, Auto">
                     <DataGrid x:Name="ServersGridServers"
                               Grid.Row="0"
+                              FontSize="12"
                               Margin="0,0,0,10"
                               Width=" 250"
-                              ItemsSource="{Binding People}"
+                              ItemsSource="{Binding Servers}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="False"
                               SelectionMode="Extended"
@@ -130,7 +133,7 @@
                               BorderThickness="1"
                               BorderBrush="Gray">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Binding="{Binding FirstName}" Width="*"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
 

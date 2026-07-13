@@ -9,6 +9,6 @@ public partial class ServersView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new ServersViewModel();
+        DataContext = new ServersViewModel(new Core.Database.ServerRepository());
     }
 }

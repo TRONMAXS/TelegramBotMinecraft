@@ -1,6 +1,6 @@
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using TelegramBotMinecraft.Avalonia.ViewModels;
-using System;
 
 namespace TelegramBotMinecraft.Avalonia.Views;
 
@@ -10,9 +10,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var consoleVm = new ConsoleViewModel(new MinecraftServerManager());
-        var serversVm = new ServersViewModel();
-        var usersVm = new UsersViewModel();
+        var consoleVm = new ConsoleViewModel(new MinecraftServerManager(), new Core.Database.ServerRepository());
+        var serversVm = new ServersViewModel(new Core.Database.ServerRepository());
+        var usersVm = new UsersViewModel(new Core.Database.ServerRepository(), new Core.Database.UserRepository(), new Core.Database.CommandRepository());
         var settingsVm = new SettingsViewModel();
 
         DataContext = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm);

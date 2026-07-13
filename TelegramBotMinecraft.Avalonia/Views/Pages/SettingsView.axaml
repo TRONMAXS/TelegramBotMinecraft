@@ -1,8 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-        x:Class="TelegramBotMinecraft.Avalonia.SettingsView"
-        x:DataType="vm:SettingsViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1220" d:DesignHeight="730"
+             x:Class="TelegramBotMinecraft.Avalonia.SettingsView"
+             x:DataType="vm:SettingsViewModel">
     <Grid ColumnDefinitions="*, Auto, *">
 
         <GroupBox Grid.Column="0" Header="Telegram" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
@@ -42,8 +46,8 @@
                                 <TextBox PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="IP : Port:"/>
-                                <TextBox PlaceholderText="12345" Padding="5,4"/>
+                                <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
+                                <TextBox PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
                             </DockPanel>
                         </StackPanel>
                     </GroupBox>

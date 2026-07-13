@@ -7,49 +7,32 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public class ServersViewModel : ObservableObject
     {
-        public ObservableCollection<Person> People { get; } = new();
+        private readonly ServerRepository _ServerRepository;
 
-        public ServersViewModel()
+        public ObservableCollection<Server> Servers { get; } = new();
+
+        public ServersViewModel(ServerRepository serverRepository)
         {
-            var initialPeople = new List<Person>
-            {
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-            };
-            foreach (var person in initialPeople)
-            {
-                People.Add(person);
-            }
+            _ServerRepository = serverRepository;
 
-
+            _ = LoadServersAsync();
         }
-        public class Person
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
 
-            public Person(string firstName, string lastName)
+        private async Task LoadServersAsync()
+        {
+            var serversNames = await _ServerRepository.GetAllServersNames();
+            if (serversNames == null) return;
+
+            foreach (var server in serversNames)
             {
-                FirstName = firstName;
-                LastName = lastName;
+                Servers.Add(new Server(0, server));
             }
         }
     }

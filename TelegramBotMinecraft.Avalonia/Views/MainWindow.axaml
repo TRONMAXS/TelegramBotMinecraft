@@ -8,7 +8,7 @@
         x:Class="TelegramBotMinecraft.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         CanResize="False"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/TelegramBotMinecraft-logo.ico"
         Title="Test">
 
     <Design.DataContext>

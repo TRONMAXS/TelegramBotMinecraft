@@ -1,8 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-        x:Class="TelegramBotMinecraft.Avalonia.UsersView"
-        x:DataType="vm:UsersViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1220" d:DesignHeight="730"
+             x:Class="TelegramBotMinecraft.Avalonia.UsersView"
+             x:DataType="vm:UsersViewModel">
 
     <Grid ColumnDefinitions="*, Auto, 275">
 
@@ -12,21 +16,20 @@
 
                     <GroupBox Grid.Column="0" Header="Сервера" Margin="3,0,10,0" FontSize="15" FontFamily="Default" Padding="0">
                         <Grid RowDefinitions="*, Auto" Margin="0">
-                            <DataGrid x:Name="ServersGridUsers"
-                                      Grid.Row="0"
-                                      HorizontalAlignment="Stretch"
-                                      Margin="0"
-                                      ItemsSource="{Binding Users}"
-                                      AutoGenerateColumns="False"
-                                      CanUserResizeColumns="False"
-                                      SelectionMode="Extended"
-                                      HorizontalScrollBarVisibility="Disabled"
-                                      IsReadOnly="True"
-                                      GridLinesVisibility="All"
-                                      BorderThickness="1"
-                                      BorderBrush="Gray">
+                            <DataGrid x:Name="ServersGrid" Grid.Row="0" FontSize="12" Margin="0" 
+                                      ItemsSource="{Binding Servers}" AutoGenerateColumns="False"
+                                      CanUserResizeColumns="False" SelectionMode="Extended"
+                                      HorizontalScrollBarVisibility="Disabled" IsReadOnly="False"
+                                      GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2*"/>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Выбор" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                             <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="False" Margin="0,10,0,0">
@@ -38,21 +41,20 @@
 
                     <GroupBox Grid.Column="2" Header="Команды" Margin="10,0,3,0" FontSize="15" FontFamily="Default" Padding="0">
                         <Grid RowDefinitions="*, Auto" Margin="0">
-                            <DataGrid x:Name="CommandsGridUsers"
-                                      Grid.Row="0"
-                                      HorizontalAlignment="Stretch"
-                                      Margin="0"
-                                      ItemsSource="{Binding Users}"
-                                      AutoGenerateColumns="False"
-                                      CanUserResizeColumns="False"
-                                      SelectionMode="Extended"
-                                      HorizontalScrollBarVisibility="Disabled"
-                                      IsReadOnly="True"
-                                      GridLinesVisibility="All"
-                                      BorderThickness="1"
-                                      BorderBrush="Gray">
+                            <DataGrid x:Name="CommandsGrid" Grid.Row="0" FontSize="12" Margin="0"
+                                      ItemsSource="{Binding Commands}" AutoGenerateColumns="False"
+                                      CanUserResizeColumns="False" SelectionMode="Extended"
+                                      HorizontalScrollBarVisibility="Disabled" IsReadOnly="False"
+                                      GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2*"/>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding CommandText}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Выбор" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                             <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="False" Margin="0,10,0,0">
@@ -71,7 +73,7 @@
         <Grid Grid.Column="2">
             <GroupBox Header="Пользователи" Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
                 <Grid RowDefinitions="*, Auto, Auto">
-                    <DataGrid x:Name="UsersGridUsers"
+                    <DataGrid x:Name="UsersGrid"
                               Grid.Row="0"
                               Width=" 250"
                               Margin="0,0,0,10"

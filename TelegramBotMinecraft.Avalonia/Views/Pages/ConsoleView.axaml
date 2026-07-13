@@ -1,8 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-        x:Class="TelegramBotMinecraft.Avalonia.ConsoleView"
-        x:DataType="vm:ConsoleViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1220" d:DesignHeight="730"
+             x:Class="TelegramBotMinecraft.Avalonia.ConsoleView"
+             x:DataType="vm:ConsoleViewModel">
+
 
     <Grid ColumnDefinitions="*, Auto, 275">
         <Grid Grid.Column="0" RowDefinitions="*,Auto">
@@ -30,8 +35,9 @@
                     <DataGrid x:Name="ServersGridConsole"
                               Grid.Row="0"
                               Width=" 250"
+                              FontSize="12"
                               Margin="0,0,0,10"
-                              ItemsSource="{Binding People}"
+                              ItemsSource="{Binding Servers}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="False"
                               SelectionMode="Extended"
@@ -41,8 +47,8 @@
                               BorderThickness="1"
                               BorderBrush="Gray">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Binding="{Binding FirstName}" Width="2*"/>
-                            <DataGridTextColumn Header="Статус" Binding="{Binding LastName}" Width="*" CanUserSort="False"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2.5*"/>
+                            <DataGridTextColumn Header="Статус" Binding="{x:Null}" Width="*" CanUserSort="False"/>
                         </DataGrid.Columns>
                     </DataGrid>
 

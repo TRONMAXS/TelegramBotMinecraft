@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TelegramBotMinecraft.Core.Models;
+using TelegramBotMinecraft.Core.Database;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -14,40 +16,36 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
     {
         private readonly MinecraftServerManager _MinecraftServerManager;
 
+        private readonly ServerRepository _ServerRepository;
+
 
         [ObservableProperty]
         public string status = "Off";
-        public ObservableCollection<Person> People { get; } = new();
 
-        public ConsoleViewModel(MinecraftServerManager minecraftServerManager)
+        public ObservableCollection<Server> Servers { get; } = new();
+
+        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository)
         {
             _MinecraftServerManager = minecraftServerManager;
+            _ServerRepository = serverRepository;
 
-            var initialPeople = new List<Person>
-            {
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-            };
-            foreach (var person in initialPeople)
-            {
-                People.Add(person);
-            }
-
-
+            _ = LoadServersAsync();
         }
+
+        private async Task LoadServersAsync()
+        {
+            var serversNames = await _ServerRepository.GetAllServersNames();
+            if (serversNames == null) return;
+
+            int i = 0;
+            foreach (var server in serversNames)
+            {
+                Servers.Add(new Server(i, server));
+                i++;
+            }
+        }
+
+
 
         [RelayCommand]
         private async Task StartServer()
@@ -59,18 +57,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task StopServer()
         {
             Status = "Off";
-        }
-
-        public class Person
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-
-            public Person(string firstName, string lastName)
-            {
-                FirstName = firstName;
-                LastName = lastName;
-            }
         }
     }
 }
