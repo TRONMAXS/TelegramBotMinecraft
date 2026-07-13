@@ -35,7 +35,7 @@ namespace TelegramBotMinecraft
 
         private async Task<bool> StartServer(string ServerName)
         {
-            await GetServerData(ServerName);
+            //await GetServerData(ServerName);
 
             if (ServerData["ID_Process"] == "-1")
             {
@@ -73,7 +73,7 @@ namespace TelegramBotMinecraft
 
         public async Task<bool> StopServer(string ServerName)
         {
-            await GetServerData(ServerName);
+            //await GetServerData(ServerName);
             try
             {
                 if (serverProcesses.TryGetValue(ServerName, out var proc) && !proc.HasExited)
@@ -105,7 +105,7 @@ namespace TelegramBotMinecraft
 
         public async Task SendCommand(string serverName, string command)
         {
-            await GetServerData(serverName);
+           // await GetServerData(serverName);
 
             if (serverProcesses.TryGetValue(serverName, out var proc) && !proc.HasExited)
             {
@@ -154,26 +154,5 @@ namespace TelegramBotMinecraft
 
         }*/
 
-        private async Task GetServerData(string ServerName)
-        {
-            ServerData.Clear();
-            using (var connection = new SqliteConnection("Data Source=Data.db"))
-            {
-                await connection.OpenAsync();
-                SqliteCommand command = new SqliteCommand("SELECT Path_Server, ID_Process, Java_args, Rcon_Enable, Rcon_Port, Rcon_Pass FROM Servers WHERE Name == @ServerName", connection);
-                command.Parameters.AddWithValue("@ServerName", ServerName);
-                SqliteDataReader reader = await command.ExecuteReaderAsync();
-
-                while (await reader.ReadAsync())
-                {
-                    ServerData["Path_Server"] = reader["Path_Server"].ToString();
-                    ServerData["Java_args"] = reader["Java_args"].ToString();
-                    ServerData["ID_Process"] = reader["ID_Process"].ToString();
-                    ServerData["Rcon_Enable"] = reader["Rcon_Enable"].ToString();
-                    ServerData["Rcon_Port"] = reader["Rcon_Port"].ToString();
-                    ServerData["Rcon_Pass"] = reader["Rcon_Pass"].ToString();
-                }
-            }
-        }
     }
 }

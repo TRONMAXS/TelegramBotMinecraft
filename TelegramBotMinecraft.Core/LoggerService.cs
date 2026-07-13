@@ -18,8 +18,6 @@ namespace TelegramBotMinecraft
             if (!string.IsNullOrEmpty(chat.Username)) AppendTextColoredBot($"@{chat.Username} [{chat.Id}] ", Color.DarkOrange);
             else AppendTextColoredBot($"{chat.FirstName} [{chat.Id}]", Color.DarkOrange);
             AppendTextColoredBot($": {text}", Color.Black);
-            //ConsoleBot.AppendText($"{Environment.NewLine}");
-            //ConsoleBot.ScrollToCaret();
         }
 
         public static void MessageBotInfo(string Message)
@@ -27,8 +25,6 @@ namespace TelegramBotMinecraft
             AppendTextColoredBot($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
             AppendTextColoredBot($" [INFO]", Color.Blue);
             AppendTextColoredBot($": {Message}", Color.Black);
-            //ConsoleBot.AppendText($"{Environment.NewLine}");
-            //ConsoleBot.ScrollToCaret();
         }
 
         public static void StartBotInfo(string FirstNameBot, string UsernameBot)
@@ -38,8 +34,6 @@ namespace TelegramBotMinecraft
             AppendTextColoredBot($": Бот ", Color.Black);
             AppendTextColoredBot($"{FirstNameBot} [@{UsernameBot}]", Color.DarkOrange);
             AppendTextColoredBot($": успешно авторизован и запущен.", Color.Black);
-            //ConsoleBot.AppendText($"{Environment.NewLine}");
-            //ConsoleBot.ScrollToCaret();
         }
 
         public static void ErrorBotInfo(string Message)
@@ -47,8 +41,6 @@ namespace TelegramBotMinecraft
             AppendTextColoredBot($"[{DateTime.Now:HH:mm:ss}]", Color.Black);
             AppendTextColoredBot($" [ERROR]", Color.Red);
             AppendTextColoredBot($": {Message}", Color.Black);
-            //ConsoleBot.AppendText($"{Environment.NewLine}");
-            //ConsoleBot.ScrollToCaret();
         }
 
         private static async Task AppendTextColoredBot(string text, Color color, bool bold = false)
