@@ -11,33 +11,62 @@ namespace TelegramBotMinecraft.Core.Database
     {
         private string Data = "Data Source=Data-test.db";
 
-        public async Task<List<string>> GetAllCommand()
+        public async Task<List<Command>> GetAllCommandAsync()
         {
-            List<string> AllCommandsList = new List<string>();
+            List<Command> AllCommandsList = new List<Command>();
 
             try
             {
                 using (var connection = new SqliteConnection(Data))
                 {
                     await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("SELECT Command FROM Commands", connection);
+                    SqliteCommand command = new SqliteCommand("SELECT * FROM Commands", connection);
 
                     using (SqliteDataReader reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            AllCommandsList.Add(reader[0].ToString());
+                            AllCommandsList.Add(new Command(Convert.ToInt32(reader["ID"]), reader["ID"].ToString()));
                         }
                     }
                 }
                 return AllCommandsList;
             }
-            catch (SqliteException ex) { return null; }
+            catch (SqliteException ex) { return new List<Command>(); }
         }
 
-        public async Task SaveUserCommands()
+        public async Task<List<Command>> GetCommandsByUserIdAsync(int userId)
+        {
+            List<Command> AllCommandsList = new List<Command>();
+
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand(@" SELECT c.ID, c.Command 
+                                                                 FROM UserCommands uc
+                                                                 JOIN Commands c ON uc.ID_Command = c.ID
+                                                                 WHERE uc.ID_User = @userId", connection);
+                    command.Parameters.AddWithValue("@userId", userId);
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            AllCommandsList.Add(new Command(Convert.ToInt32(reader["ID"]), reader["Command"].ToString()));
+                        }
+                    }
+                }
+                return AllCommandsList;
+            }
+            catch (SqliteException ex) { return new List<Command>(); }
+        }
+
+        public async Task SaveUserCommandsAsync()
         {
 
         }
+
     }
 }

@@ -26,7 +26,7 @@
                                     <DataGridTemplateColumn Header="Выбор" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsChecked}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -47,11 +47,11 @@
                                       HorizontalScrollBarVisibility="Disabled" IsReadOnly="False"
                                       GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Название" Binding="{Binding CommandText}" Width="*"/>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                                     <DataGridTemplateColumn Header="Выбор" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsChecked}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -78,6 +78,7 @@
                               Width=" 250"
                               Margin="0,0,0,10"
                               ItemsSource="{Binding Users}"
+                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="False"
                               SelectionMode="Extended"

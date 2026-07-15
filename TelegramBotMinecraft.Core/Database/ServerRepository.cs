@@ -1,9 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TelegramBotMinecraft.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TelegramBotMinecraft.Core.Database
 {
@@ -15,27 +11,27 @@ namespace TelegramBotMinecraft.Core.Database
         public ServerRepository() { }
 
 
-        public async Task<List<string>> GetAllServersNames()
+        public async Task<List<Server>> GetAllServers()
         {
-            List<string> AllServersList = new List<string>();
+            List<Server> AllServersList = new List<Server>();
             try
             {
                 using (var connection = new SqliteConnection(Data))
                 {
                     await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("SELECT Name FROM Servers", connection);
+                    SqliteCommand command = new SqliteCommand("SELECT ID, Name FROM Servers", connection);
 
                     using (SqliteDataReader reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            AllServersList.Add(reader[0].ToString());
+                            AllServersList.Add(new Server(Convert.ToInt32(reader["ID"]), reader["Name"].ToString()));
                         }
                     }
                 }
                 return AllServersList;
             }
-            catch (SqliteException ex) { return new List<string>(); }
+            catch (SqliteException ex) { return new List<Server>(); }
         }
 
         public async Task<List<Server>> GetServerByName(string Name)
@@ -71,6 +67,34 @@ namespace TelegramBotMinecraft.Core.Database
             }
             catch (SqliteException ex) { return new List<Server>(); }
             return server;
+        }
+
+        public async Task<List<Server>> GetServersByUserIdAsync(int userId)
+        {
+            List<Server> AllServersList = new List<Server>();
+
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand(@" SELECT s.ID, s.Name 
+                                                                 FROM UserServers us
+                                                                 JOIN Servers s ON us.ID_Server = s.ID
+                                                                 WHERE us.ID_User = @userId", connection);
+                    command.Parameters.AddWithValue("@userId", userId);
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            AllServersList.Add(new Server(Convert.ToInt32(reader["ID"]), reader["Name"].ToString()));
+                        }
+                    }
+                }
+                return AllServersList;
+            }
+            catch (SqliteException ex) { return new List<Server>(); }
         }
 
         public async Task AddServer()

@@ -5,23 +5,29 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TelegramBotMinecraft.Avalonia.ViewModels.Items;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
-    public class UsersViewModel : ObservableObject
+    public partial class UsersViewModel : ObservableObject
     {
+
         private readonly ServerRepository _ServerRepository;
         private readonly UserRepository _UserRepository;
         private readonly CommandRepository _CommandRepository;
 
         public ObservableCollection<User> Users { get; } = new();
-        public ObservableCollection<Server> Servers { get; } = new();
-        public ObservableCollection<Command> Commands { get; } = new();
+        public ObservableCollection<ServerItemViewModel> Servers { get; } = new();
+        public ObservableCollection<CommandItemViewModel> Commands { get; } = new();
 
+
+        [ObservableProperty]
+        private User? _selectedItem;
 
         public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, CommandRepository commandRepository)
         {
@@ -37,12 +43,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadServersAsync()
         {
-            var serversNames = await _ServerRepository.GetAllServersNames();
+            var serversNames = await _ServerRepository.GetAllServers();
             if (serversNames == null) return;
 
             foreach (var server in serversNames)
             {
-                Servers.Add(new Server(0, server));
+                Servers.Add(new ServerItemViewModel(server.Id, server.Name));
             }
         }
         private async Task LoadUsersAsync()
@@ -57,13 +63,51 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
         private async Task LoadCommandsAsync()
         {
-            var commandsNames = await _CommandRepository.GetAllCommand();
+            var commandsNames = await _CommandRepository.GetAllCommandAsync();
             if (commandsNames == null) return;
 
             foreach (var command in commandsNames)
             {
-                Commands.Add(new Command(0, command));
+                Commands.Add(new CommandItemViewModel(command.Id, command.CommandText));
             }
+        }
+        private async Task LoadPermissionsUserAsync(int userId)
+        {
+            var userServers = await _ServerRepository.GetServersByUserIdAsync(userId);
+            var userCommands = await _CommandRepository.GetCommandsByUserIdAsync(userId);
+            if (userServers == null || userServers.Count == 0) return;
+            if (userCommands == null || userCommands.Count == 0) return;
+
+            foreach (var server in Servers)
+            {
+                server.IsChecked = false;
+            }
+            foreach (var command in Commands)
+            {
+                command.IsChecked = false;
+            }
+
+            foreach (var server in userServers)
+            {
+                var item = Servers.FirstOrDefault(x => x.Id == server.Id);
+
+                if (item != null)
+                    item.IsChecked = true;
+            }
+
+            foreach (var command in userCommands)
+            {
+                var item = Commands.FirstOrDefault(x => x.Id == command.Id);
+
+                if (item != null)
+                    item.IsChecked = true;
+            }
+        }
+
+        partial void OnSelectedItemChanged(User? value)
+        {
+            if (value == null) return;
+            _ = LoadPermissionsUserAsync(value.Id);
         }
     }
 }
