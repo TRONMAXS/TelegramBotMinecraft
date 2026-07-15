@@ -26,7 +26,7 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         while (await reader.ReadAsync())
                         {
-                            AllCommandsList.Add(new Command(Convert.ToInt32(reader["ID"]), reader["ID"].ToString()));
+                            AllCommandsList.Add(new Command(Convert.ToInt32(reader["ID"]), reader["Command"].ToString()));
                         }
                     }
                 }
