@@ -4,9 +4,9 @@
     {
         public string Name { get; set; }
 
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public User(string name, string id)
+        public User(string name, int id)
         {
             Name = name;
             Id = id;

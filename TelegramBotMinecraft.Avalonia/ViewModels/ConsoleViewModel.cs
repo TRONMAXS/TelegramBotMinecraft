@@ -34,13 +34,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadServersAsync()
         {
-            var serversNames = await _ServerRepository.GetAllServersNames();
+            var serversNames = await _ServerRepository.GetAllServers();
             if (serversNames == null) return;
 
             int i = 0;
             foreach (var server in serversNames)
             {
-                Servers.Add(new Server(i, server));
+                Servers.Add(new Server(server.Id, server.Name));
                 i++;
             }
         }

@@ -27,15 +27,14 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         while (await reader.ReadAsync())
                         {
-                            users.Add(new User(reader[0].ToString(), reader[1].ToString()));
+                            users.Add(new User(reader["Name"].ToString(), Convert.ToInt32(reader["ID_TG"])));
                         }
                     }
                 }
                 return users;
             }
-            catch (SqliteException ex) { return null; }
+            catch (SqliteException ex) { return new List<User>(); }
         }
-       // public record User(string Name, string Id);
 
         public async Task GetUserByIdTg(string Id)
         {
