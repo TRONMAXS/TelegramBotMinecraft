@@ -6,35 +6,45 @@ using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
 {
-    internal class SettingsRepository
+    public class SettingsRepository
     {
-        private string Data = "Data-test.db";
-        List<Setting> settingList = new List<Setting>();
+        private string Data = "Data Source=Data-test.db";
 
-
-        public async Task GetAllSettings()
+        public async Task<List<Setting>> GetAllSettings()
         {
-            using (var connection = new SqliteConnection(Data))
+            var settings = new List<Setting>();
+
+            try
             {
-                await connection.OpenAsync();
-                SqliteCommand command = new SqliteCommand("SELECT * FROM Settings", connection);
-                SqliteDataReader reader = await command.ExecuteReaderAsync();
-
-
-                while (await reader.ReadAsync())
+                using (var connection = new SqliteConnection(Data))
                 {
-                    /*tb_BotToken.Text = reader["BotToken"].ToString();
-                    chk_AutoStartBot.Checked = Convert.ToInt32(reader["Auto_Bot"]) == 1 ? true : false;
-                    chk_StartToTray.Checked = Convert.ToInt32(reader["TrayOnStart"]) == 1 ? true : false;
-                    chk_AutoStartup.Checked = Convert.ToInt32(reader["RunAtStartup"]) == 1 ? true : false;
-                    chk_AutoRestartBot.Checked = Convert.ToInt32(reader["AutoReconnect"]) == 1 ? true : false;
-                    chk_PushNotifications.Checked = Convert.ToInt32(reader["AutoReconnect"]) == 1 ? true : false;
-                    tb_ProxyHost.Text = reader["Proxy_Host"].ToString();
-                    tb_ProxyPort.Text = reader["Proxy_Port"].ToString();
-                    tb_ProxyUsername.Text = reader["Proxy_Username"].ToString();
-                    tb_ProxyPassword.Text = reader["Proxy_Password"].ToString();*/
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("SELECT * FROM Settings", connection);
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            settings.Add(new Setting(
+                                Convert.ToInt32(reader["Id"]),
+                                reader["BotToken"]?.ToString(),
+                                Convert.ToInt32(reader["AutoBot"]),
+                                Convert.ToInt32(reader["TrayOnStart"]),
+                                Convert.ToInt32(reader["RunAtStartup"]),
+                                Convert.ToInt32(reader["AutoReconnect"]),
+                                reader["Notifications"] == DBNull.Value ? null : Convert.ToInt32(reader["Notifications"]),
+                                reader["ProxyHost"]?.ToString(),
+                                reader["ProxyPort"]?.ToString(),
+                                reader["ProxyUsername"]?.ToString(),
+                                reader["ProxyPassword"]?.ToString()
+                            ));
+
+                        }
+                    }
                 }
+                return settings;
             }
+            catch (SqliteException ex) { return new List<Setting>(); }
         }
 
         public async Task SaveSettings()

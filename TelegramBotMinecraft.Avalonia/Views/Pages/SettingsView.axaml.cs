@@ -9,6 +9,6 @@ public partial class SettingsView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new SettingsViewModel();
+        DataContext = new SettingsViewModel(new Core.Database.SettingsRepository());
     }
 }

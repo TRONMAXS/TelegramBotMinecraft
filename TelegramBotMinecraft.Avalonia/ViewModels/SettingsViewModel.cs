@@ -1,53 +1,63 @@
-﻿using Avalonia.Automation;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Models;
+
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
-    public class SettingsViewModel : ObservableObject
+    public partial class SettingsViewModel : ObservableObject
     {
-        public ObservableCollection<Person> People { get; } = new();
+        private readonly SettingsRepository _SettingsRepository;
 
-        public SettingsViewModel()
+        [ObservableProperty]
+        public string? _textBotToken;
+        [ObservableProperty]
+        public bool _checkAutoBot;
+        [ObservableProperty]
+        public bool _checkTrayOnStart;
+        [ObservableProperty]
+        public bool _checkRunAtStartup;
+        [ObservableProperty]
+        public bool _checkAutoReconnect;
+        [ObservableProperty]
+        public bool _checkNotifications;
+        [ObservableProperty]
+        public string? _textProxyHost;
+        [ObservableProperty]
+        public string? _textProxyPort;
+        [ObservableProperty]
+        public string? _textProxyUsername;
+        [ObservableProperty]
+        public string? _textProxyPassword;
+
+
+        public SettingsViewModel(SettingsRepository settingsRepository)
         {
-            var initialPeople = new List<Person>
-            {
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-                new Person("Neil", "Armstrong"),
-                new Person("Buzz", "Lightyear"),
-                new Person("James", "Kirk"),
-            };
-            foreach (var person in initialPeople)
-            {
-                People.Add(person);
-            }
+            _SettingsRepository = settingsRepository;
+
+            _ = LoadSettingsAsync();
         }
-        public class Person
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
 
-            public Person(string firstName, string lastName)
-            {
-                FirstName = firstName;
-                LastName = lastName;
-            }
+        private async Task LoadSettingsAsync()
+        {
+            var settings = await _SettingsRepository.GetAllSettings();
+            if (settings == null || settings.Count == 0) return;
+
+            var setting = settings[0];
+
+            TextBotToken = setting.BotToken;
+            TextProxyHost = setting.ProxyHost;
+            TextProxyPort = setting.ProxyPort;
+            TextProxyUsername = setting.ProxyUsername;
+            TextProxyPassword = setting.ProxyPassword;
+
+            CheckAutoBot = setting.AutoBot == 1;
+            CheckTrayOnStart = setting.TrayOnStart == 1;
+            CheckRunAtStartup = setting.RunAtStartup == 1;
+            CheckAutoReconnect = setting.AutoReconnect == 1;
+            CheckNotifications = setting.Notifications == 1;
         }
     }
 }
