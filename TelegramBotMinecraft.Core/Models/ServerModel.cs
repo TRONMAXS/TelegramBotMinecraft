@@ -17,5 +17,20 @@
             Id = id;
             Name = name;
         }
+
+        public Server(int id, string name, string? connected, string? pathServer,
+        int? idProcess, string? javaArgs, int? rconEnable, int? rconPort, string? rconPass)
+        {
+            Id = id;
+            Name = name;
+            Connected = connected;
+            PathServer = pathServer;
+            IdProcess = idProcess;
+            JavaArgs = javaArgs;
+            RconEnable = rconEnable;
+            RconPort = rconPort;
+            RconPass = rconPass;
+        }
+
     }
 }

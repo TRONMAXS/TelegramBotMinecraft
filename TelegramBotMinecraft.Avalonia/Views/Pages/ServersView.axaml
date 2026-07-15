@@ -27,11 +27,11 @@
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Название:"/>
-                                    <TextBox PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
+                                    <TextBox Text="{Binding TextName}" PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="IP : Port:"/>
-                                    <TextBox PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
+                                    <TextBox Text="{Binding TextIpPort}" PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -41,12 +41,12 @@
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Путь к серверу:"/>
                                     <Button Content="Выбрать" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
+                                    <TextBox Text="{Binding TextPathToServer}" PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Аргументы Java:"/>
                                     <Button Content="Настроить" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
+                                    <TextBox Text="{Binding TextArgJava}" PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -88,18 +88,18 @@
                         <GroupBox Grid.Row="3" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
                             <GroupBox.Header>
                                 <StackPanel Orientation="Horizontal">
-                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="False" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
+                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="{Binding CheckRcon}" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
                                 </StackPanel>
                             </GroupBox.Header>
 
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Порт:"/>
-                                    <TextBox PlaceholderText="25575" Padding="5,4"/>
+                                    <TextBox Text="{Binding TextRconPort}" PlaceholderText="25575" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                    <TextBox PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                    <TextBox Text="{Binding TextRconPass}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -124,6 +124,7 @@
                               Margin="0,0,0,10"
                               Width=" 250"
                               ItemsSource="{Binding Servers}"
+                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="False"
                               SelectionMode="Extended"

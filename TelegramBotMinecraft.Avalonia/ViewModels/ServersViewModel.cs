@@ -12,11 +12,30 @@ using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
-    public class ServersViewModel : ObservableObject
+    public partial class ServersViewModel : ObservableObject
     {
         private readonly ServerRepository _ServerRepository;
 
         public ObservableCollection<Server> Servers { get; } = new();
+
+
+        [ObservableProperty]
+        public string _textName;
+        [ObservableProperty]
+        public string _textIpPort;
+        [ObservableProperty]
+        public string _textPathToServer;
+        [ObservableProperty]
+        public string _textArgJava;
+        [ObservableProperty]
+        public string _textRconPort;
+        [ObservableProperty]
+        public string _textRconPass;
+        [ObservableProperty]
+        public bool _checkRcon = false;
+
+        [ObservableProperty]
+        private Server? _selectedItem;
 
         public ServersViewModel(ServerRepository serverRepository)
         {
@@ -34,6 +53,28 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 Servers.Add(new Server(0, server));
             }
+        }
+
+        private async Task LoadSettingsServerAsync(string Name)
+        {
+            var serverSettings = await _ServerRepository.GetServerByName(Name);
+            if (serverSettings == null || serverSettings.Count == 0) return;
+
+            var firstServer = serverSettings[0];
+
+            TextName = firstServer.Name ?? string.Empty;
+            TextIpPort = firstServer.Connected ?? string.Empty;
+            TextPathToServer = firstServer.PathServer ?? string.Empty;
+            TextArgJava = firstServer.JavaArgs ?? string.Empty;
+            TextRconPort = firstServer.RconPort?.ToString() ?? string.Empty;
+            TextRconPass = firstServer.RconPass?.ToString() ?? string.Empty;
+            CheckRcon = Convert.ToBoolean(firstServer.RconEnable);
+        }
+
+        partial void OnSelectedItemChanged(Server? value)
+        {
+            if (value == null) return;
+            _ = LoadSettingsServerAsync(value.Name);
         }
     }
 }
