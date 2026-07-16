@@ -18,7 +18,7 @@
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="BotToken:"/>
-                                <TextBox Text="{Binding TextBotToken}" PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding TextBotToken}" PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <CheckBox IsChecked="{Binding CheckAutoBot}" VerticalAlignment="Center"/>
@@ -43,11 +43,11 @@
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Admin:"/>
-                                <TextBox Text="{Binding TextProxyUsername}" PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding TextProxyUsername}" PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                <TextBox Text="{Binding TextProxyPassword}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding TextProxyPassword}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                         </StackPanel>
                     </GroupBox>
