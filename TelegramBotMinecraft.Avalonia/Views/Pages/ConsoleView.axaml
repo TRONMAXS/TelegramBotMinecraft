@@ -38,6 +38,7 @@
                               FontSize="12"
                               Margin="0,0,0,10"
                               ItemsSource="{Binding Servers}"
+                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="False"
                               SelectionMode="Extended"
@@ -60,10 +61,10 @@
                     <GroupBox Grid.Row="2" Header="Информация" Margin="5,10,5,0" FontSize="15" FontFamily="Default" Width="250" Padding="0">
                         <StackPanel>
                             <TextBlock Text="Название:" HorizontalAlignment="Center"/>
-                            <TextBox IsReadOnly="True" HorizontalAlignment="Stretch"/>
+                            <TextBox Text="{Binding NameServer}" IsReadOnly="True" HorizontalAlignment="Stretch"/>
 
                             <TextBlock Text="Статус:" HorizontalAlignment="Center"/>
-                            <TextBox IsReadOnly="True" Text="{Binding Status}" HorizontalAlignment="Stretch"/>
+                            <TextBox IsReadOnly="True" Text="{Binding StatusServer}" HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>

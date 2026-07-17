@@ -20,9 +20,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
 
         [ObservableProperty]
-        public string status = "Off";
+        public string statusServer;
+
+        [ObservableProperty]
+        public string nameServer;
+
+        [ObservableProperty]
+        private Server? _selectedItem;
 
         public ObservableCollection<Server> Servers { get; } = new();
+
 
         public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository)
         {
@@ -45,18 +52,29 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+        private async Task LoadSelectedNameServerAsync(string Name)
+        {
+            NameServer = Name;
+        }
+
 
 
         [RelayCommand]
         private async Task StartServer()
         {
-            Status = "On";
+            StatusServer = "On";
         }
 
         [RelayCommand]
         private async Task StopServer()
         {
-            Status = "Off";
+            StatusServer = "Off";
+        }
+
+        partial void OnSelectedItemChanged(Server? value)
+        {
+            if (value == null) return;
+            _ = LoadSelectedNameServerAsync(value.Name);
         }
     }
 }
