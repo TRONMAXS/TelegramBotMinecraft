@@ -93,14 +93,12 @@ namespace TelegramBotMinecraft
                     fileStream = new FileStream(pathToFile, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                 {
                     var totalRead = 0L;
-                    var totalReads = 0L;
                     var buffer = new byte[8192];
                     var isMoreToRead = true;
 
                     long? totalBytes = response.Content.Headers.ContentLength;
                     const int progressBarWidth = 30;
                     char[] spinnerAnimation = new char[] { '|', '/', '-', '\\' };
-                    int animationIndex = 0;
 
                     do
                     {
