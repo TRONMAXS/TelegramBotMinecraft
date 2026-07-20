@@ -9,30 +9,14 @@ namespace TelegramBotMinecraft
 {
     public class MinecraftServerManager
     {
-        private static MinecraftServerManager? _currentInstance;
+        private MinecraftServerManager? _currentInstance;
 
         private Process? process = null;
         private int processId = -1;
 
         private Dictionary<string, Process> serverProcesses = new();
 
-        public static async Task<bool> Start(string ServerName)
-        {
-            _currentInstance = new MinecraftServerManager();
-            return await _currentInstance.StartServer(ServerName);
-        }
-
-        public static async Task<bool> Stop(string ServerName)
-        {
-            if (_currentInstance == null)
-            {
-                _currentInstance = new MinecraftServerManager();
-            }
-
-            return await _currentInstance.StopServer(ServerName);
-        }
-
-        private async Task<bool> StartServer(string ServerName)
+        public async Task<bool> StartServer(string ServerName)
         {
             var ServerData = await GetServerData(ServerName);
 
