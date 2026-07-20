@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Diagnostics;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -102,9 +103,28 @@ namespace TelegramBotMinecraft.Core.Database
 
         }
 
-        public async Task UpdateServer()
+        public async Task UpdateServer(string ServerName, int PID)
         {
-
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name == @ServerName", connection);
+                    command.Parameters.AddWithValue("@ProcessId", PID);
+                    command.Parameters.AddWithValue("@ServerName", ServerName);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            catch { }
+        }
+        public async Task UpdateServer(List<Server> ServerData)
+        {
+            try
+            {
+                
+            }
+            catch { }
         }
 
         public async Task DeleteServer()

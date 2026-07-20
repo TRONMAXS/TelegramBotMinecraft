@@ -2,19 +2,18 @@
 using Microsoft.Data.Sqlite;
 using System.Diagnostics;
 using System.Net;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft
 {
     public class MinecraftServerManager
     {
-        private static MinecraftServerManager _currentInstance;
-
-        //public static UserControl_Console userControl_Console;
+        private static MinecraftServerManager? _currentInstance;
 
         private Process? process = null;
         private int processId = -1;
 
-        private Dictionary<string, string> ServerData = new();
         private Dictionary<string, Process> serverProcesses = new();
 
         public static async Task<bool> Start(string ServerName)
@@ -29,41 +28,35 @@ namespace TelegramBotMinecraft
             {
                 _currentInstance = new MinecraftServerManager();
             }
-            
+
             return await _currentInstance.StopServer(ServerName);
         }
 
         private async Task<bool> StartServer(string ServerName)
         {
-            //await GetServerData(ServerName);
+            var ServerData = await GetServerData(ServerName);
 
             if (ServerData["ID_Process"] == "-1")
             {
                 try
                 {
                     process = new Process();
-                    process.StartInfo = new ProcessStartInfo
+                    process?.StartInfo = new ProcessStartInfo
                     {
-                        FileName = @"C:\Program Files\Java\jdk-21.0.11\bin\java.exe",
+                        FileName = @"C:\Program Files\Java\jdk-25.0.3\bin\javaw.exe",
                         WorkingDirectory = ServerData["Path_Server"],
                         Arguments = ServerData["Java_args"],
                         CreateNoWindow = true,
                         RedirectStandardInput = true,
                         UseShellExecute = false
                     };
-                    process.Start();
+                    process?.Start();
                     processId = process.Id;
                     serverProcesses[ServerName] = process;
 
-                    using (var connection = new SqliteConnection("Data Source=Data.db"))
-                    {
-                        await connection.OpenAsync();
-                        SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name == @ServerName", connection);
-                        command.Parameters.AddWithValue("@ProcessId", processId);
-                        command.Parameters.AddWithValue("@ServerName", ServerName);
-                        await command.ExecuteNonQueryAsync();
-                    }
-                    //userControl_Console.TriggerServerInfoRefresh(ServerName, 1);
+                    ServerRepository repository = new ServerRepository();
+                    await repository.UpdateServer(ServerName, processId);
+
                     return true;
                 }
                 catch (Exception ex) { /*MessageBox.Show($"Ошибка при запуске: {ex.Message}");*/ return false; }
@@ -73,7 +66,7 @@ namespace TelegramBotMinecraft
 
         public async Task<bool> StopServer(string ServerName)
         {
-            //await GetServerData(ServerName);
+            var ServerData = await GetServerData(ServerName);
             try
             {
                 if (serverProcesses.TryGetValue(ServerName, out var proc) && !proc.HasExited)
@@ -89,15 +82,9 @@ namespace TelegramBotMinecraft
                     }
                 }
 
-                using (var connection = new SqliteConnection("Data Source=Data.db"))
-                {
-                    await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name == @ServerName", connection);
-                    command.Parameters.AddWithValue("@ProcessId", -1);
-                    command.Parameters.AddWithValue("@ServerName", ServerName);
-                    await command.ExecuteNonQueryAsync();
-                }
-                //userControl_Console.TriggerServerInfoRefresh(ServerName, 0);
+                ServerRepository repository = new ServerRepository();
+                await repository.UpdateServer(ServerName, -1);
+
                 return true;
             }
             catch { return false; }
@@ -105,7 +92,7 @@ namespace TelegramBotMinecraft
 
         public async Task SendCommand(string serverName, string command)
         {
-           // await GetServerData(serverName);
+            var ServerData = await GetServerData(serverName);
 
             if (serverProcesses.TryGetValue(serverName, out var proc) && !proc.HasExited)
             {
@@ -119,6 +106,26 @@ namespace TelegramBotMinecraft
                     await rcon.SendCommandAsync(command);
                 }
             }
+        }
+
+        public async Task<Dictionary<string, string>> GetServerData(string ServerName)
+        {
+            Dictionary<string, string> ServerData = new();
+
+            ServerRepository repository = new ServerRepository();
+            var serverData = await repository.GetServerByName(ServerName);
+            if (serverData == null || serverData.Count == 0) return new Dictionary<string, string>();
+
+            var Data = serverData[0];
+
+            ServerData["Path_Server"] = Data.PathServer ?? string.Empty;
+            ServerData["Java_args"] = Data.JavaArgs ?? string.Empty;
+            ServerData["ID_Process"] = Data.IdProcess.ToString() ?? string.Empty;
+            ServerData["Rcon_Enable"] = Data.RconEnable.ToString() ?? string.Empty;
+            ServerData["Rcon_Port"] = Data.RconPort?.ToString() ?? string.Empty;
+            ServerData["Rcon_Pass"] = Data.RconPass?.ToString() ?? string.Empty;
+
+            return ServerData;
         }
 
         /*private async Task StopServer(string ServerName)

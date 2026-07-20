@@ -28,7 +28,6 @@
                 </Grid>
             </GroupBox>
         </Grid>
-
         <Grid Grid.Column="2">
             <GroupBox Header="Сервера" Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
                 <Grid RowDefinitions="*, Auto, Auto">
