@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -22,6 +23,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly MinecraftServerManager _MinecraftServerManager;
 
         private readonly ServerRepository _ServerRepository;
+
+        private readonly ServerStatusService _ServerStatusService;
 
 
         [ObservableProperty]
@@ -36,10 +39,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public ObservableCollection<Server> Servers { get; } = new();
 
 
-        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository)
+        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository, ServerStatusService serverStatusService)
         {
             _MinecraftServerManager = minecraftServerManager;
             _ServerRepository = serverRepository;
+            _ServerStatusService = serverStatusService;
 
             _ = LoadServersAsync();
         }
@@ -60,7 +64,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task LoadSelectedInfoServerAsync(string Name)
         {
             NameServer = Name;
-            StatusServer = string.Empty;
+
+            var status = await _ServerStatusService.GetStatus(Name);
+            StatusServer = status.ToString();
         }
 
 
@@ -70,10 +76,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedItem == null) return;
 
-            bool status = await MinecraftServerManager.Start(SelectedItem.Name);
+            bool status = await _MinecraftServerManager.StartServer(SelectedItem.Name);
 
-            if (status == true) StatusServer = "Запущен";
-            else if (status == false) StatusServer = "Ошибка включения";
+            /*if (status == true) StatusServer = "Запущен";
+            else if (status == false) StatusServer = "Ошибка включения";*/
+            await UpdateStatusServer(SelectedItem.Name);
         }
 
         [RelayCommand]
@@ -93,12 +100,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
                 if (result == ButtonResult.Yes)
                 {
-                    bool status = await MinecraftServerManager.Stop(SelectedItem.Name);
+                    bool status = await _MinecraftServerManager.StopServer(SelectedItem.Name);
 
-                    if (status == true) StatusServer = "Остановлен";
-                    else if (status == false) StatusServer = "Ошибка выключения";
+                    /*if (status == true) StatusServer = "Остановлен";
+                    else if (status == false) StatusServer = "Ошибка выключения";*/
                 }
+                await UpdateStatusServer(SelectedItem.Name);
             }
+        }
+
+        private async Task UpdateStatusServer(string Name)
+        {
+            var status = await _ServerStatusService.GetStatus(Name);
+            StatusServer = status.ToString();
         }
 
         partial void OnSelectedItemChanged(Server? value)
