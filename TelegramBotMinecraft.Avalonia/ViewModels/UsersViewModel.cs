@@ -43,30 +43,30 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadServersAsync()
         {
-            var serversNames = await _ServerRepository.GetAllServers();
-            if (serversNames == null) return;
+            var servers = await _ServerRepository.GetAllServersIdAndName();
+            if (servers == null) return;
 
-            foreach (var server in serversNames)
+            foreach (var server in servers)
             {
                 Servers.Add(new ServerItemViewModel(server.Id, server.Name));
             }
         }
         private async Task LoadUsersAsync()
         {
-            var usersNames = await _UserRepository.GetAllUserNamesAndId();
-            if (usersNames == null) return;
+            var users = await _UserRepository.GetAllUserNamesAndId();
+            if (users == null) return;
 
-            foreach (var user in usersNames)
+            foreach (var user in users)
             {
                 Users.Add(new User(user.Name, user.Id));
             }
         }
         private async Task LoadCommandsAsync()
         {
-            var commandsNames = await _CommandRepository.GetAllCommandAsync();
-            if (commandsNames == null) return;
+            var commands = await _CommandRepository.GetAllCommandAsync();
+            if (commands == null) return;
 
-            foreach (var command in commandsNames)
+            foreach (var command in commands)
             {
                 Commands.Add(new CommandItemViewModel(command.Id, command.CommandText));
             }
