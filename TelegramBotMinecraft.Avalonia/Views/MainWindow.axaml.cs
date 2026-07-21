@@ -10,7 +10,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var consoleVm = new ConsoleViewModel(new MinecraftServerManager(), new Core.Database.ServerRepository(), new Core.Services.ServerStatusService());
+        var consoleVm = new ConsoleViewModel(new MinecraftServerManager(), new Core.Database.ServerRepository(), new Core.Services.ServerStatusService(new Core.Database.ServerRepository()));
         var serversVm = new ServersViewModel(new Core.Database.ServerRepository());
         var usersVm = new UsersViewModel(new Core.Database.ServerRepository(), new Core.Database.UserRepository(), new Core.Database.CommandRepository());
         var settingsVm = new SettingsViewModel(new Core.Database.SettingsRepository());

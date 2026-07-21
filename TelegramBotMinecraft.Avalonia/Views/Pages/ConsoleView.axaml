@@ -48,7 +48,7 @@
                               BorderBrush="Gray">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2.5*"/>
-                            <DataGridTextColumn Header="Статус" Binding="{x:Null}" Width="*" CanUserSort="False"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="*" CanUserSort="False"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
