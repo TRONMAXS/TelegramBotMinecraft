@@ -111,39 +111,5 @@ namespace TelegramBotMinecraft
 
             return ServerData;
         }
-
-        /*private async Task StopServer(string ServerName)
-        {
-            await GetServerData(ServerName);
-
-            if (ServerData[2] != "-1")
-            {
-                try
-                {
-                    process = Process.GetProcessById(Convert.ToInt32(ServerData[2]));
-
-                    await process.StandardInput.WriteLineAsync("stop");
-                    if (!process.WaitForExit(30000)) MessageBox.Show("Сервер не выключился.");
-                    else MessageBox.Show("Сервер остановлен.");
-
-                    processId = -1;
-                    process.Dispose();
-                    process = null;
-
-                    using (var connection = new SqliteConnection("Data Source=Data.db"))
-                    {
-                        await connection.OpenAsync();
-                        SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name == @ServerName", connection);
-                        command.Parameters.AddWithValue("@ProcessId", processId);
-                        command.Parameters.AddWithValue("@ServerName", ServerName);
-                        await command.ExecuteNonQueryAsync();
-                    }
-                }
-                catch (Exception ex) { MessageBox.Show($"Ошибка при остановке: {ex.Message}"); }
-            }
-            else MessageBox.Show("Остановка невозможна: сервер не запущен.");
-
-        }*/
-
     }
 }
