@@ -127,6 +127,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
         private async Task UpdateServerLogsAsync(string Name)
         {
+            LogsServer = string.Empty;
             using var cts = new CancellationTokenSource();
 
             await foreach (var logLine in _ServerLogService.UpdateConsoleServer(Name, cts.Token))
