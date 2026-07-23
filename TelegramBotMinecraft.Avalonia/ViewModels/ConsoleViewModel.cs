@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.ViewModels.Items;
@@ -31,6 +32,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private readonly ServerStatusService _ServerStatusService;
 
+        private readonly ServerLogService _ServerLogService;
+
 
         [ObservableProperty]
         public string statusServer;
@@ -39,16 +42,23 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public string nameServer;
 
         [ObservableProperty]
+        public string logsServer;
+
+        [ObservableProperty]
+        public int caretIndexConsole;
+
+        [ObservableProperty]
         private ServerStatusItemViewModel? _selectedItem;
 
         public ObservableCollection<ServerStatusItemViewModel> Servers { get; } = new();
 
 
-        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository, ServerStatusService serverStatusService)
+        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository, ServerStatusService serverStatusService, ServerLogService serverLogService)
         {
             _MinecraftServerManager = minecraftServerManager;
             _ServerRepository = serverRepository;
             _ServerStatusService = serverStatusService;
+            _ServerLogService = serverLogService;
 
             _ = LoadServersAsync();
             _ = MonitorServersAsync();
@@ -69,11 +79,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task StartServer()
         {
             if (SelectedItem == null) return;
-
-            bool status = await _MinecraftServerManager.StartServer(SelectedItem.Name);
-
-            /*if (status == true) await UpdateStatusServer(SelectedItem.Name, ServerStatus.Starting);
-            else if (status == false) await UpdateStatusServer(SelectedItem.Name, ServerStatus.Offline);*/
+            await _MinecraftServerManager.StartServer(SelectedItem.Name);
         }
 
         [RelayCommand]
@@ -97,21 +103,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
                 if (result == ButtonResult.Yes)
                 {
-                    bool status = await _MinecraftServerManager.StopServer(SelectedItem.Name);
-
-                    /*if (status == true) await UpdateStatusServer(SelectedItem.Name, ServerStatus.Stopping);
-                    else if (status == false) await UpdateStatusServer(SelectedItem.Name, ServerStatus.Offline);*/
+                    await _MinecraftServerManager.StopServer(SelectedItem.Name);
                 }
             }
         }
 
-        private async Task UpdateStatusServer(string Name, string status = null)
+        private async Task UpdateStatusServer(string Name, string? status = null)
         {
             NameServer = Name;
             var item = Servers.FirstOrDefault(x => x.Name == Name);
             StatusServer = item.Status;
-            /*var status = await _ServerStatusService.GetStatus(Name, serverStatus);
-            StatusServer = status.ToString();*/
         }
         private async Task MonitorServersAsync()
         {
@@ -122,6 +123,26 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 UpdateServers(statuses);
 
                 await Task.Delay(2000);
+            }
+        }
+        private async Task UpdateServerLogsAsync(string Name)
+        {
+            using var cts = new CancellationTokenSource();
+
+            await foreach (var logLine in _ServerLogService.UpdateConsoleServer(Name, cts.Token))
+            {
+                if (logLine == null) continue;
+
+                if (logLine == "Console log clear")
+                {
+                    LogsServer = string.Empty;
+                    CaretIndexConsole = 0;
+                }
+                else
+                {
+                    LogsServer += logLine;
+                    CaretIndexConsole = LogsServer.Length;
+                }
             }
         }
         private void UpdateServers(List<ServerStatusInfo> statuses)
@@ -158,6 +179,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (value == null) return;
             _ = UpdateStatusServer(value.Name);
+            _ = UpdateServerLogsAsync(value.Name);
         }
     }
 }

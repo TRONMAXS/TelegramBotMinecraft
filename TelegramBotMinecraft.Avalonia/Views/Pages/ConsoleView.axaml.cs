@@ -9,6 +9,9 @@ public partial class ConsoleView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new ConsoleViewModel(new MinecraftServerManager(), new Core.Database.ServerRepository(), new Core.Services.ServerStatusService(new Core.Database.ServerRepository()));
+        DataContext = new ConsoleViewModel(new MinecraftServerManager(), 
+            new Core.Database.ServerRepository(), 
+            new Core.Services.ServerStatusService(new Core.Database.ServerRepository()),
+            new Core.Services.ServerLogService(new Core.Database.ServerRepository()));
     }
 }

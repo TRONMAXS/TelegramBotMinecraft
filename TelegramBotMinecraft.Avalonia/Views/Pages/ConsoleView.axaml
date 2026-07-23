@@ -16,10 +16,12 @@
                     <TextBox Grid.Row="0" HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"
                              VerticalContentAlignment="Top"
+                             Text="{Binding LogsServer}"
                              Margin="0"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
-                             IsReadOnly="True"/>
+                             IsReadOnly="True"
+                             CaretIndex="{Binding CaretIndexConsole}"/>
 
                     <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="True" Margin="0,5,0,0">
                         <Button Content="Ввод" DockPanel.Dock="Right"  Margin="5,0,0,0"/>
