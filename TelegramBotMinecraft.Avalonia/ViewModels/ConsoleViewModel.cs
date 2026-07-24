@@ -3,6 +3,11 @@ using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Styling;
+using Avalonia.Threading;
+using AvaloniaEdit;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Editing;
+using AvaloniaEdit.Snippets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoreRCON.Parsers.Standard;
@@ -42,16 +47,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public string nameServer;
 
         [ObservableProperty]
-        public string logsServer;
-
-        [ObservableProperty]
-        public int caretIndexConsole;
+        public TextDocument logsServer = new();
 
         [ObservableProperty]
         private ServerStatusItemViewModel? _selectedItem;
 
         public ObservableCollection<ServerStatusItemViewModel> Servers { get; } = new();
-
 
         public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository, ServerStatusService serverStatusService, ServerLogService serverLogService)
         {
@@ -127,25 +128,28 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
         private async Task UpdateServerLogsAsync(string Name)
         {
-            LogsServer = string.Empty;
+            LogsServer.Text = string.Empty;
+
             using var cts = new CancellationTokenSource();
 
             await foreach (var logLine in _ServerLogService.UpdateConsoleServer(Name, cts.Token))
             {
                 if (logLine == null) continue;
-
-                if (logLine == "Console log clear")
+                Dispatcher.UIThread.Post(() =>
                 {
-                    LogsServer = string.Empty;
-                    CaretIndexConsole = 0;
-                }
-                else
-                {
-                    LogsServer += logLine;
-                    CaretIndexConsole = LogsServer.Length;
-                }
+                    if (logLine == "Console log clear")
+                    {
+                        LogsServer.Text = string.Empty;
+                    }
+                    else
+                    {
+                        LogsServer.Insert(LogsServer.TextLength, logLine);
+                    }
+                    
+                });
             }
         }
+
         private void UpdateServers(List<ServerStatusInfo> statuses)
         {
             foreach (var status in statuses)

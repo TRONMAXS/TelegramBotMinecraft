@@ -8,5 +8,6 @@
     <Application.Styles>
         <semi:SemiTheme Locale="en-US" />
         <semi:DataGridSemiTheme />
+        <semi:AvaloniaEditSemiTheme />
     </Application.Styles>
 </Application>
