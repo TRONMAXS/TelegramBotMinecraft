@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using TelegramBotMinecraft.Avalonia.ViewModels;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia;
 
@@ -9,6 +11,6 @@ public partial class SettingsView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new SettingsViewModel(new Core.Database.SettingsRepository());
+        DataContext = new SettingsViewModel(new SettingsRepository());
     }
 }

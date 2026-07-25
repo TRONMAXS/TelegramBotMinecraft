@@ -9,8 +9,6 @@ namespace TelegramBotMinecraft
 {
     public class MinecraftServerManager
     {
-        private MinecraftServerManager? _currentInstance;
-
         private Process? process = null;
         private int processId = -1;
 

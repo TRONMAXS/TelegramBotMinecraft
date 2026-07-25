@@ -64,8 +64,6 @@ namespace TelegramBotMinecraft.Core.Services
                                 yield return content;
                             }
                             lastPosition = fs.Position;
-
-
                         }
                         await Task.Delay(1000, cancellationToken);
                     }
