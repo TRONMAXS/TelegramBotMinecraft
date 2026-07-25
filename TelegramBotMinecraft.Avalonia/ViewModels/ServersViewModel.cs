@@ -24,6 +24,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private Server? _selectedItem;
 
+        private bool _addingServer;
+
 
         public ServersViewModel(ServerRepository serverRepository)
         {
@@ -51,19 +53,43 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        public async Task SaveButton()
+        public async Task SaveButtonAsync()
         {
             if (SelectedItem == null) return;
-            _ServerRepository?.UpdateServer(EditableServer);
-            _ = LoadServersAsync();
-            // если кнопка добавить активна то сервер добавляется, а не обновляется
+            if (!_addingServer)
+            {
+                _ServerRepository?.UpdateServer(EditableServer);
+            }
+            else
+            {
+                _ServerRepository?.AddServer(EditableServer);
+            }
+            _addingServer = false;
+            await LoadServersAsync();
         }
 
         [RelayCommand]
-        public async Task CancelButton()
+        public async Task CancelButtonAsync()
         {
-            if (SelectedItem == null) return;
-            _ = LoadSettingsServerAsync(SelectedItem.Name);
+            if (!_addingServer)
+            {
+                if (SelectedItem == null) return;
+                await LoadSettingsServerAsync(SelectedItem.Name);
+            }
+            else
+            {
+                await LoadServersAsync();
+            }
+            _addingServer = false;
+
+        }
+
+        [RelayCommand]
+        public async Task AddButton()
+        {
+            _addingServer = true;
+            EditableServer = new Server();
+            await LoadServersAsync();
         }
 
         partial void OnSelectedItemChanged(Server? value)

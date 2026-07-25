@@ -139,7 +139,7 @@
                     </DataGrid>
 
                     <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" Width="250" LastChildFill="False">
-                        <Button Content="Добавить" MinWidth="90" DockPanel.Dock="Left"/>
+                        <Button Content="Добавить" MinWidth="90" Command="{Binding AddButtonCommand}" DockPanel.Dock="Left"/>
                         <Button Content="Удалить"  MinWidth="90" DockPanel.Dock="Right"/>
                     </DockPanel>
 

@@ -130,9 +130,33 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new List<Server>(); }
         }
 
-        public async Task AddServer()
+        public async Task AddServer(Server server)
         {
+            try
+            {
+                string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
+                          "VALUES (@Name, @Connected, @Path_Server, @Java_args, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
 
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    using (SqliteCommand command = new SqliteCommand(sqlAddServer, connection))
+                    {
+                        command.Parameters.AddWithValue("@ServerID", server.Id);
+                        command.Parameters.AddWithValue("@Name", server.Name);
+
+                        command.Parameters.AddWithValue("@Connected", server.Connected ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Path_Server", server.PathServer ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_args", server.JavaArgs ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Rcon_Enable", server.RconEnable);
+                        command.Parameters.AddWithValue("@Rcon_Port", server.RconPort.HasValue ? (object)server.RconPort.Value : DBNull.Value);
+                        command.Parameters.AddWithValue("@Rcon_Pass", server.RconPass ?? (object)DBNull.Value);
+
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+            catch { }
         }
 
         public async Task UpdateServer(string ServerName, int PID)
@@ -142,7 +166,7 @@ namespace TelegramBotMinecraft.Core.Database
                 using (var connection = new SqliteConnection(Data))
                 {
                     await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name == @ServerName", connection);
+                    SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name = @ServerName", connection);
                     command.Parameters.AddWithValue("@ProcessId", PID);
                     command.Parameters.AddWithValue("@ServerName", ServerName);
                     await command.ExecuteNonQueryAsync();
