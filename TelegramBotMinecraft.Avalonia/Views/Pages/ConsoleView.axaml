@@ -1,75 +1,167 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
-             mc:Ignorable="d"
-             d:DesignWidth="1220" d:DesignHeight="730"
-             x:Class="TelegramBotMinecraft.Avalonia.ConsoleView"
-             x:DataType="vm:ConsoleViewModel">
+<UserControl
+    x:Class="TelegramBotMinecraft.Avalonia.ConsoleView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    d:DesignHeight="730"
+    d:DesignWidth="1220"
+    x:DataType="vm:ConsoleViewModel"
+    mc:Ignorable="d">
 
 
     <Grid ColumnDefinitions="*, Auto, 275">
         <Grid Grid.Column="0" RowDefinitions="*,Auto">
-            <GroupBox Grid.Row="0" Header="Консоль" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
-                <Grid RowDefinitions="*,Auto">
-                    <AvaloniaEdit:TextEditor Grid.Row="0" x:Name="LogConsole"
-                           Document="{Binding LogsServer, Mode=OneWay}"
-                           ShowLineNumbers="True"
-                           HorizontalScrollBarVisibility="Auto"
-                           VerticalScrollBarVisibility="Auto"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch"
-                           Margin="0"
-                           FontWeight="Normal" 
-                           FontSize="14"
-                           WordWrap="False"
-                           IsReadOnly="True"/>
-                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="True" Margin="0,10,0,0">
-                        <Button Content="Ввод" DockPanel.Dock="Right"  Margin="5,0,0,0"/>
-                        <TextBox HorizontalAlignment="Stretch" PlaceholderText="Поле команд"/>
+            <GroupBox
+                Grid.Row="0"
+                Margin="3"
+                Padding="0"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Консоль">
+                <AvaloniaEdit:TextEditor
+                    x:Name="LogConsole"
+                    Grid.Row="0"
+                    Margin="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Document="{Binding LogsServer, Mode=OneWay}"
+                    FontSize="14"
+                    FontWeight="Normal"
+                    HorizontalScrollBarVisibility="Auto"
+                    IsReadOnly="True"
+                    ShowLineNumbers="True"
+                    VerticalScrollBarVisibility="Auto"
+                    WordWrap="False" />
+            </GroupBox>
+            <GroupBox
+                Grid.Row="1"
+                Margin="3"
+                Padding="0"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Rcon">
+
+                <Grid
+                    Grid.Row="1"
+                    
+                    RowDefinitions="*,Auto">
+                    <DockPanel
+                        Grid.Row="0"
+                        HorizontalAlignment="Stretch"
+                        LastChildFill="True">
+                        <Button
+                            Margin="5,0,0,0"
+                            Command="{Binding SendCommandCommand}"
+                            Content="Ввод"
+                            DockPanel.Dock="Right" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            PlaceholderText="Поле команд"
+                            Text="{Binding TextCommand, Mode=TwoWay}" />
                     </DockPanel>
+                    <AvaloniaEdit:TextEditor
+                        x:Name="LogRcon"
+                        Grid.Row="1"
+                        Height="100"
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Document="{Binding LogsRcon, Mode=OneWay}"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        HorizontalScrollBarVisibility="Auto"
+                        IsReadOnly="True"
+                        ShowLineNumbers="True"
+                        VerticalScrollBarVisibility="Auto"
+                        WordWrap="False" />
                 </Grid>
+
             </GroupBox>
         </Grid>
         <Grid Grid.Column="2">
-            <GroupBox Header="Сервера" Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
+            <GroupBox
+                Margin="3,3,3,3"
+                Padding="0"
+                HorizontalAlignment="Stretch"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Сервера">
                 <Grid RowDefinitions="*, Auto, Auto">
-                    <DataGrid x:Name="ServersGridConsole"
-                              Grid.Row="0"
-                              Width=" 250"
-                              FontSize="12"
-                              Margin="0,0,0,10"
-                              ItemsSource="{Binding Servers}"
-                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                              AutoGenerateColumns="False"
-                              CanUserResizeColumns="False"
-                              SelectionMode="Extended"
-                              HorizontalScrollBarVisibility="Disabled"
-                              IsReadOnly="True"
-                              GridLinesVisibility="All"
-                              BorderThickness="1"
-                              BorderBrush="Gray"
-                              CanUserSortColumns="True">
+                    <DataGrid
+                        x:Name="ServersGridConsole"
+                        Grid.Row="0"
+                        Width=" 250"
+                        Margin="0,0,0,10"
+                        AutoGenerateColumns="False"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CanUserResizeColumns="False"
+                        CanUserSortColumns="True"
+                        FontSize="12"
+                        GridLinesVisibility="All"
+                        HorizontalScrollBarVisibility="Disabled"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding Servers}"
+                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                        SelectionMode="Extended">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2.5*" CanUserSort="True"/>
-                            <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="*" CanUserSort="True"/>
+                            <DataGridTextColumn
+                                Width="2.5*"
+                                Binding="{Binding Name}"
+                                CanUserSort="True"
+                                Header="Название" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Status}"
+                                CanUserSort="True"
+                                Header="Статус" />
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" LastChildFill="False" Width="250">
-                        <Button Content="Вкл" Command="{Binding StartServerCommand}" MinWidth="61" DockPanel.Dock="Left"/>
-                        <Button Content="Выкл" Command="{Binding StopServerCommand}" MinWidth="61"  DockPanel.Dock="Right"/>
+                    <DockPanel
+                        Grid.Row="1"
+                        Width="250"
+                        HorizontalAlignment="Stretch"
+                        LastChildFill="False">
+                        <Button
+                            MinWidth="61"
+                            Command="{Binding StartServerCommand}"
+                            Content="Вкл"
+                            DockPanel.Dock="Left" />
+                        <Button
+                            MinWidth="61"
+                            Command="{Binding StopServerCommand}"
+                            Content="Выкл"
+                            DockPanel.Dock="Right" />
                     </DockPanel>
 
-                    <GroupBox Grid.Row="2" Header="Информация" Margin="5,10,5,0" FontSize="15" FontFamily="Default" Width="250" Padding="0">
+                    <GroupBox
+                        Grid.Row="2"
+                        Width="250"
+                        Margin="5,10,5,0"
+                        Padding="0"
+                        FontFamily="Default"
+                        FontSize="15"
+                        Header="Информация">
                         <StackPanel>
-                            <TextBlock Text="Название:" HorizontalAlignment="Center"/>
-                            <TextBox Text="{Binding NameServer}" IsReadOnly="True" FontSize="14" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock HorizontalAlignment="Center" Text="Название:" />
+                            <TextBox
+                                HorizontalAlignment="Stretch"
+                                FontSize="14"
+                                IsReadOnly="True"
+                                Text="{Binding NameServer}"
+                                TextAlignment="Center" />
 
-                            <TextBlock Text="Статус:" HorizontalAlignment="Center"/>
-                            <TextBox IsReadOnly="True" Text="{Binding StatusServer}" FontSize="14" TextAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock HorizontalAlignment="Center" Text="Статус:" />
+                            <TextBox
+                                HorizontalAlignment="Stretch"
+                                FontSize="14"
+                                IsReadOnly="True"
+                                Text="{Binding StatusServer}"
+                                TextAlignment="Center" />
                         </StackPanel>
                     </GroupBox>
                 </Grid>

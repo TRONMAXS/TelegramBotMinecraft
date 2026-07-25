@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.ViewModels.Items;
 using TelegramBotMinecraft.Core.Database;
@@ -39,6 +40,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private readonly ServerLogService _ServerLogService;
 
+        private readonly ServerCommandService _ServerCommandService;
+
 
         [ObservableProperty]
         public string statusServer;
@@ -50,16 +53,29 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public TextDocument logsServer = new();
 
         [ObservableProperty]
+        public TextDocument logsRcon = new();
+
+        [ObservableProperty]
+        public string textCommand;
+
+        [ObservableProperty]
         private ServerStatusItemViewModel? _selectedItem;
 
         public ObservableCollection<ServerStatusItemViewModel> Servers { get; } = new();
 
-        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository, ServerStatusService serverStatusService, ServerLogService serverLogService)
+        public Dictionary<string, string> LogsRconServers = new();
+
+        public ConsoleViewModel(MinecraftServerManager minecraftServerManager, 
+            ServerRepository serverRepository, 
+            ServerStatusService serverStatusService, 
+            ServerLogService serverLogService,
+            ServerCommandService serverCommandService)
         {
             _MinecraftServerManager = minecraftServerManager;
             _ServerRepository = serverRepository;
             _ServerStatusService = serverStatusService;
             _ServerLogService = serverLogService;
+            _ServerCommandService = serverCommandService;
 
             _ = LoadServersAsync();
             _ = MonitorServersAsync();
@@ -109,12 +125,49 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+        [RelayCommand]
+        private async Task SendCommand()
+        {
+            if (SelectedItem == null || string.IsNullOrWhiteSpace(TextCommand)) return;
+
+            var currentCommand = TextCommand;
+            var currentServerName = SelectedItem.Name;
+
+            TextCommand = string.Empty;
+
+            var response = await _ServerCommandService.SendCommandToServer(currentServerName, currentCommand);
+
+            DateTime dateTime = DateTime.Now;
+            string timeStr = dateTime.ToString("HH:mm:ss");
+
+            string responseText = string.IsNullOrWhiteSpace(response) ? "Success" : response.Trim();
+            string newLogEntry = $"[{timeStr}] Command: {currentCommand}\n[{timeStr}] Response: {responseText}\n";
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (SelectedItem?.Name == currentServerName)
+                {
+                    LogsRcon.Insert(LogsRcon.TextLength, newLogEntry);
+                }
+            });
+
+            if (LogsRconServers.TryGetValue(currentServerName, out var currentLogs))
+            {
+                LogsRconServers[currentServerName] = currentLogs + newLogEntry;
+            }
+            else
+            {
+                LogsRconServers[currentServerName] = newLogEntry;
+            }
+        }
+
         private async Task UpdateStatusServer(string Name, string? status = null)
         {
             NameServer = Name;
             var item = Servers.FirstOrDefault(x => x.Name == Name);
             StatusServer = item.Status;
         }
+
         private async Task MonitorServersAsync()
         {
             while (true)
@@ -126,6 +179,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 await Task.Delay(2000);
             }
         }
+
         private async Task UpdateServerLogsAsync(string Name)
         {
             LogsServer.Text = string.Empty;
@@ -147,6 +201,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     }
                     
                 });
+            }
+        }
+
+        private void UpdateLogsRconServerAsync(string Name)
+        {
+            LogsRcon.Text = string.Empty;
+            if (LogsRconServers.TryGetValue(Name, out var value))
+            {
+                LogsRcon.Insert(LogsRcon.TextLength, value);
             }
         }
 
@@ -185,6 +248,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (value == null) return;
             _ = UpdateStatusServer(value.Name);
             _ = UpdateServerLogsAsync(value.Name);
+            UpdateLogsRconServerAsync(value.Name);
         }
     }
 }

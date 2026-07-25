@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using System;
 using TelegramBotMinecraft.Avalonia.ViewModels;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia;
 
@@ -11,20 +13,35 @@ public partial class ConsoleView : UserControl
         InitializeComponent();
 
         DataContext = new ConsoleViewModel(new MinecraftServerManager(),
-            new Core.Database.ServerRepository(),
-            new Core.Services.ServerStatusService(new Core.Database.ServerRepository()),
-            new Core.Services.ServerLogService(new Core.Database.ServerRepository()));
+            new ServerRepository(),
+            new ServerStatusService(new ServerRepository()),
+            new ServerLogService(new ServerRepository()),
+            new ServerCommandService(new ServerRepository(), new MinecraftServerManager()));
 
         var logConsole = this.FindControl<AvaloniaEdit.TextEditor>("LogConsole");
         if (logConsole != null)
         {
             logConsole.Options.AllowScrollBelowDocument = false;
-            LogConsole.TextChanged += LogConsole_TextChanged;
+            LogConsole.TextChanged += LogConsoleAndRcon_TextChanged;
         }
 
+        var logRcon = this.FindControl<AvaloniaEdit.TextEditor>("LogRcon");
+        if (logRcon != null)
+        {
+            logRcon.Options.AllowScrollBelowDocument = false;
+            LogRcon.TextChanged += LogConsoleAndRcon_TextChanged;
+        }
     }
-    private void LogConsole_TextChanged(object? sender, EventArgs e)
+    private void LogConsoleAndRcon_TextChanged(object? sender, EventArgs e)
     {
-        LogConsole.ScrollToLine(LogConsole.LineCount);
+        if (sender == LogConsole)
+        {
+            LogConsole.ScrollToLine(LogConsole.LineCount);
+        }
+        else if (sender == LogRcon)
+        {
+            LogRcon.ScrollToLine(LogRcon.LineCount);
+
+        }
     }
 }
