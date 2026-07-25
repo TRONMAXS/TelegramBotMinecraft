@@ -12,6 +12,8 @@
         public int? RconPort { get; set; }
         public string? RconPass { get; set; }
 
+        public Server() {}
+
         public Server(int id, string name)
         {
             Id = id;

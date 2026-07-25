@@ -14,6 +14,7 @@
         public string? ProxyUsername { get; set; }
         public string? ProxyPassword { get; set; }
 
+        public Setting() { }
         public Setting(int id, string? botToken, int autoBot, int trayOnStart, int runAtStartup,
                   int autoReconnect, int? notifications, string? proxyHost, string? proxyPort,
                   string? proxyUsername, string? proxyPassword)

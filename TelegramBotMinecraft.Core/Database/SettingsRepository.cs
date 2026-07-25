@@ -10,9 +10,9 @@ namespace TelegramBotMinecraft.Core.Database
     {
         private string Data = "Data Source=Data-test.db";
 
-        public async Task<List<Setting>> GetAllSettings()
+        public async Task<Setting> GetAllSettings()
         {
-            var settings = new List<Setting>();
+            Setting settings = new Setting();
 
             try
             {
@@ -25,7 +25,7 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         while (await reader.ReadAsync())
                         {
-                            settings.Add(new Setting(
+                            settings = new Setting(
                                 Convert.ToInt32(reader["Id"]),
                                 reader["BotToken"]?.ToString(),
                                 Convert.ToInt32(reader["AutoBot"]),
@@ -37,14 +37,14 @@ namespace TelegramBotMinecraft.Core.Database
                                 reader["ProxyPort"]?.ToString(),
                                 reader["ProxyUsername"]?.ToString(),
                                 reader["ProxyPassword"]?.ToString()
-                            ));
+                            );
 
                         }
                     }
                 }
                 return settings;
             }
-            catch (SqliteException ex) { return new List<Setting>(); }
+            catch (SqliteException ex) { return new Setting(); }
         }
 
         public async Task SaveSettings()

@@ -18,14 +18,14 @@
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="BotToken:"/>
-                                <TextBox Text="{Binding TextBotToken}" PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding Settings.BotToken}" PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding CheckAutoBot}" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Settings.AutoBot}" VerticalAlignment="Center"/>
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Автозапуск бота"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding CheckAutoReconnect}" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Settings.AutoReconnect}" VerticalAlignment="Center"/>
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Авторестарт бота"/>
                             </StackPanel>
                         </StackPanel>
@@ -35,19 +35,19 @@
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Хост / IP:"/>
-                                <TextBox Text="{Binding TextProxyHost}" PlaceholderText="127.0.0.1" Padding="5,4"/>
+                                <TextBox Text="{Binding Settings.ProxyHost}" PlaceholderText="127.0.0.1" Padding="5,4"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Port:"/>
-                                <TextBox Text="{Binding TextProxyPort}" PlaceholderText="1080" Padding="5,4"/>
+                                <TextBox Text="{Binding Settings.ProxyPort}" PlaceholderText="1080" Padding="5,4"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Admin:"/>
-                                <TextBox Text="{Binding TextProxyUsername}" PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding Settings.ProxyUsername}" PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                <TextBox Text="{Binding TextProxyPassword}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBox Text="{Binding Settings.ProxyPassword}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
                             </DockPanel>
                         </StackPanel>
                     </GroupBox>
@@ -66,15 +66,15 @@
                     <Grid RowDefinitions="*, auto">
                         <StackPanel Spacing="8">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding CheckTrayOnStart}" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Settings.TrayOnStart}" VerticalAlignment="Center"/>
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="В трей при запуске"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding CheckRunAtStartup}" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Settings.RunAtStartup}" VerticalAlignment="Center"/>
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Запуск с Windows"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding CheckNotifications}" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Settings.Notifications}" VerticalAlignment="Center"/>
                                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Всплывающие уведомления"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

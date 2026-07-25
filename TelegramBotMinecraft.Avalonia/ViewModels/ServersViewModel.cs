@@ -18,29 +18,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public ObservableCollection<Server> Servers { get; } = new();
 
-
         [ObservableProperty]
-        public string _textName;
-        [ObservableProperty]
-        public string _textIpPort;
-        [ObservableProperty]
-        public string _textPathToServer;
-        [ObservableProperty]
-        public string _textArgJava;
-        [ObservableProperty]
-        public string _textRconPort;
-        [ObservableProperty]
-        public string _textRconPass;
-        [ObservableProperty]
-        public bool _checkRcon = false;
+        private Server? _editableServer;
 
         [ObservableProperty]
         private Server? _selectedItem;
 
+
         public ServersViewModel(ServerRepository serverRepository)
         {
             _ServerRepository = serverRepository;
-
             _ = LoadServersAsync();
         }
 
@@ -57,18 +44,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadSettingsServerAsync(string Name)
         {
-            var serverSettings = await _ServerRepository.GetServerByName(Name);
-            if (serverSettings == null || serverSettings.Count == 0) return;
+            Server serverSettings = await _ServerRepository.GetServerByName(Name);
+            if (serverSettings != null) EditableServer = serverSettings;
+        }
 
-            var firstServer = serverSettings[0];
+        [RelayCommand]
+        public async Task SaveButton()
+        {
 
-            TextName = firstServer.Name ?? string.Empty;
-            TextIpPort = firstServer.Connected ?? string.Empty;
-            TextPathToServer = firstServer.PathServer ?? string.Empty;
-            TextArgJava = firstServer.JavaArgs ?? string.Empty;
-            TextRconPort = firstServer.RconPort?.ToString() ?? string.Empty;
-            TextRconPass = firstServer.RconPass?.ToString() ?? string.Empty;
-            CheckRcon = Convert.ToBoolean(firstServer.RconEnable);
         }
 
         partial void OnSelectedItemChanged(Server? value)

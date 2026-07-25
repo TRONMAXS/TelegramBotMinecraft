@@ -13,13 +13,13 @@ namespace TelegramBotMinecraft.Core.Services
             long lastPosition = 0;
 
             var server = await _repository.GetServerByName(Name);
-            if (server == null || server.Count == 0)
+            if (server == null)
             {
                 yield return "Console log clear";
                 yield break;
             }
 
-            pathToLogsServer = Path.Combine(server[0].PathServer ?? string.Empty, "logs", "latest.log");
+            pathToLogsServer = Path.Combine(server.PathServer ?? string.Empty, "logs", "latest.log");
             if (!File.Exists(pathToLogsServer))
             {
                 yield return "Console log clear";

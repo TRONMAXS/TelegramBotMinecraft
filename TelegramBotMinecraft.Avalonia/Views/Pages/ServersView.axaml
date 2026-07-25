@@ -27,11 +27,11 @@
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Название:"/>
-                                    <TextBox Text="{Binding TextName}" PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
+                                    <TextBox Text="{Binding EditableServer.Name}" PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="IP : Port:"/>
-                                    <TextBox Text="{Binding TextIpPort}" PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
+                                    <TextBox Text="{Binding EditableServer.Connected}" PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -41,12 +41,12 @@
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Путь к серверу:"/>
                                     <Button Content="Выбрать" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox Text="{Binding TextPathToServer}" PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
+                                    <TextBox Text="{Binding EditableServer.PathServer}" PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Аргументы Java:"/>
                                     <Button Content="Настроить" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox Text="{Binding TextArgJava}" PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
+                                    <TextBox Text="{Binding EditableServer.JavaArgs}" PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -88,25 +88,25 @@
                         <GroupBox Grid.Row="3" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
                             <GroupBox.Header>
                                 <StackPanel Orientation="Horizontal">
-                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="{Binding CheckRcon}" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
+                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="{Binding EditableServer.RconEnable}" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
                                 </StackPanel>
                             </GroupBox.Header>
 
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Порт:"/>
-                                    <TextBox Text="{Binding TextRconPort}" PlaceholderText="25575" Padding="5,4"/>
+                                    <TextBox Text="{Binding EditableServer.RconPort}" PlaceholderText="25575" Padding="5,4"/>
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                    <TextBox Text="{Binding TextRconPass}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                    <TextBox Text="{Binding EditableServer.RconPass}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
 
                         <StackPanel Orientation="Horizontal" Spacing="10" Margin="10,10,0,0">
-                            <Button Content="Сохранить"/>
-                            <Button Content="Отмена" />
+                            <Button Content="Сохранить" MinWidth="100" Command="{Binding SaveButton}"/>
+                            <Button Content="Отмена" MinWidth="100"/>
                         </StackPanel>
 
                     </StackPanel>

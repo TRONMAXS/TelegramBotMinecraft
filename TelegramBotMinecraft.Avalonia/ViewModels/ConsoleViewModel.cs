@@ -105,8 +105,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (SelectedItem == null) return;
 
             var ServerData = await _ServerRepository.GetServerByName(SelectedItem.Name);
-            var Data = ServerData[0];
-            if (Data.IdProcess == -1) return;
+            if (ServerData.IdProcess == -1) return;
 
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

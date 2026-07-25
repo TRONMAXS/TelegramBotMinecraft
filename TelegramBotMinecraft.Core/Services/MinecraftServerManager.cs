@@ -18,7 +18,7 @@ namespace TelegramBotMinecraft
         {
             var ServerData = await GetServerData(ServerName);
 
-            if (ServerData["ID_Process"] == "-1")
+            if (ServerData.IdProcess == -1)
             {
                 try
                 {
@@ -26,8 +26,8 @@ namespace TelegramBotMinecraft
                     process?.StartInfo = new ProcessStartInfo
                     {
                         FileName = @"C:\Program Files\Java\jdk-25.0.3\bin\javaw.exe",
-                        WorkingDirectory = ServerData["Path_Server"],
-                        Arguments = ServerData["Java_args"],
+                        WorkingDirectory = ServerData.PathServer,
+                        Arguments = ServerData.JavaArgs,
                         CreateNoWindow = true,
                         RedirectStandardInput = true,
                         UseShellExecute = false
@@ -58,7 +58,7 @@ namespace TelegramBotMinecraft
                 }
                 else
                 {
-                    using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData["Rcon_Port"]), ServerData["Rcon_Pass"]))
+                    using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData.RconPort), ServerData.RconPass))
                     {
                         await rcon.SendCommandAsync("stop");
                     }
@@ -83,31 +83,29 @@ namespace TelegramBotMinecraft
             }
             else
             {
-                using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData["Rcon_Port"]), ServerData["Rcon_Pass"]))
+                using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData.RconPort), ServerData.RconPass))
                 {
                     await rcon.SendCommandAsync(command);
                 }
             }
         }
 
-        public async Task<Dictionary<string, string>> GetServerData(string ServerName)
+        public async Task<Server> GetServerData(string ServerName)
         {
-            Dictionary<string, string> ServerData = new();
+            Server Server = new();
 
             ServerRepository repository = new ServerRepository();
             var serverData = await repository.GetServerByName(ServerName);
-            if (serverData == null || serverData.Count == 0) return new Dictionary<string, string>();
+            if (serverData == null) return new Server();
 
-            var Data = serverData[0];
+            Server.PathServer = serverData.PathServer ?? string.Empty;
+            Server.JavaArgs = serverData.JavaArgs ?? string.Empty;
+            Server.IdProcess = serverData.IdProcess;
+            Server.RconEnable = serverData.RconEnable;
+            Server.RconPort = serverData.RconPort;
+            Server.RconPass = serverData.RconPass ?? string.Empty;
 
-            ServerData["Path_Server"] = Data.PathServer ?? string.Empty;
-            ServerData["Java_args"] = Data.JavaArgs ?? string.Empty;
-            ServerData["ID_Process"] = Data.IdProcess.ToString() ?? string.Empty;
-            ServerData["Rcon_Enable"] = Data.RconEnable.ToString() ?? string.Empty;
-            ServerData["Rcon_Port"] = Data.RconPort?.ToString() ?? string.Empty;
-            ServerData["Rcon_Pass"] = Data.RconPass?.ToString() ?? string.Empty;
-
-            return ServerData;
+            return Server;
         }
     }
 }

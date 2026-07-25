@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using System.Diagnostics;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -68,9 +67,9 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new List<Server>(); }
         }
 
-        public async Task<List<Server>> GetServerByName(string Name)
+        public async Task<Server> GetServerByName(string Name)
         {
-            var server = new List<Server>();
+            Server server = new Server();
             try
             {
 
@@ -83,7 +82,7 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         while (await reader.ReadAsync())
                         {
-                            server.Add(new Server(
+                            server = new Server(
                             Convert.ToInt32(reader["ID"]),
                             reader["Name"].ToString() ?? string.Empty,
                             reader["Connected"] as string,
@@ -93,14 +92,13 @@ namespace TelegramBotMinecraft.Core.Database
                             reader["Rcon_Enable"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Rcon_Enable"]),
                             reader["Rcon_Port"] == DBNull.Value ? null : Convert.ToInt32(reader["Rcon_Port"]),
                             reader["Rcon_Pass"] == DBNull.Value ? null : reader["Rcon_Pass"].ToString()
-                            ));
+                            );
                         }
-                    }
-
+                    } 
                 }
+                return server;
             }
-            catch (SqliteException ex) { return new List<Server>(); }
-            return server;
+            catch (SqliteException ex) { return new Server(); }
         }
 
         public async Task<List<Server>> GetServersByUserIdAsync(int userId)
@@ -151,6 +149,7 @@ namespace TelegramBotMinecraft.Core.Database
             }
             catch { }
         }
+
         public async Task UpdateServer(List<Server> ServerData)
         {
             try

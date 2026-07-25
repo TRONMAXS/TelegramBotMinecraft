@@ -13,13 +13,12 @@ namespace TelegramBotMinecraft.Core.Services
         {
             var ServerData = await _repository.GetServerByName(serverName);
             if (ServerData == null) return string.Empty;
-            var Data = ServerData[0];
             command = command.Trim();
             try
             {
-                if (Data.IdProcess != -1)
+                if (ServerData.IdProcess != -1)
                 {
-                    if (Data.RconEnable == 1)
+                    if (ServerData.RconEnable == 1)
                     {
                         if (command == "stop")
                         {
@@ -29,7 +28,7 @@ namespace TelegramBotMinecraft.Core.Services
                             return "Server Stopped";
                         }
 
-                        using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(Data.RconPort), Data.RconPass))
+                        using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData.RconPort), ServerData.RconPass))
                         {
                             string response = await rcon.SendCommandAsync(command);
                             return response;
