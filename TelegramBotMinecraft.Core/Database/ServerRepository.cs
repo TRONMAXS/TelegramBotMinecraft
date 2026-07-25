@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Security.Cryptography;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -150,11 +151,34 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task UpdateServer(List<Server> ServerData)
+        public async Task UpdateServer(Server server)
         {
             try
             {
-                
+                string sqlAddServer = "UPDATE Servers SET Name = @Name, Connected = @Connected, " +
+                    "Path_Server = @Path_Server, Java_args = @Java_args, " +
+                    "Rcon_Enable = @Rcon_Enable, Rcon_Port = @Rcon_Port, " +
+                    "Rcon_Pass = @Rcon_Pass " +
+                    "WHERE ID = @ServerID";
+
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    using (SqliteCommand command = new SqliteCommand(sqlAddServer, connection))
+                    {
+                        command.Parameters.AddWithValue("@ServerID", server.Id);
+                        command.Parameters.AddWithValue("@Name", server.Name);
+
+                        command.Parameters.AddWithValue("@Connected", server.Connected ?? (object)server.Connected ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Path_Server", server.PathServer ?? (object)server.PathServer ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_args", server.JavaArgs ?? (object)server.JavaArgs ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Rcon_Enable", server.RconEnable);
+                        command.Parameters.AddWithValue("@Rcon_Port", server.RconPort.HasValue ? (object)server.RconPort.Value : DBNull.Value);
+                        command.Parameters.AddWithValue("@Rcon_Pass", server.RconPass ?? (object)server.RconPass ?? DBNull.Value);
+
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
             }
             catch { }
         }
@@ -166,7 +190,7 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task SaveUserServers()
         {
-
+            
         }
     }
 }

@@ -51,7 +51,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand]
         public async Task SaveButton()
         {
-
+            if (SelectedItem?.Name == null) return;
+            _ServerRepository?.UpdateServer(EditableServer);
+            // если кнопка добавить активна то сервер добавляется, а не обновляется
         }
 
         partial void OnSelectedItemChanged(Server? value)
