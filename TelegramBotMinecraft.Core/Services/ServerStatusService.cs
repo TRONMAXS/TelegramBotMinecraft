@@ -146,6 +146,11 @@ namespace TelegramBotMinecraft.Core.Services
                 return ServerStatus.Starting;
             }
 
+            if (processStatus == ServerStatus.Online && logStatus == ServerStatus.Offline)
+            {
+                return ServerStatus.Starting;
+            }
+
             return ServerStatus.Offline;
         }
     }
