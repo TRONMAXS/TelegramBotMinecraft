@@ -105,8 +105,8 @@
                         </GroupBox>
 
                         <StackPanel Orientation="Horizontal" Spacing="10" Margin="10,10,0,0">
-                            <Button Content="Сохранить" MinWidth="100" Command="{Binding SaveButton}"/>
-                            <Button Content="Отмена" MinWidth="100"/>
+                            <Button Content="Сохранить" MinWidth="100" Command="{Binding SaveButtonCommand}"/>
+                            <Button Content="Отмена" MinWidth="100" Command="{Binding CancelButtonCommand}"/>
                         </StackPanel>
 
                     </StackPanel>
