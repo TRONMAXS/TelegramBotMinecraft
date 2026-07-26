@@ -207,9 +207,21 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task DeleteServer()
+        public async Task DeleteServer(int Id)
         {
-
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    using (SqliteCommand command = new SqliteCommand("DELETE FROM Servers WHERE ID = @Id", connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", Id);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+            catch { }
         }
 
         public async Task SaveUserServers()
