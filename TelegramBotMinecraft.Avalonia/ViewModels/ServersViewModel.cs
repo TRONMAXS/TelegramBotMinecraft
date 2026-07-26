@@ -1,6 +1,10 @@
-﻿using Avalonia.Automation;
+﻿using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,14 +22,21 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public ObservableCollection<Server> Servers { get; } = new();
 
+
         [ObservableProperty]
         private Server? _editableServer;
 
         [ObservableProperty]
-        private Server? _selectedItem;
+        [NotifyPropertyChangedFor(nameof(IsEditorEnabled))]
+        [NotifyCanExecuteChangedFor(nameof(DeleteButtonCommand))]
+        private Server? _selectedServer;
 
-        private bool _addingServer;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEditorEnabled))]
+        [NotifyCanExecuteChangedFor(nameof(DeleteButtonCommand))]
+        private bool _isAddingNewServer;
 
+        public bool IsEditorEnabled => SelectedServer != null || IsAddingNewServer;
 
         public ServersViewModel(ServerRepository serverRepository)
         {
@@ -53,46 +64,64 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        public async Task SaveButtonAsync()
+        private void AddButton()
         {
-            if (SelectedItem == null) return;
-            if (!_addingServer)
-            {
-                _ServerRepository?.UpdateServer(EditableServer);
-            }
-            else
-            {
-                _ServerRepository?.AddServer(EditableServer);
-            }
-            _addingServer = false;
-            await LoadServersAsync();
-        }
-
-        [RelayCommand]
-        public async Task CancelButtonAsync()
-        {
-            if (!_addingServer)
-            {
-                if (SelectedItem == null) return;
-                await LoadSettingsServerAsync(SelectedItem.Name);
-            }
-            else
-            {
-                await LoadServersAsync();
-            }
-            _addingServer = false;
-
-        }
-
-        [RelayCommand]
-        public async Task AddButton()
-        {
-            _addingServer = true;
+            SelectedServer = null;
             EditableServer = new Server();
+            IsAddingNewServer = true;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanDelete))]
+        private async Task DeleteButton()
+        {
+            if (SelectedServer == null) return;
+
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var box = MessageBoxManager.GetMessageBoxStandard(
+                    title: "Подтверждение",
+                    text: $"Вы уверены, что хотите удалить сервер {SelectedServer.Name}?",
+                    ButtonEnum.YesNo,
+                    Icon.Warning);
+
+                var result = await box.ShowWindowDialogAsync(desktop.MainWindow);
+
+                if (result == ButtonResult.Yes)
+                {
+                    await _ServerRepository.DeleteServer(SelectedServer.Id);
+
+                    SelectedServer = null;
+                    await LoadServersAsync();
+                }
+            }
+        }
+
+        [RelayCommand]
+        public async Task SaveButton()
+        {
+            if (EditableServer == null) return;
+
+            if (IsAddingNewServer) await _ServerRepository.AddServer(EditableServer);
+            else await _ServerRepository.UpdateServer(EditableServer);
+
+            IsAddingNewServer = false;
+            SelectedServer = null;
             await LoadServersAsync();
         }
 
-        partial void OnSelectedItemChanged(Server? value)
+        [RelayCommand]
+        public async Task CancelButton()
+        {
+            IsAddingNewServer = false;
+
+            if (SelectedServer != null) await LoadSettingsServerAsync(SelectedServer.Name);
+            else EditableServer = new Server();
+        }
+
+
+        private bool CanDelete() => SelectedServer != null && !IsAddingNewServer;
+
+        partial void OnSelectedServerChanged(Server? value)
         {
             if (value == null) return;
             _ = LoadSettingsServerAsync(value.Name);

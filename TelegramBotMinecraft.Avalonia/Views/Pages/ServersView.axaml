@@ -1,61 +1,127 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             d:DesignWidth="1220" d:DesignHeight="730"
-             x:Class="TelegramBotMinecraft.Avalonia.ServersView"
-             x:DataType="vm:ServersViewModel">
+<UserControl
+    x:Class="TelegramBotMinecraft.Avalonia.ServersView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    d:DesignHeight="730"
+    d:DesignWidth="1220"
+    x:DataType="vm:ServersViewModel"
+    mc:Ignorable="d">
 
     <Grid ColumnDefinitions="*,Auto,275">
         <Grid Grid.Column="0" RowDefinitions="*">
-            <GroupBox Grid.Row="0"
-                      Header="Настройки сервера"
-                      Margin="3"
-                      FontSize="15"
-                      FontFamily="Default"
-                      Padding="0"
-                      VerticalAlignment="Stretch">
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch">
-                    <StackPanel Spacing="10" Margin="10">
+            <GroupBox
+                Grid.Row="0"
+                Margin="3"
+                Padding="0"
+                VerticalAlignment="Stretch"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Настройки сервера">
+                <ScrollViewer
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel
+                        Margin="10"
+                        IsEnabled="{Binding IsEditorEnabled}"
+                        Spacing="10">
 
-                        <GroupBox Grid.Row="0" Header="Основное" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                        <GroupBox
+                            Grid.Row="0"
+                            Margin="0"
+                            Padding="15,10,15,15"
+                            FontFamily="Default"
+                            FontSize="15"
+                            Header="Основное">
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Название:"/>
-                                    <TextBox Text="{Binding EditableServer.Name}" PlaceholderText="Survival - 1.20.1" Padding="5,4"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Название:" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        PlaceholderText="Survival - 1.20.1"
+                                        Text="{Binding EditableServer.Name}" />
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="IP : Port:"/>
-                                    <TextBox Text="{Binding EditableServer.Connected}" PlaceholderText="127.0.0.1:25565" Padding="5,4"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="IP : Port:" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        PlaceholderText="127.0.0.1:25565"
+                                        Text="{Binding EditableServer.Connected}" />
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Grid.Row="1" Header="Запуск" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                        <GroupBox
+                            Grid.Row="1"
+                            Margin="0"
+                            Padding="15,10,15,15"
+                            FontFamily="Default"
+                            FontSize="15"
+                            Header="Запуск">
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Путь к серверу:"/>
-                                    <Button Content="Выбрать" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox Text="{Binding EditableServer.PathServer}" PlaceholderText="C:\Minecraft\Server\" Padding="5,4"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Путь к серверу:" />
+                                    <Button
+                                        Width="101"
+                                        Margin="10,0,0,0"
+                                        Padding="15,4"
+                                        Content="Выбрать"
+                                        DockPanel.Dock="Right" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        PlaceholderText="C:\Minecraft\Server\"
+                                        Text="{Binding EditableServer.PathServer}" />
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Аргументы Java:"/>
-                                    <Button Content="Настроить" DockPanel.Dock="Right" Width="101" Margin="10,0,0,0" Padding="15,4"/>
-                                    <TextBox Text="{Binding EditableServer.JavaArgs}" PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui" Padding="5,4"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Аргументы Java:" />
+                                    <Button
+                                        Width="101"
+                                        Margin="10,0,0,0"
+                                        Padding="15,4"
+                                        Content="Настроить"
+                                        DockPanel.Dock="Right" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui"
+                                        Text="{Binding EditableServer.JavaArgs}" />
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Grid.Row="2" Header="Java" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                        <GroupBox
+                            Grid.Row="2"
+                            Margin="0"
+                            Padding="15,10,15,15"
+                            FontFamily="Default"
+                            FontSize="15"
+                            Header="Java">
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="False">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Версия Minecraft:"/>
-                                    <ComboBox PlaceholderText="Minecraft" Padding="5,4" MaxDropDownHeight="300" Width="300">
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Версия Minecraft:" />
+                                    <ComboBox
+                                        Width="300"
+                                        Padding="5,4"
+                                        MaxDropDownHeight="300"
+                                        PlaceholderText="Minecraft">
                                         <ComboBoxItem>Text Item 1</ComboBoxItem>
                                         <ComboBoxItem>Text Item 2</ComboBoxItem>
                                         <ComboBoxItem>Text Item 3</ComboBoxItem>
@@ -68,8 +134,15 @@
                                     </ComboBox>
                                 </DockPanel>
                                 <DockPanel LastChildFill="False">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Версия Java:"/>
-                                    <ComboBox PlaceholderText="Java" Padding="5,4" MaxDropDownHeight="300" Width="300">
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Версия Java:" />
+                                    <ComboBox
+                                        Width="300"
+                                        Padding="5,4"
+                                        MaxDropDownHeight="300"
+                                        PlaceholderText="Java">
                                         <ComboBoxItem>Text Item 1</ComboBoxItem>
                                         <ComboBoxItem>Text Item 2</ComboBoxItem>
                                         <ComboBoxItem>Text Item 3</ComboBoxItem>
@@ -80,33 +153,74 @@
                                         <ComboBoxItem>Text Item 8</ComboBoxItem>
                                         <ComboBoxItem>Text Item 9</ComboBoxItem>
                                     </ComboBox>
-                                    <Button Content="Управление" Width="111" Margin="10,0,0,0" Padding="15,4"/>
+                                    <Button
+                                        Width="111"
+                                        Margin="10,0,0,0"
+                                        Padding="15,4"
+                                        Content="Управление" />
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Grid.Row="3" FontSize="15" FontFamily="Default" Padding="15,10,15,15" Margin="0">
+                        <GroupBox
+                            Grid.Row="3"
+                            Margin="0"
+                            Padding="15,10,15,15"
+                            FontFamily="Default"
+                            FontSize="15">
                             <GroupBox.Header>
                                 <StackPanel Orientation="Horizontal">
-                                    <ToggleButton x:Name="ToggleButtonRcon" IsChecked="{Binding EditableServer.RconEnable}" MinWidth="50" FontSize="12" HorizontalAlignment="Left" Content="Rcon" Margin="0,0,0,0" Padding="15,4"/>
+                                    <ToggleButton
+                                        x:Name="ToggleButtonRcon"
+                                        MinWidth="50"
+                                        Margin="0,0,0,0"
+                                        Padding="15,4"
+                                        HorizontalAlignment="Left"
+                                        Content="Rcon"
+                                        FontSize="12"
+                                        IsChecked="{Binding EditableServer.RconEnable}" />
                                 </StackPanel>
                             </GroupBox.Header>
 
                             <StackPanel Spacing="8">
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Порт:"/>
-                                    <TextBox Text="{Binding EditableServer.RconPort}" PlaceholderText="25575" Padding="5,4"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Порт:" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        PlaceholderText="25575"
+                                        Text="{Binding EditableServer.RconPort}" />
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
-                                    <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                    <TextBox Text="{Binding EditableServer.RconPass}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="True" Classes="revealPasswordButton"/>
+                                    <TextBlock
+                                        Width="150"
+                                        VerticalAlignment="Center"
+                                        Text="Пароль:" />
+                                    <TextBox
+                                        Padding="5,4"
+                                        Classes="revealPasswordButton"
+                                        PasswordChar="*"
+                                        PlaceholderText="12345"
+                                        RevealPassword="True"
+                                        Text="{Binding EditableServer.RconPass}" />
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
 
-                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="10,10,0,0">
-                            <Button Content="Сохранить" MinWidth="100" Command="{Binding SaveButtonCommand}"/>
-                            <Button Content="Отмена" MinWidth="100" Command="{Binding CancelButtonCommand}"/>
+                        <StackPanel
+                            Margin="10,10,0,0"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <Button
+                                MinWidth="100"
+                                Command="{Binding SaveButtonCommand}"
+                                Content="Сохранить" />
+                            <Button
+                                MinWidth="100"
+                                Command="{Binding CancelButtonCommand}"
+                                Content="Отмена" />
                         </StackPanel>
 
                     </StackPanel>
@@ -116,31 +230,55 @@
 
 
         <Grid Grid.Column="2">
-            <GroupBox Header="Сервера"  Margin="3,3,3,3" FontSize="15" FontFamily="Default" Padding="0" HorizontalAlignment="Stretch" >
+            <GroupBox
+                Margin="3,3,3,3"
+                Padding="0"
+                HorizontalAlignment="Stretch"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Сервера">
                 <Grid RowDefinitions="*, Auto">
-                    <DataGrid x:Name="ServersGridServers"
-                              Grid.Row="0"
-                              FontSize="12"
-                              Margin="0,0,0,10"
-                              Width=" 250"
-                              ItemsSource="{Binding Servers}"
-                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                              AutoGenerateColumns="False"
-                              CanUserResizeColumns="False"
-                              SelectionMode="Extended"
-                              HorizontalScrollBarVisibility="Disabled"
-                              IsReadOnly="True"
-                              GridLinesVisibility="All"
-                              BorderThickness="1"
-                              BorderBrush="Gray">
+                    <DataGrid
+                        x:Name="ServersGridServers"
+                        Grid.Row="0"
+                        Width=" 250"
+                        Margin="0,0,0,10"
+                        AutoGenerateColumns="False"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CanUserResizeColumns="False"
+                        FontSize="12"
+                        GridLinesVisibility="All"
+                        HorizontalScrollBarVisibility="Disabled"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding Servers}"
+                        SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
+                        SelectionMode="Extended">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Name}"
+                                Header="Название" />
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" Width="250" LastChildFill="False">
-                        <Button Content="Добавить" MinWidth="90" Command="{Binding AddButtonCommand}" DockPanel.Dock="Left"/>
-                        <Button Content="Удалить"  MinWidth="90" DockPanel.Dock="Right"/>
+                    <DockPanel
+                        Grid.Row="1"
+                        Width="250"
+                        HorizontalAlignment="Stretch"
+                        LastChildFill="False">
+                        <Button
+                            MinWidth="90"
+                            Command="{Binding AddButtonCommand}"
+                            Content="Добавить"
+                            DockPanel.Dock="Left"
+                            IsEnabled="{Binding}" />
+                        <Button
+                            MinWidth="90"
+                            Command="{Binding DeleteButtonCommand}"
+                            Content="Удалить"
+                            DockPanel.Dock="Right"
+                            IsEnabled="{Binding}" />
                     </DockPanel>
 
                 </Grid>
