@@ -117,6 +117,23 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             else EditableServer = new Server();
         }
 
+        [RelayCommand]
+        private async Task SelectButton()
+        {
+            var result = await _dialogService.SelectFolderAsync($"Путь к папке сервера");
+            if (result == null) return;
+
+            if (EditableServer != null)
+            {
+                EditableServer.PathServer = result;
+
+                var temp = EditableServer;
+                EditableServer = null;
+                EditableServer = temp;
+            }
+        }
+
+
         private bool CanDelete() => SelectedServer != null && !IsAddingNewServer;
 
         partial void OnSelectedServerChanged(Server? value)

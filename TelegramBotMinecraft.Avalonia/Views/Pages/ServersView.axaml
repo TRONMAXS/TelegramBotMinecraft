@@ -78,6 +78,7 @@
                                         Width="101"
                                         Margin="10,0,0,0"
                                         Padding="15,4"
+                                        Command="{Binding SelectButtonCommand}"
                                         Content="Выбрать"
                                         DockPanel.Dock="Right" />
                                     <TextBox
