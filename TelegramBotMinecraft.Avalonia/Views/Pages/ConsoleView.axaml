@@ -13,7 +13,10 @@
 
 
     <Grid ColumnDefinitions="*, Auto, 275">
-        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+        <Grid
+            Grid.Column="0"
+            IsEnabled="{Binding IsLogsAndRconEnabled}"
+            RowDefinitions="*,Auto">
             <GroupBox
                 Grid.Row="0"
                 Margin="3"
@@ -44,10 +47,7 @@
                 FontSize="15"
                 Header="Rcon">
 
-                <Grid
-                    Grid.Row="1"
-                    
-                    RowDefinitions="*,Auto">
+                <Grid Grid.Row="1" RowDefinitions="*,Auto">
                     <DockPanel
                         Grid.Row="0"
                         HorizontalAlignment="Stretch"
@@ -105,7 +105,7 @@
                         HorizontalScrollBarVisibility="Disabled"
                         IsReadOnly="True"
                         ItemsSource="{Binding Servers}"
-                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                        SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
                         SelectionMode="Extended">
                         <DataGrid.Columns>
                             <DataGridTextColumn

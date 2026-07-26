@@ -45,8 +45,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly IDialogService _dialogService;
 
 
-
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(StartServerCommand))]
+        [NotifyCanExecuteChangedFor(nameof(StopServerCommand))]
         public string statusServer;
 
         [ObservableProperty]
@@ -62,7 +63,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public string textCommand;
 
         [ObservableProperty]
-        private ServerStatusItemViewModel? _selectedItem;
+        [NotifyPropertyChangedFor(nameof(IsLogsAndRconEnabled))]
+        [NotifyCanExecuteChangedFor(nameof(StartServerCommand))]
+        [NotifyCanExecuteChangedFor(nameof(StopServerCommand))]
+        private ServerStatusItemViewModel? _selectedServer;
+
+        public bool IsLogsAndRconEnabled => SelectedServer != null;
+
 
         public ObservableCollection<ServerStatusItemViewModel> Servers { get; } = new();
 
@@ -97,33 +104,33 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanStartServer))]
         private async Task StartServer()
         {
-            if (SelectedItem == null) return;
-            await _MinecraftServerManager.StartServer(SelectedItem.Name);
+            if (SelectedServer == null) return;
+            await _MinecraftServerManager.StartServer(SelectedServer.Name);
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanStopServer))]
         private async Task StopServer()
         {
-            if (SelectedItem == null) return;
+            if (SelectedServer == null) return;
 
-            var ServerData = await _ServerRepository.GetServerByName(SelectedItem.Name);
+            var ServerData = await _ServerRepository.GetServerByName(SelectedServer.Name);
             if (ServerData.IdProcess == -1) return;
 
-            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedItem.Name}?");
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedServer.Name}?");
 
-            if (result == true) await _MinecraftServerManager.StopServer(SelectedItem.Name);
+            if (result == true) await _MinecraftServerManager.StopServer(SelectedServer.Name);
         }
 
         [RelayCommand]
         private async Task SendCommand()
         {
-            if (SelectedItem == null || string.IsNullOrWhiteSpace(TextCommand)) return;
+            if (SelectedServer == null || string.IsNullOrWhiteSpace(TextCommand)) return;
 
             var currentCommand = TextCommand;
-            var currentServerName = SelectedItem.Name;
+            var currentServerName = SelectedServer.Name;
 
             TextCommand = string.Empty;
 
@@ -137,7 +144,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             Dispatcher.UIThread.Post(() =>
             {
-                if (SelectedItem?.Name == currentServerName)
+                if (SelectedServer?.Name == currentServerName)
                 {
                     LogsRcon.Insert(LogsRcon.TextLength, newLogEntry);
                 }
@@ -230,12 +237,25 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                             server.Status = "Warning";
                             break;
                     }
-                    if (SelectedItem != null && server.Name == SelectedItem.Name) _ = UpdateStatusServer(server.Name, server.Status);
+                    if (SelectedServer != null && server.Name == SelectedServer.Name) _ = UpdateStatusServer(server.Name, server.Status);
                 }
             }
         }
 
-        partial void OnSelectedItemChanged(ServerStatusItemViewModel? value)
+        private bool CanStartServer()
+        {
+            if (SelectedServer != null && SelectedServer.Status == "Starting") return false;
+            return SelectedServer != null && SelectedServer.Status != "Online";
+        }
+
+        private bool CanStopServer()
+        {
+            if (SelectedServer != null && SelectedServer.Status == "Starting") return false;
+            return SelectedServer != null && SelectedServer.Status != "Offline";
+        }
+
+
+        partial void OnSelectedServerChanged(ServerStatusItemViewModel? value)
         {
             if (value == null) return;
             _ = UpdateStatusServer(value.Name);
