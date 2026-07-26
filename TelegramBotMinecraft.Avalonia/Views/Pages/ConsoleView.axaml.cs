@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using System;
+using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Avalonia.ViewModels;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Services;
@@ -16,7 +17,8 @@ public partial class ConsoleView : UserControl
             new ServerRepository(),
             new ServerStatusService(new ServerRepository()),
             new ServerLogService(new ServerRepository()),
-            new ServerCommandService(new ServerRepository(), new MinecraftServerManager()));
+            new ServerCommandService(new ServerRepository(), new MinecraftServerManager()), 
+            new AvaloniaDialogService());
 
         var logConsole = this.FindControl<AvaloniaEdit.TextEditor>("LogConsole");
         if (logConsole != null)

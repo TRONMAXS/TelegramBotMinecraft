@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Automation;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
@@ -11,14 +13,18 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class ServersViewModel : ObservableObject
     {
         private readonly ServerRepository _ServerRepository;
+
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<Server> Servers { get; } = new();
 
@@ -38,9 +44,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public bool IsEditorEnabled => SelectedServer != null || IsAddingNewServer;
 
-        public ServersViewModel(ServerRepository serverRepository)
+        public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService)
         {
             _ServerRepository = serverRepository;
+            _dialogService = dialogService;
             _ = LoadServersAsync();
         }
 
@@ -76,28 +83,20 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedServer == null) return;
 
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить сервер {SelectedServer.Name}?");
+
+
+            if (result == true)
             {
-                var box = MessageBoxManager.GetMessageBoxStandard(
-                    title: "Подтверждение",
-                    text: $"Вы уверены, что хотите удалить сервер {SelectedServer.Name}?",
-                    ButtonEnum.YesNo,
-                    Icon.Warning);
+                await _ServerRepository.DeleteServer(SelectedServer.Id);
 
-                var result = await box.ShowWindowDialogAsync(desktop.MainWindow);
-
-                if (result == ButtonResult.Yes)
-                {
-                    await _ServerRepository.DeleteServer(SelectedServer.Id);
-
-                    SelectedServer = null;
-                    await LoadServersAsync();
-                }
+                SelectedServer = null;
+                await LoadServersAsync();
             }
         }
 
         [RelayCommand]
-        public async Task SaveButton()
+        private async Task SaveButton()
         {
             if (EditableServer == null) return;
 
@@ -110,14 +109,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        public async Task CancelButton()
+        private async Task CancelButton()
         {
             IsAddingNewServer = false;
 
             if (SelectedServer != null) await LoadSettingsServerAsync(SelectedServer.Name);
             else EditableServer = new Server();
         }
-
 
         private bool CanDelete() => SelectedServer != null && !IsAddingNewServer;
 

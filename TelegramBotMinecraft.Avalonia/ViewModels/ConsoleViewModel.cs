@@ -42,6 +42,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private readonly ServerCommandService _ServerCommandService;
 
+        private readonly IDialogService _dialogService;
+
+
 
         [ObservableProperty]
         public string statusServer;
@@ -69,13 +72,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             ServerRepository serverRepository, 
             ServerStatusService serverStatusService, 
             ServerLogService serverLogService,
-            ServerCommandService serverCommandService)
+            ServerCommandService serverCommandService,
+            IDialogService dialogService)
         {
             _MinecraftServerManager = minecraftServerManager;
             _ServerRepository = serverRepository;
             _ServerStatusService = serverStatusService;
             _ServerLogService = serverLogService;
             _ServerCommandService = serverCommandService;
+            _dialogService = dialogService;
 
             _ = LoadServersAsync();
             _ = MonitorServersAsync();
@@ -107,21 +112,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             var ServerData = await _ServerRepository.GetServerByName(SelectedItem.Name);
             if (ServerData.IdProcess == -1) return;
 
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                var box = MessageBoxManager.GetMessageBoxStandard(
-                    title: "Подтверждение",
-                    text: $"Вы уверены, что хотите остановить сервер {SelectedItem.Name}?",
-                    ButtonEnum.YesNo,
-                    Icon.Warning);
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedItem.Name}?");
 
-                var result = await box.ShowWindowDialogAsync(desktop.MainWindow);
-
-                if (result == ButtonResult.Yes)
-                {
-                    await _MinecraftServerManager.StopServer(SelectedItem.Name);
-                }
-            }
+            if (result == true) await _MinecraftServerManager.StopServer(SelectedItem.Name);
         }
 
         [RelayCommand]
