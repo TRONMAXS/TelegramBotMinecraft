@@ -15,7 +15,7 @@
     <Grid ColumnDefinitions="*, Auto, 275">
         <Grid
             Grid.Column="0"
-            IsEnabled="{Binding IsLogsAndRconEnabled}"
+            IsEnabled="{Binding IsLogsEnabled}"
             RowDefinitions="*,Auto">
             <GroupBox
                 Grid.Row="0"
@@ -51,7 +51,9 @@
                     <DockPanel
                         Grid.Row="0"
                         HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding IsRconEnabled}"
                         LastChildFill="True">
+
                         <Button
                             Margin="5,0,0,0"
                             Command="{Binding SendCommandCommand}"

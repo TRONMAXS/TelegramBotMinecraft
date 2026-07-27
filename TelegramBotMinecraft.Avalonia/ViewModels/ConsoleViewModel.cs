@@ -46,29 +46,32 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsRconEnabled))]
         [NotifyCanExecuteChangedFor(nameof(StartServerCommand))]
         [NotifyCanExecuteChangedFor(nameof(StopServerCommand))]
-        public string statusServer;
+        public string? statusServer;
 
         [ObservableProperty]
-        public string nameServer;
+        public string? nameServer;
 
         [ObservableProperty]
-        public TextDocument logsServer = new();
+        public TextDocument? logsServer = new();
 
         [ObservableProperty]
-        public TextDocument logsRcon = new();
+        public TextDocument? logsRcon = new();
 
         [ObservableProperty]
-        public string textCommand;
+        public string? textCommand;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsLogsAndRconEnabled))]
+        [NotifyPropertyChangedFor(nameof(IsLogsEnabled))]
+        [NotifyPropertyChangedFor(nameof(IsRconEnabled))]
         [NotifyCanExecuteChangedFor(nameof(StartServerCommand))]
         [NotifyCanExecuteChangedFor(nameof(StopServerCommand))]
         private ServerStatusItemViewModel? _selectedServer;
 
-        public bool IsLogsAndRconEnabled => SelectedServer != null;
+        public bool IsLogsEnabled => SelectedServer != null;
+        public bool IsRconEnabled => SelectedServer != null && SelectedServer.Status == "Online";
 
 
         public ObservableCollection<ServerStatusItemViewModel> Servers { get; } = new();
