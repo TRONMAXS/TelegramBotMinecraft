@@ -1,4 +1,5 @@
 ﻿using Avalonia.Automation;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -101,6 +102,43 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
                 if (item != null)
                     item.IsChecked = true;
+            }
+        }
+
+
+        [RelayCommand]
+        private void DisableAllServers()
+        {
+            foreach (var server in Servers)
+            {
+                server.IsChecked = false;
+            }
+        }
+
+        [RelayCommand]
+        private void EnableAllServers()
+        {
+            foreach (var server in Servers)
+            {
+                server.IsChecked = true;
+            }
+        }
+
+        [RelayCommand]
+        private void DisableAllCommands()
+        {
+            foreach (var command in Commands)
+            {
+                command.IsChecked = false;
+            }
+        }
+
+        [RelayCommand]
+        private void EnableAllCommands()
+        {
+            foreach (var command in Commands)
+            {
+                command.IsChecked = true;
             }
         }
 
