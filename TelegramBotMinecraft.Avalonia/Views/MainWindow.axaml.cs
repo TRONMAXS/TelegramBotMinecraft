@@ -23,7 +23,7 @@ public partial class MainWindow : Window
 
         var usersVm = new UsersViewModel(new ServerRepository(), 
             new UserRepository(), 
-            new CommandRepository());
+            new CommandRepository(), new AvaloniaDialogService());
 
         var settingsVm = new SettingsViewModel(new SettingsRepository());
 

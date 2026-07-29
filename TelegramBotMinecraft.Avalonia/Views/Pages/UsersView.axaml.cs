@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Avalonia.ViewModels;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Services;
@@ -11,6 +12,6 @@ public partial class UsersView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new UsersViewModel(new ServerRepository(), new UserRepository(), new CommandRepository());
+        DataContext = new UsersViewModel(new ServerRepository(), new UserRepository(), new CommandRepository(), new AvaloniaDialogService());
     }
 }

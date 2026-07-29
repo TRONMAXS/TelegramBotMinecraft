@@ -92,9 +92,19 @@ namespace TelegramBotMinecraft.Core.Database
 
         }
 
-        public async Task DeleteUser(string IdTg)
+        public async Task DeleteUser(int? id)
         {
-
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("DELETE FROM Users WHERE (ID_TG) = @UserId;", connection);
+                    command.Parameters.AddWithValue("@UserId", id);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            catch { }
         }
 
     }

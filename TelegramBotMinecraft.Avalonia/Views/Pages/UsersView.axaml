@@ -191,7 +191,10 @@
                         Spacing="5">
                         <Button Content="Изменить" FontSize="12" />
                         <Button Content="Сохранить" FontSize="12" />
-                        <Button Content="Удалить" FontSize="12" />
+                        <Button
+                            Command="{Binding DeleteUserCommand}"
+                            Content="Удалить"
+                            FontSize="12" />
                     </StackPanel>
 
                     <GroupBox

@@ -12,6 +12,7 @@ using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.ViewModels.Items;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -21,6 +22,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly ServerRepository _ServerRepository;
         private readonly UserRepository _UserRepository;
         private readonly CommandRepository _CommandRepository;
+        private readonly IDialogService _dialogService;
+
 
         public ObservableCollection<User> Users { get; } = new();
         public ObservableCollection<ServerItemViewModel> Servers { get; } = new();
@@ -35,11 +38,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private int? _userId;
 
-        public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, CommandRepository commandRepository)
+        public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, 
+            CommandRepository commandRepository, IDialogService dialogService)
         {
             _ServerRepository = serverRepository;
             _UserRepository = userRepository;
             _CommandRepository = commandRepository;
+            _dialogService = dialogService;
 
             _ = LoadServersAsync();
             _ = LoadUsersAsync();
@@ -126,6 +131,20 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             UserId = null;
 
             await LoadUsersAsync();
+        }
+
+        [RelayCommand]
+        private async Task DeleteUser()
+        {
+            if (SelectedItem == null) return;
+
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить пользователя {SelectedItem.Name} : {SelectedItem.Id}?");
+
+            if (result == true)
+            {
+                await _UserRepository.DeleteUser(SelectedItem.Id);
+                await LoadUsersAsync();
+            }
         }
 
         [RelayCommand]
