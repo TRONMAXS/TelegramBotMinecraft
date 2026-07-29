@@ -47,58 +47,32 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new Setting(); }
         }
 
-        public async Task SaveSettings()
+        public async Task SaveSettings(Setting? settings)
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
-                {
-                    connection.Open();
-                    SqliteCommand command = new SqliteCommand("UPDATE Settings SET (TrayOnStart, RunAtStartup, Notifications) = (@TrayOnStart, @RunAtStartup, @Notifications) WHERE ID == 1;", connection);
-                    /*command.Parameters.AddWithValue("@TrayOnStart", Convert.ToInt32(chk_StartToTray.Checked));
-                    command.Parameters.AddWithValue("@RunAtStartup", Convert.ToInt32(chk_AutoStartup.Checked));
-                    command.Parameters.AddWithValue("@Notifications", Convert.ToInt32(chk_PushNotifications.Checked));*/
-                    command.ExecuteNonQuery();
-                }
-                LoggerService.MessageAppInfo("Настройки приложения сохранены.");
-            }
-            catch (Exception ex)
-            {
-                LoggerService.ErrorAppInfo($"Ошибка при сохранении настроек приложения: {ex.Message}");
-            }
-        }
-
-        public async Task SaveSettingsBOT()
-        {
-            try
-            {
-
-                string OldBotToken = "";
                 using (var connection = new SqliteConnection(Data))
                 {
                     await connection.OpenAsync();
-                    SqliteCommand getOldTokenCmd = new SqliteCommand("SELECT BotToken FROM Settings", connection);
-                    OldBotToken = getOldTokenCmd.ExecuteScalar().ToString();
+                    SqliteCommand updateCommand = new SqliteCommand("UPDATE Settings SET " +
+                        "(BotToken, AutoBot, AutoReconnect, ProxyHost, ProxyPort, ProxyUsername, ProxyPassword, TrayOnStart, RunAtStartup, Notifications)" +
+                        " = (@BotToken, @AutoBot, @AutoReconnect, @ProxyHost, @ProxyPort, @ProxyUsername, @ProxyPassword, @TrayOnStart, @RunAtStartup, @Notifications) " +
+                        "WHERE ID == 1;", connection);
+                    updateCommand.Parameters.AddWithValue("@BotToken", settings?.BotToken);
+                    updateCommand.Parameters.AddWithValue("@AutoBot", settings?.AutoBot);
+                    updateCommand.Parameters.AddWithValue("@AutoReconnect", settings?.AutoReconnect);
+                    updateCommand.Parameters.AddWithValue("@ProxyHost", settings?.ProxyHost);
+                    updateCommand.Parameters.AddWithValue("@ProxyPort", settings?.ProxyPort);
+                    updateCommand.Parameters.AddWithValue("@ProxyUsername", settings?.ProxyUsername);
+                    updateCommand.Parameters.AddWithValue("@ProxyPassword", settings?.ProxyPassword);
+                    updateCommand.Parameters.AddWithValue("@TrayOnStart", settings?.TrayOnStart);
+                    updateCommand.Parameters.AddWithValue("@RunAtStartup", settings?.RunAtStartup);
+                    updateCommand.Parameters.AddWithValue("@Notifications", settings?.Notifications);
 
-                    SqliteCommand updateCommand = new SqliteCommand("UPDATE Settings SET (BotToken, Auto_Bot, AutoReconnect, Proxy_Host, Proxy_Port, Proxy_Username, Proxy_Password)" +
-                        " = (@BotToken, @Auto_Bot, @AutoReconnect, @Proxy_Host, @Proxy_Port, @Proxy_Username, @Proxy_Password) WHERE ID == 1;", connection);
-                    /*updateCommand.Parameters.AddWithValue("@BotToken", tb_BotToken.Text.Trim());
-                    updateCommand.Parameters.AddWithValue("@Auto_Bot", Convert.ToInt32(chk_AutoStartBot.Checked));
-                    updateCommand.Parameters.AddWithValue("@AutoReconnect", Convert.ToInt32(chk_AutoRestartBot.Checked));
-                    updateCommand.Parameters.AddWithValue("@Proxy_Host", tb_ProxyHost.Text.Trim());
-                    updateCommand.Parameters.AddWithValue("@Proxy_Port", tb_ProxyPort.Text.Trim());
-                    updateCommand.Parameters.AddWithValue("@Proxy_Username", tb_ProxyUsername.Text.Trim());
-                    updateCommand.Parameters.AddWithValue("@Proxy_Password", tb_ProxyPassword.Text.Trim());*/
                     await updateCommand.ExecuteNonQueryAsync();
-
                 }
-
-                LoggerService.MessageAppInfo("Настройки бота обновлены.");
             }
-            catch (Exception ex)
-            {
-                LoggerService.ErrorAppInfo($"Ошибка при сохранении настроек бота: {ex.Message}");
-            }
+            catch { }
         }
     }
 }

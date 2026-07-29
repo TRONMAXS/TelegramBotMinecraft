@@ -4,11 +4,11 @@
     {
         public int Id { get; set; }
         public string? BotToken { get; set; }
-        public int AutoBot { get; set; } = 1;
+        public int AutoBot { get; set; } = 0;
         public int TrayOnStart { get; set; } = 0;
         public int RunAtStartup { get; set; } = 0;
-        public int AutoReconnect { get; set; } = 1;
-        public int? Notifications { get; set; } = 1;
+        public int AutoReconnect { get; set; } = 0;
+        public int? Notifications { get; set; } = 0;
         public string? ProxyHost { get; set; }
         public string? ProxyPort { get; set; }
         public string? ProxyUsername { get; set; }

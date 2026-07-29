@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
@@ -25,6 +24,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             Setting settings = await _SettingsRepository.GetAllSettings();
             if (settings != null) Settings = settings;
+        }
+
+        [RelayCommand]
+        private async Task SaveSettings()
+        {
+            await _SettingsRepository.SaveSettings(Settings);
         }
     }
 }

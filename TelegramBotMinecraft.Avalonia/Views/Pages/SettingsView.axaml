@@ -187,6 +187,7 @@
             Grid.Row="1"
             Margin="3"
             VerticalAlignment="Bottom"
+            Command="{Binding SaveSettingsCommand}"
             Content="Coxpaнить" />
     </Grid>
 </UserControl>
