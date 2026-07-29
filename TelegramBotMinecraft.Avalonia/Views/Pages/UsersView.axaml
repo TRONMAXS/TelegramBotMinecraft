@@ -189,8 +189,14 @@
                         HorizontalAlignment="Center"
                         Orientation="Horizontal"
                         Spacing="5">
-                        <Button Content="Изменить" FontSize="12" />
-                        <Button Content="Сохранить" FontSize="12" />
+                        <Button
+                            Command="{Binding EditUserCommand}"
+                            Content="Изменить"
+                            FontSize="12" />
+                        <Button
+                            Command="{Binding SaveUserCommand}"
+                            Content="Сохранить"
+                            FontSize="12" />
                         <Button
                             Command="{Binding DeleteUserCommand}"
                             Content="Удалить"

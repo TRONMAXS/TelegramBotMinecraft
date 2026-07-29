@@ -38,6 +38,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private int? _userId;
 
+        private int? UserOldId;
+
         public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, 
             CommandRepository commandRepository, IDialogService dialogService)
         {
@@ -145,6 +147,27 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 await _UserRepository.DeleteUser(SelectedItem.Id);
                 await LoadUsersAsync();
             }
+        }
+
+        [RelayCommand]
+        private void EditUser()
+        {
+            if (SelectedItem == null) return;
+            UserName = SelectedItem.Name;
+            UserId = SelectedItem.Id;
+            UserOldId = SelectedItem.Id;
+        }
+
+        [RelayCommand]
+        private async Task SaveUser()
+        {
+            await _UserRepository.UpdateUser(UserName, UserId, UserOldId);
+
+            UserName = null;
+            UserId = null;
+            UserOldId = null;
+
+            await LoadUsersAsync();
         }
 
         [RelayCommand]

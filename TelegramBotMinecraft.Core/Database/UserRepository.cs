@@ -68,28 +68,22 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task UpdateUser(string UserName, string ID_TG, string UserID)
+        public async Task UpdateUser(string? name, int? newId, int? oldId)
         {
-            string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserIDTG WHERE ID = @UserID;";
+            string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserNewId WHERE ID_TG = @UserOldId;";
             try
             {
-                using (var connection = new SqliteConnection("Data Source=Data.db"))
+                using (var connection = new SqliteConnection(Data))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlUpdateUser, connection);
-                    command.Parameters.AddWithValue("@UserName", UserName);
-                    command.Parameters.AddWithValue("@UserIDTG", ID_TG);
-                    command.Parameters.AddWithValue("@UserID", UserID);
+                    command.Parameters.AddWithValue("@UserName", name);
+                    command.Parameters.AddWithValue("@UserNewId", newId);
+                    command.Parameters.AddWithValue("@UserOldId", oldId);
                     await command.ExecuteNonQueryAsync();
                 }
-
-                LoggerService.MessageAppInfo($"Пользователь [{UserName}] обновлен");
             }
-            catch (Exception ex)
-            {
-                LoggerService.ErrorAppInfo($"Ошибка при обновление пользователя [{UserName}] : {ex.Message}");
-            }
-
+            catch { }
         }
 
         public async Task DeleteUser(int? id)
