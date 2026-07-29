@@ -1,104 +1,192 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             d:DesignWidth="1220" d:DesignHeight="730"
-             x:Class="TelegramBotMinecraft.Avalonia.SettingsView"
-             x:DataType="vm:SettingsViewModel">
-    <Grid ColumnDefinitions="*, Auto, *">
-
-        <GroupBox Grid.Column="0" Header="Telegram" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
-            <Grid RowDefinitions="*, auto">
+<UserControl
+    x:Class="TelegramBotMinecraft.Avalonia.SettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    d:DesignHeight="730"
+    d:DesignWidth="1220"
+    x:DataType="vm:SettingsViewModel"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="*, Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto, *">
+            <GroupBox
+                Grid.Column="0"
+                Margin="3"
+                Padding="0"
+                FontFamily="Default"
+                FontSize="15"
+                Header="Telegram">
                 <StackPanel Grid.Row="0" Spacing="10">
-
-
-                    <GroupBox Header="Настройки бота"  FontSize="15" FontFamily="Default" Padding="0">
+                    <GroupBox
+                        Padding="0"
+                        FontFamily="Default"
+                        FontSize="15"
+                        Header="Настройки бота">
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="BotToken:"/>
-                                <TextBox Text="{Binding Settings.BotToken}" PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBlock
+                                    Width="150"
+                                    VerticalAlignment="Center"
+                                    Text="BotToken:" />
+                                <TextBox
+                                    Padding="5,4"
+                                    Classes="revealPasswordButton"
+                                    PasswordChar="*"
+                                    PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ"
+                                    RevealPassword="False"
+                                    Text="{Binding Settings.BotToken}" />
                             </DockPanel>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding Settings.AutoBot}" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Автозапуск бота"/>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.AutoBot}" />
+                                <TextBlock
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Автозапуск бота" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding Settings.AutoReconnect}" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Авторестарт бота"/>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.AutoReconnect}" />
+                                <TextBlock
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Авторестарт бота" />
                             </StackPanel>
+                            <Button
+                                Margin="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Content="Включить бот" />
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Прокси" FontSize="15" FontFamily="Default" Padding="0">
+                    <GroupBox
+                        Padding="0"
+                        FontFamily="Default"
+                        FontSize="15"
+                        Header="Прокси (SOCKS5)">
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="Хост / IP:"/>
-                                <TextBox Text="{Binding Settings.ProxyHost}" PlaceholderText="127.0.0.1" Padding="5,4"/>
+                                <TextBlock
+                                    Width="150"
+                                    VerticalAlignment="Center"
+                                    Text="Хост / IP:" />
+                                <TextBox
+                                    Padding="5,4"
+                                    PlaceholderText="127.0.0.1"
+                                    Text="{Binding Settings.ProxyHost}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="Port:"/>
-                                <TextBox Text="{Binding Settings.ProxyPort}" PlaceholderText="1080" Padding="5,4"/>
+                                <TextBlock
+                                    Width="150"
+                                    VerticalAlignment="Center"
+                                    Text="Port:" />
+                                <TextBox
+                                    Padding="5,4"
+                                    PlaceholderText="1080"
+                                    Text="{Binding Settings.ProxyPort}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="Admin:"/>
-                                <TextBox Text="{Binding Settings.ProxyUsername}" PlaceholderText="Admin" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBlock
+                                    Width="150"
+                                    VerticalAlignment="Center"
+                                    Text="Admin:" />
+                                <TextBox
+                                    Padding="5,4"
+                                    PlaceholderText="Admin"
+                                    Text="{Binding Settings.ProxyUsername}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
-                                <TextBlock Width="150" VerticalAlignment="Center" Text="Пароль:"/>
-                                <TextBox Text="{Binding Settings.ProxyPassword}" PlaceholderText="12345" Padding="5,4" PasswordChar="*" RevealPassword="False" Classes="revealPasswordButton"/>
+                                <TextBlock
+                                    Width="150"
+                                    VerticalAlignment="Center"
+                                    Text="Пароль:" />
+                                <TextBox
+                                    Padding="5,4"
+                                    Classes="revealPasswordButton"
+                                    PasswordChar="*"
+                                    PlaceholderText="12345"
+                                    RevealPassword="False"
+                                    Text="{Binding Settings.ProxyPassword}" />
                             </DockPanel>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>
-                <Button Grid.Row="1" Content="Coxpaнить и переподключить" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
-                <Button Grid.Row="1" Content="Вкл бот" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
-            </Grid>
+            </GroupBox>
 
-        </GroupBox>
-
-        <Grid Grid.Column="2">
-            <Grid RowDefinitions="auto, *">
-
-
-                <GroupBox Grid.Row="0" Header="Основные" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
-                    <Grid RowDefinitions="*, auto">
-                        <StackPanel Spacing="8">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding Settings.TrayOnStart}" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="В трей при запуске"/>
+            <Grid Grid.Column="2">
+                <Grid RowDefinitions="auto, *">
+                    <GroupBox
+                        Grid.Row="0"
+                        Margin="3"
+                        Padding="0"
+                        FontFamily="Default"
+                        FontSize="15"
+                        Header="Основные">
+                        <Grid RowDefinitions="*, auto">
+                            <StackPanel Spacing="8">
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.TrayOnStart}" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="Сворачивать в трей при запуске" />
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.RunAtStartup}" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="Запуск с Windows" />
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.Notifications}" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="Всплывающие уведомления" />
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding}" />
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="Автоматический выбор Java" />
+                                </StackPanel>
+                                <Grid>
+                                    <Button
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Content="Управление Java" />
+                                </Grid>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding Settings.RunAtStartup}" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Запуск с Windows"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding Settings.Notifications}" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Всплывающие уведомления"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <CheckBox IsChecked="{Binding }" VerticalAlignment="Center"/>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="Автоматический выбор Java"/>
-                            </StackPanel>
-                            <Grid>
-                                <Button Content="Управление Java" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                <Button Content="Сохранить" HorizontalAlignment="Center" Margin="10,0,0,0"/>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-                </GroupBox>
+                        </Grid>
+                    </GroupBox>
 
-                <GroupBox Grid.Row="1" Header="Консоль бота" Margin="3" FontSize="15" FontFamily="Default" Padding="0">
-                    <TextBox Grid.Row="0" HorizontalAlignment="Stretch"
-                             VerticalAlignment="Stretch"
-                             VerticalContentAlignment="Top"
-                             Margin="0"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             IsReadOnly="True"/>
-                </GroupBox>
+                    <GroupBox
+                        Grid.Row="1"
+                        Margin="3"
+                        Padding="0"
+                        FontFamily="Default"
+                        FontSize="15"
+                        Header="Консоль бота и приложения">
+                        <TextBox
+                            Grid.Row="0"
+                            Margin="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            VerticalContentAlignment="Top"
+                            AcceptsReturn="True"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap" />
+                    </GroupBox>
+                </Grid>
             </Grid>
         </Grid>
+        <Button
+            Grid.Row="1"
+            Margin="3"
+            VerticalAlignment="Bottom"
+            Content="Coxpaнить" />
     </Grid>
 </UserControl>
