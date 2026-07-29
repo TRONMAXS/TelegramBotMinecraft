@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Telegram.Bot.Types;
 using TelegramBotMinecraft.Core.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -63,9 +64,49 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new List<Command>(); }
         }
 
-        public async Task SaveUserCommandsAsync()
+        public async Task SaveUserCommandsAsync(int userId, List<int> commandsId)
         {
+            using (var connection = new SqliteConnection(Data))
+            {
+                await connection.OpenAsync();
+                using (var transaction = await connection.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        string deleteSql = "DELETE FROM UserCommands WHERE ID_User = @UserID;";
+                        using (var delCommand = new SqliteCommand(deleteSql, connection, transaction as SqliteTransaction))
+                        {
+                            delCommand.Parameters.AddWithValue("@UserID", userId);
+                            await delCommand.ExecuteNonQueryAsync();
+                        }
 
+                        if (commandsId != null && commandsId.Count > 0)
+                        {
+                            string insertSql = "INSERT INTO UserCommands (ID_User, ID_Command) VALUES (@UserID, @CommandID);";
+                            using (var insCommand = new SqliteCommand(insertSql, connection, transaction as SqliteTransaction))
+                            {
+                                var userParam = insCommand.Parameters.Add("@UserID", SqliteType.Integer);
+                                var commandParam = insCommand.Parameters.Add("@CommandID", SqliteType.Integer);
+
+                                userParam.Value = userId;
+
+                                foreach (int Id in commandsId)
+                                {
+                                    commandParam.Value = Id;
+                                    await insCommand.ExecuteNonQueryAsync();
+                                }
+                            }
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
+            }
         }
 
     }

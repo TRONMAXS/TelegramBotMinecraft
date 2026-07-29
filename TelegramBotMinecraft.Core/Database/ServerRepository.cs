@@ -1,5 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System.Security.Cryptography;
+using Telegram.Bot.Types;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -224,9 +224,49 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task SaveUserServers()
+        public async Task SaveUserServersAsync(int userId, List<int> serversId)
         {
-            
+            using (var connection = new SqliteConnection(Data))
+            {
+                await connection.OpenAsync();
+                using (var transaction = await connection.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        string deleteSql = "DELETE FROM UserServers WHERE ID_User = @UserID;";
+                        using (var delCommand = new SqliteCommand(deleteSql, connection, transaction as SqliteTransaction))
+                        {
+                            delCommand.Parameters.AddWithValue("@UserID", userId);
+                            await delCommand.ExecuteNonQueryAsync();
+                        }
+
+                        if (serversId != null && serversId.Count > 0)
+                        {
+                            string insertSql = "INSERT INTO UserServers (ID_User, ID_Server) VALUES (@UserID, @ServerID);";
+                            using (var insCommand = new SqliteCommand(insertSql, connection, transaction as SqliteTransaction))
+                            {
+                                var userParam = insCommand.Parameters.Add("@UserID", SqliteType.Integer);
+                                var serverParam = insCommand.Parameters.Add("@ServerID", SqliteType.Integer);
+
+                                userParam.Value = userId;
+
+                                foreach (int Id in serversId)
+                                {
+                                    serverParam.Value = Id;
+                                    await insCommand.ExecuteNonQueryAsync();
+                                }
+                            }
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
+            }
         }
     }
 }

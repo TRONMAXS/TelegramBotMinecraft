@@ -74,10 +74,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
         private async Task LoadPermissionsUserAsync(int userId)
         {
+            if (SelectedItem == null) return;
+
             var userServers = await _ServerRepository.GetServersByUserIdAsync(userId);
             var userCommands = await _CommandRepository.GetCommandsByUserIdAsync(userId);
-            if (userServers == null || userServers.Count == 0) return;
-            if (userCommands == null || userCommands.Count == 0) return;
+            if (userServers == null) return;
+            if (userCommands == null) return;
 
             foreach (var server in Servers)
             {
@@ -105,6 +107,27 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+
+        [RelayCommand]
+        private async Task SavePermissionsButton()
+        {
+            if(SelectedItem == null) return;
+
+            List<int> selectedServers = Servers
+                                                .Where(s => s.IsChecked)
+                                                .Select(s => s.Id)
+                                                .ToList();
+
+            List<int> selectedCommands = Commands
+                                                .Where(c => c.IsChecked)
+                                                .Select(c => c.Id)
+                                                .ToList();
+
+            await _ServerRepository.SaveUserServersAsync(SelectedItem.Id, selectedServers);       
+            await _CommandRepository.SaveUserCommandsAsync(SelectedItem.Id, selectedCommands);
+
+            SelectedItem = null;
+        }
 
         [RelayCommand]
         private void DisableAllServers()
