@@ -26,9 +26,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public ObservableCollection<ServerItemViewModel> Servers { get; } = new();
         public ObservableCollection<CommandItemViewModel> Commands { get; } = new();
 
-
         [ObservableProperty]
         private User? _selectedItem;
+
+        [ObservableProperty]
+        private string? _userName;
+
+        [ObservableProperty]
+        private int? _userId;
 
         public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, CommandRepository commandRepository)
         {
@@ -39,7 +44,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _ = LoadServersAsync();
             _ = LoadUsersAsync();
             _ = LoadCommandsAsync();
-
         }
 
         private async Task LoadServersAsync()
@@ -56,6 +60,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             var users = await _UserRepository.GetAllUserNamesAndId();
             if (users == null) return;
+
+            SelectedItem = null;
+
+            Users.Clear();
 
             foreach (var user in users)
             {
@@ -107,9 +115,21 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+        [RelayCommand]
+        private async Task AddUser()
+        {
+            if(UserName == null && UserId == null) return;
+
+            await _UserRepository.AddUser(UserName, UserId);
+
+            UserName = null;
+            UserId = null;
+
+            await LoadUsersAsync();
+        }
 
         [RelayCommand]
-        private async Task SavePermissionsButton()
+        private async Task SavePermissions()
         {
             if(SelectedItem == null) return;
 

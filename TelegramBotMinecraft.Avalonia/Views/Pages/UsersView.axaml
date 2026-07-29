@@ -140,7 +140,7 @@
                     Margin="0,15,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Command="{Binding SavePermissionsButtonCommand}"
+                    Command="{Binding SavePermissionsCommand}"
                     Content="Сохранить" />
             </Grid>
 
@@ -206,14 +206,17 @@
                             <TextBox
                                 HorizontalAlignment="Stretch"
                                 IsReadOnly="False"
-                                PlaceholderText="Имя" />
+                                PlaceholderText="Имя"
+                                Text="{Binding UserName}" />
                             <TextBox
                                 HorizontalAlignment="Stretch"
                                 IsReadOnly="False"
-                                PlaceholderText="Id" />
-
-                            <Button Margin="0,5,0,0" Content="Добавить" />
-
+                                PlaceholderText="Id"
+                                Text="{Binding UserId}" />
+                            <Button
+                                Margin="0,5,0,0"
+                                Command="{Binding AddUserCommand}"
+                                Content="Добавить" />
                         </StackPanel>
                     </GroupBox>
                 </Grid>

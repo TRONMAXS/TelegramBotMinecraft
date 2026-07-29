@@ -52,9 +52,20 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return; }
         }
 
-        public async Task AddUser(string UserName, string ID_TG)
+        public async Task AddUser(string? name, int? id)
         {
-
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@UserName, @UserId);", connection);
+                    command.Parameters.AddWithValue("@UserName", name);
+                    command.Parameters.AddWithValue("@UserId", id);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            catch { }
         }
 
         public async Task UpdateUser(string UserName, string ID_TG, string UserID)
