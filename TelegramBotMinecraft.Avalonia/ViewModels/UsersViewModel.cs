@@ -30,7 +30,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public ObservableCollection<CommandItemViewModel> Commands { get; } = new();
 
         [ObservableProperty]
-        private User? _selectedItem;
+        private User? _selectedUser;
+
+        [ObservableProperty]
+        private bool _isEditingUser;
+
+        public bool IsPermissionsEnabled => SelectedUser != null && !IsEditingUser;
+        public bool IsListUsersEnabled => !IsEditingUser;
 
         [ObservableProperty]
         private string? _userName;
@@ -63,12 +69,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 Servers.Add(new ServerItemViewModel(server.Id, server.Name));
             }
         }
+
         private async Task LoadUsersAsync()
         {
             var users = await _UserRepository.GetAllUserNamesAndId();
             if (users == null) return;
 
-            SelectedItem = null;
+            SelectedUser = null;
 
             Users.Clear();
 
@@ -77,6 +84,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 Users.Add(new User(user.Name, user.Id));
             }
         }
+
         private async Task LoadCommandsAsync()
         {
             var commands = await _CommandRepository.GetAllCommandAsync();
@@ -87,9 +95,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 Commands.Add(new CommandItemViewModel(command.Id, command.CommandText));
             }
         }
+
         private async Task LoadPermissionsUserAsync(int userId)
         {
-            if (SelectedItem == null) return;
+            if (SelectedUser == null) return;
 
             var userServers = await _ServerRepository.GetServersByUserIdAsync(userId);
             var userCommands = await _CommandRepository.GetCommandsByUserIdAsync(userId);
@@ -122,7 +131,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        [RelayCommand]
+
+        [RelayCommand(CanExecute = nameof(CanAdd))]
         private async Task AddUser()
         {
             if(UserName == null && UserId == null) return;
@@ -135,30 +145,37 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             await LoadUsersAsync();
         }
 
-        [RelayCommand]
+
+        [RelayCommand(CanExecute = nameof(CanDelete))]
         private async Task DeleteUser()
         {
-            if (SelectedItem == null) return;
+            if (SelectedUser == null) return;
 
-            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить пользователя {SelectedItem.Name} : {SelectedItem.Id}?");
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить пользователя {SelectedUser.Name} : {SelectedUser.Id}?");
 
             if (result == true)
             {
-                await _UserRepository.DeleteUser(SelectedItem.Id);
+                await _UserRepository.DeleteUser(SelectedUser.Id);
+
                 await LoadUsersAsync();
+                await RefreshListServersAndCommads();
             }
         }
 
-        [RelayCommand]
+
+        [RelayCommand(CanExecute = nameof(CanNotEdit))]
         private void EditUser()
         {
-            if (SelectedItem == null) return;
-            UserName = SelectedItem.Name;
-            UserId = SelectedItem.Id;
-            UserOldId = SelectedItem.Id;
+            if (SelectedUser == null) return;
+            IsEditingUser = true;
+
+            UserName = SelectedUser.Name;
+            UserId = SelectedUser.Id;
+            UserOldId = SelectedUser.Id;
         }
 
-        [RelayCommand]
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
         private async Task SaveUser()
         {
             await _UserRepository.UpdateUser(UserName, UserId, UserOldId);
@@ -167,13 +184,17 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             UserId = null;
             UserOldId = null;
 
+            IsEditingUser = false;
+
             await LoadUsersAsync();
+            await RefreshListServersAndCommads();
         }
+
 
         [RelayCommand]
         private async Task SavePermissions()
         {
-            if(SelectedItem == null) return;
+            if(SelectedUser == null) return;
 
             List<int> selectedServers = Servers
                                                 .Where(s => s.IsChecked)
@@ -185,11 +206,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                                                 .Select(c => c.Id)
                                                 .ToList();
 
-            await _ServerRepository.SaveUserServersAsync(SelectedItem.Id, selectedServers);       
-            await _CommandRepository.SaveUserCommandsAsync(SelectedItem.Id, selectedCommands);
+            await _ServerRepository.SaveUserServersAsync(SelectedUser.Id, selectedServers);       
+            await _CommandRepository.SaveUserCommandsAsync(SelectedUser.Id, selectedCommands);
 
-            SelectedItem = null;
+            SelectedUser = null;
+            await RefreshListServersAndCommads();
         }
+
 
         [RelayCommand]
         private void DisableAllServers()
@@ -200,6 +223,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+
         [RelayCommand]
         private void EnableAllServers()
         {
@@ -208,6 +232,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 server.IsChecked = true;
             }
         }
+
 
         [RelayCommand]
         private void DisableAllCommands()
@@ -218,6 +243,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
+
         [RelayCommand]
         private void EnableAllCommands()
         {
@@ -227,8 +253,41 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        partial void OnSelectedItemChanged(User? value)
+
+        private async Task RefreshListServersAndCommads()
         {
+            foreach (var server in Servers)
+            {
+                server.IsChecked = false;
+            }
+            foreach (var command in Commands)
+            {
+                command.IsChecked = false;
+            }
+        }
+
+
+        private bool CanDelete() => SelectedUser != null && !IsEditingUser;
+        private bool CanEdit() => SelectedUser != null && IsEditingUser;
+        private bool CanNotEdit() => SelectedUser != null && !CanEdit();
+        private bool CanAdd() => !IsEditingUser;
+
+        private void RefreshUserUI()
+        {
+            OnPropertyChanged(nameof(IsPermissionsEnabled));
+            OnPropertyChanged(nameof(IsListUsersEnabled));
+
+            AddUserCommand.NotifyCanExecuteChanged();
+            DeleteUserCommand.NotifyCanExecuteChanged();
+            EditUserCommand.NotifyCanExecuteChanged();
+            SaveUserCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnIsEditingUserChanged(bool value) => RefreshUserUI();
+        partial void OnSelectedUserChanged(User? value)
+        {
+            RefreshUserUI();
+
             if (value == null) return;
             _ = LoadPermissionsUserAsync(value.Id);
         }

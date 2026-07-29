@@ -19,9 +19,8 @@
             FontFamily="Default"
             FontSize="15"
             Header="Разрешения пользователей">
-            <Grid RowDefinitions="*, Auto">
+            <Grid IsEnabled="{Binding IsPermissionsEnabled}" RowDefinitions="*, Auto">
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*">
-
                     <GroupBox
                         Grid.Column="0"
                         Margin="3,0,10,0"
@@ -166,9 +165,10 @@
                         CanUserResizeColumns="False"
                         GridLinesVisibility="All"
                         HorizontalScrollBarVisibility="Disabled"
+                        IsEnabled="{Binding IsListUsersEnabled}"
                         IsReadOnly="True"
                         ItemsSource="{Binding Users}"
-                        SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                        SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
                         SelectionMode="Extended">
                         <DataGrid.Columns>
                             <DataGridTextColumn
