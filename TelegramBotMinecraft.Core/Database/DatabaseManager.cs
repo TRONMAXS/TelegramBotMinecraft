@@ -86,7 +86,7 @@ namespace TelegramBotMinecraft.Core.Database
             }
             catch (Exception ex)
             {
-                LoggerService.ErrorAppInfo($"Ошибка при инициализации БД: {ex.Message}");
+                //LoggerService.ErrorAppInfo($"Ошибка при инициализации БД: {ex.Message}");
             }
         }
 
@@ -110,12 +110,12 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         connection.BackupDatabase(connectionBackup);
                     }
-                    LoggerService.MessageAppInfo("Бэкап прошел успешно: " + currentBackupFilePath);
+                    //LoggerService.MessageAppInfo("Бэкап прошел успешно: " + currentBackupFilePath);
                 }
             }
             catch (Exception ex)
             {
-                LoggerService.ErrorAppInfo($"Ошибка при создании бэкапа: {ex.Message}");
+               //LoggerService.ErrorAppInfo($"Ошибка при создании бэкапа: {ex.Message}");
             }
         }
     }

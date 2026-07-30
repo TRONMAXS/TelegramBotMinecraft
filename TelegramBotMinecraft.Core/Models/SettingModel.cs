@@ -1,4 +1,6 @@
-﻿namespace TelegramBotMinecraft.Core.Models
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace TelegramBotMinecraft.Core.Models
 {
     public class Setting
     {
@@ -15,6 +17,7 @@
         public string? ProxyPassword { get; set; }
 
         public Setting() { }
+
         public Setting(int id, string? botToken, int autoBot, int trayOnStart, int runAtStartup,
                   int autoReconnect, int? notifications, string? proxyHost, string? proxyPort,
                   string? proxyUsername, string? proxyPassword)
@@ -26,6 +29,16 @@
             RunAtStartup = runAtStartup;
             AutoReconnect = autoReconnect;
             Notifications = notifications;
+            ProxyHost = proxyHost;
+            ProxyPort = proxyPort;
+            ProxyUsername = proxyUsername;
+            ProxyPassword = proxyPassword;
+        }
+
+        public Setting(string? botToken, string? proxyHost, string? proxyPort,
+                  string? proxyUsername, string? proxyPassword)
+        {
+            BotToken = botToken;
             ProxyHost = proxyHost;
             ProxyPort = proxyPort;
             ProxyUsername = proxyUsername;

@@ -1,151 +1,144 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using MihaZupan;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using MihaZupan;
+using TelegramBotMinecraft.Core.Database;
+using TelegramBotMinecraft.Core.Models;
 
-namespace TelegramBotMinecraft
+namespace TelegramBotMinecraft.Core.Services
 {
     public class TelegramBot
     {
-        private TelegramBotClient botClient;
-        private CancellationTokenSource cts;
+        private readonly SettingsRepository? _SettingsRepository;
+        private readonly LoggerService? _LoggerService;
 
-        private static TelegramBot _currentInstance;
+        private TelegramBotClient? botClient;
+        private HttpToSocks5Proxy? proxy;
 
-       // public static UserControl_Settings userControl_Settings;
+        private CancellationTokenSource? cts;
 
-        private HttpToSocks5Proxy proxy;
+        public DateTime? BotStartTime;
 
-        private string BotToken;
-        private string Proxy_Host;
-        private string Proxy_Port;
-        private string Proxy_Username;
-        private string Proxy_Password;
-
-        public static DateTime BotStartTime { get; set; }
-
-        public static void StartBotTelegram()
+        public TelegramBot(SettingsRepository settingsRepository, LoggerService loggerService)
         {
-            if (_currentInstance != null)
-            {
-                var oldInstance = _currentInstance;
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await Task.Delay(150); 
-                        oldInstance.cts?.Dispose();
-                    }
-                    catch {}
-                });
-            }
-            _currentInstance = new TelegramBot();
-            _ = _currentInstance.StartBotAsync();
+            _SettingsRepository = settingsRepository;
+            _LoggerService = loggerService;
         }
 
-        public static void StopBotTelegram()
+        public void StartBotTelegram()
         {
-            if (_currentInstance != null)
-            {
-                _currentInstance.cts?.Cancel();
-                _currentInstance = null;
-                LoggerService.MessageBotInfo("Telegram бот остановлен!");
-                //userControl_Settings.ButtonOnBotTelegram();
-            }
+            if (botClient == null && cts == null) _ = StartBotAsync();
+        }
+
+        public void StopBotTelegram()
+        {
+            ExceptionStartBotOrStop();
         }
 
         private async Task StartBotAsync()
         {
-            TelegramBot.BotStartTime = DateTime.UtcNow;
+            BotStartTime = DateTime.UtcNow;
+
+            ExceptionStartBotOrStop();
 
             cts = new CancellationTokenSource();
             proxy = null;
+
             try
             {
-                using (var connection = new SqliteConnection("Data Source=Data.db"))
-                {
-                    await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("SELECT BotToken, Proxy_Host, Proxy_Port, Proxy_Username, Proxy_Password FROM Settings ", connection);
-                    SqliteDataReader reader = await command.ExecuteReaderAsync();
+                Setting? settings = await _SettingsRepository.GetTokenAndProxySettings();
+                if (settings == null) return;
 
-                    while (await reader.ReadAsync())
+                HttpClient? httpClient = null;
+
+                if (!string.IsNullOrWhiteSpace(settings.ProxyHost) && !string.IsNullOrWhiteSpace(settings.ProxyPort))
+                {
+                    int port = Convert.ToInt32(settings.ProxyPort);
+
+                    if (string.IsNullOrWhiteSpace(settings.ProxyUsername) && string.IsNullOrWhiteSpace(settings.ProxyPassword))
                     {
-                        BotToken = reader["BotToken"].ToString();
-                        Proxy_Host = reader["Proxy_Host"].ToString();
-                        Proxy_Port = reader["Proxy_Port"].ToString();
-                        Proxy_Username = reader["Proxy_Username"].ToString();
-                        Proxy_Password = reader["Proxy_Password"].ToString();
+                        proxy = new HttpToSocks5Proxy(settings.ProxyHost, port);
                     }
+                    else
+                    {
+                        proxy = new HttpToSocks5Proxy(settings.ProxyHost, port, settings.ProxyUsername, settings.ProxyPassword);
+                    }
+
+                    var handler = new HttpClientHandler { Proxy = proxy };
+                    httpClient = new HttpClient(handler);
                 }
-                if (string.IsNullOrWhiteSpace(Proxy_Username) && string.IsNullOrWhiteSpace(Proxy_Password) &&
-                    !string.IsNullOrWhiteSpace(Proxy_Host) && !string.IsNullOrWhiteSpace(Proxy_Port))
+
+                if (httpClient != null)
                 {
-                    proxy = new HttpToSocks5Proxy(Proxy_Host, Convert.ToInt32(Proxy_Port));
-                    botClient = new TelegramBotClient(BotToken, new HttpClient(new HttpClientHandler { Proxy = proxy }));
-                }
-                else if (!string.IsNullOrWhiteSpace(Proxy_Username) && !string.IsNullOrWhiteSpace(Proxy_Password) &&
-                    !string.IsNullOrWhiteSpace(Proxy_Host) && !string.IsNullOrWhiteSpace(Proxy_Port))
-                {
-                    proxy = new HttpToSocks5Proxy(Proxy_Host, Convert.ToInt32(Proxy_Port), Proxy_Username, Proxy_Password);
-                    botClient = new TelegramBotClient(BotToken, new HttpClient(new HttpClientHandler { Proxy = proxy }));
+                    var options = new TelegramBotClientOptions(settings.BotToken);
+                    botClient = new TelegramBotClient(options, httpClient);
                 }
                 else
                 {
-                    botClient = new TelegramBotClient(BotToken);
+                    botClient = new TelegramBotClient(settings.BotToken);
                 }
 
-
-                var me = await botClient.GetMe();
+                var me = await botClient.GetMe(cts.Token);
 
                 botClient.StartReceiving(
                     updateHandler: HandleUpdateAsync,
                     errorHandler: HandleErrorAsync,
-                    receiverOptions: new ReceiverOptions { AllowedUpdates = { } },
+                    receiverOptions: new ReceiverOptions { AllowedUpdates = [] },
                     cancellationToken: cts.Token
                 );
 
-                LoggerService.StartBotInfo(me.FirstName, me.Username);
+                _LoggerService?.StartBotInfo(me.FirstName, me.Username);
 
-                //userControl_Settings.ButtonOffBotTelegram();
-
-                await Task.Delay(Timeout.Infinite, cts.Token);
+                try
+                {
+                    await Task.Delay(Timeout.Infinite, cts.Token);
+                }
+                catch (OperationCanceledException) { }
             }
-            catch (OperationCanceledException) {}
             catch (HttpRequestException netEx)
             {
-                LoggerService.ErrorBotInfo("Попытка установить соединение была безуспешной.\nПожалуйста, перепроверьте настройки сети или прокси.");
-                 ExceptionStartBot();
+                _LoggerService?.ErrorBotInfo("Попытка установить соединение была безуспешной.\nПожалуйста, перепроверьте настройки сети или прокси.");
+                ExceptionStartBotOrStop();
             }
             catch (RequestException apiEx)
             {
                 if (apiEx.InnerException is HttpRequestException || apiEx.InnerException?.InnerException is System.Net.Sockets.SocketException)
                 {
-                    LoggerService.ErrorBotInfo("Попытка установить соединение была безуспешной.\nПожалуйста, перепроверьте настройки сети или прокси.");
+                    _LoggerService?.ErrorBotInfo("Попытка установить соединение была безуспешной.\nПожалуйста, перепроверьте настройки сети или прокси.");
                 }
                 else
                 {
-                    LoggerService.ErrorBotInfo("Неверный токен бота или ошибка API: " + apiEx.Message);
+                    _LoggerService?.ErrorBotInfo("Неверный токен бота или ошибка API: " + apiEx.Message);
                 }
-                 ExceptionStartBot();
+                ExceptionStartBotOrStop();
             }
             catch (Exception ex)
             {
-                LoggerService.ErrorBotInfo($"Непредвиденная ошибка: {ex.Message}");
-                 ExceptionStartBot();
+                _LoggerService?.ErrorBotInfo($"Непредвиденная ошибка: {ex.Message}");
+                 ExceptionStartBotOrStop();
             }
         }
 
-        private void ExceptionStartBot()
+        private void ExceptionStartBotOrStop()
         {
-            if (_currentInstance != null)
+            if (botClient == null && cts == null) return;
+
+            _LoggerService?.MessageBotInfo("Остановка Telegram бота...");
+            try
             {
-                _currentInstance.cts?.Cancel();
-                _currentInstance.cts?.Dispose();
-                _currentInstance = null;
-                //userControl_Settings.ButtonOnBotTelegram();
+                cts?.Cancel();
+            }
+            catch (Exception ex) { _LoggerService?.MessageBotInfo($"Ошибка при закрытии сессии: {ex.Message}"); }
+            finally
+            {
+                cts?.Dispose();
+                cts = null;
+                botClient = null;
+                proxy = null;
+                BotStartTime = null;
+                _LoggerService?.MessageBotInfo("Telegram бот успешно остановлен!");
             }
         }
 
@@ -160,7 +153,7 @@ namespace TelegramBotMinecraft
             string text = msg.Text.Trim();
 
             bool isNewMessage = msg.Date >= BotStartTime;
-            LoggerService.MessageChat(msg.Chat, msg.Text.Trim(), isNewMessage);
+            _LoggerService?.MessageChat(msg.Chat, msg.Text.Trim(), isNewMessage);
         }
 
         private async Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken token)
@@ -170,13 +163,13 @@ namespace TelegramBotMinecraft
                 ApiRequestException apiEx => $"Telegram API ошибка: [{apiEx.ErrorCode}] {apiEx.Message}",
                 _ => ex.ToString()
             };
-            LoggerService.ErrorBotInfo(error);
+            _LoggerService?.ErrorBotInfo(error);
             if (ex is ApiRequestException ApiEx)
             {
                 if (ApiEx.ErrorCode == 409)
                 {
-                    LoggerService.ErrorBotInfo("Обнаружена копия бота! Завершение работы бота...");
-                    StopBotTelegram();
+                    _LoggerService?.ErrorBotInfo("Обнаружена копия бота! Завершение работы бота...");
+                    ExceptionStartBotOrStop();
                 }
             }
             return;

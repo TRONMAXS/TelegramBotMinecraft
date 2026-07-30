@@ -38,7 +38,36 @@ namespace TelegramBotMinecraft.Core.Database
                                 reader["ProxyUsername"]?.ToString(),
                                 reader["ProxyPassword"]?.ToString()
                             );
+                        }
+                    }
+                }
+                return settings;
+            }
+            catch (SqliteException ex) { return new Setting(); }
+        }
 
+        public async Task<Setting> GetTokenAndProxySettings()
+        {
+            Setting settings = new Setting();
+
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("SELECT BotToken, ProxyHost, ProxyPort, ProxyUsername, ProxyPassword FROM Settings", connection);
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            settings = new Setting(
+                                reader["BotToken"]?.ToString(),
+                                reader["ProxyHost"]?.ToString(),
+                                reader["ProxyPort"]?.ToString(),
+                                reader["ProxyUsername"]?.ToString(),
+                                reader["ProxyPassword"]?.ToString()
+                            );
                         }
                     }
                 }
