@@ -1,5 +1,5 @@
 <UserControl
-    x:Class="TelegramBotMinecraft.Avalonia.SettingsView"
+    x:Class="TelegramBotMinecraft.Avalonia.Views.SettingsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -64,7 +64,7 @@
                         Padding="0"
                         FontFamily="Default"
                         FontSize="15"
-                        Header="Прокси (SOCKS5)">
+                        Header="Прокси (SOCKS5, HTTP)">
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock

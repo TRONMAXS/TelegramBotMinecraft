@@ -1,27 +1,28 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-        public ConsoleViewModel Console { get; }
+        public ConsoleViewModel ConsoleVm { get; }
 
-        public ServersViewModel Servers { get; }
+        public ServersViewModel ServersVm { get; }
 
-        public UsersViewModel Users { get; }
+        public UsersViewModel UsersVm { get; }
 
-        public SettingsViewModel Settings { get; }
+        public SettingsViewModel SettingsVm { get; }
 
         public MainViewModel(
-            ConsoleViewModel console,
-            ServersViewModel servers,
-            UsersViewModel users,
-            SettingsViewModel settings)
+            ConsoleViewModel consoleVm,
+            ServersViewModel serversVm,
+            UsersViewModel usersVm,
+            SettingsViewModel settingsVm)
         {
-            Console = console;
-            Servers = servers;
-            Users = users;
-            Settings = settings;
+            ConsoleVm = consoleVm;
+            ServersVm = serversVm;
+            UsersVm = usersVm;
+            SettingsVm = settingsVm;
         }
     }
 }

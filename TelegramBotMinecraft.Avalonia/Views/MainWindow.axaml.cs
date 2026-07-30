@@ -12,20 +12,27 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var consoleVm = new ConsoleViewModel(new MinecraftServerManager(),
-            new ServerRepository(),
-            new ServerStatusService(new ServerRepository()),
-            new ServerLogService(new ServerRepository()),
-            new ServerCommandService(new ServerRepository(), new MinecraftServerManager()),
-            new AvaloniaDialogService());
+        var serverRepo = new ServerRepository();
+        var serverManager = new MinecraftServerManager();
 
-        var serversVm = new ServersViewModel(new ServerRepository(), new AvaloniaDialogService());
+        var dialogService = new AvaloniaDialogService();
 
-        var usersVm = new UsersViewModel(new ServerRepository(), 
+        var sharedLogger = new LoggerService();
+        var telegramBot = new TelegramBot(new SettingsRepository(), sharedLogger);
+
+
+        var consoleVm = new ConsoleViewModel(serverManager, serverRepo,
+            new ServerStatusService(serverRepo),
+            new ServerLogService(serverRepo),
+            new ServerCommandService(serverRepo, serverManager), dialogService); 
+
+        var serversVm = new ServersViewModel(serverRepo, dialogService);
+
+        var usersVm = new UsersViewModel(serverRepo, 
             new UserRepository(), 
-            new CommandRepository(), new AvaloniaDialogService());
+            new CommandRepository(), dialogService);
 
-        var settingsVm = new SettingsViewModel(new SettingsRepository());
+        var settingsVm = new SettingsViewModel(new SettingsRepository(), sharedLogger, telegramBot, dialogService);
 
         DataContext = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm);
     }
