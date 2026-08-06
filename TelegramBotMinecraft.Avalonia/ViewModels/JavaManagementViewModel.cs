@@ -11,7 +11,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class JavaManagementViewModel : ObservableObject
     {
-        private readonly JavaRepository? _JavaRepository;
         private readonly IWindowService? _WindowService;
         private readonly JavaManagerService? _JavaManagerService;
 
@@ -23,9 +22,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private JavaManager? _selectedJava;
 
-        public JavaManagementViewModel(JavaRepository? javaRepository, IWindowService? windowService, JavaManagerService? javaManagerService)
+        public JavaManagementViewModel(IWindowService? windowService, JavaManagerService? javaManagerService)
         {
-            _JavaRepository = javaRepository;
             _WindowService = windowService;
             _JavaManagerService = javaManagerService;
 

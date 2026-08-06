@@ -16,13 +16,12 @@ public partial class MainWindow : Window
         HttpClient httpClient = new HttpClient();
 
         var serverRepo = new ServerRepository();
-        var javaRepo = new JavaRepository();
 
         var serverManager = new MinecraftServerManager();
         var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService());
 
         var dialogService = new AvaloniaDialogService();
-        var windowService = new AvaloniaWindowService((ws) => new JavaManagementViewModel(javaRepo, ws, javaManager), () => new JavaDownloadViewModel(javaRepo, javaManager));
+        var windowService = new AvaloniaWindowService((ws) => new JavaManagementViewModel(ws, javaManager), () => new JavaDownloadViewModel(javaManager));
 
         var sharedLogger = new LoggerService();
         var telegramBot = new TelegramBot(new SettingsRepository(), sharedLogger);
