@@ -272,14 +272,12 @@
                             MinWidth="90"
                             Command="{Binding AddButtonCommand}"
                             Content="Добавить"
-                            DockPanel.Dock="Left"
-                            IsEnabled="{Binding}" />
+                            DockPanel.Dock="Left" />
                         <Button
                             MinWidth="90"
                             Command="{Binding DeleteButtonCommand}"
                             Content="Удалить"
-                            DockPanel.Dock="Right"
-                            IsEnabled="{Binding}" />
+                            DockPanel.Dock="Right" />
                     </DockPanel>
 
                 </Grid>
