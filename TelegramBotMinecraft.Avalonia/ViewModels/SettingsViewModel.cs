@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TelegramBotMinecraft.Avalonia.Views;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
@@ -17,6 +18,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly LoggerService _LoggerService;
         private readonly TelegramBot _TelegramBot;
         private readonly IDialogService _dialogService;
+        private readonly IWindowService _windowService;
 
 
         [ObservableProperty]
@@ -30,12 +32,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
 
         public SettingsViewModel(SettingsRepository settingsRepository, LoggerService loggerService, 
-            TelegramBot telegramBot, IDialogService dialogService)
+            TelegramBot telegramBot, IDialogService dialogService, IWindowService windowService)
         {
             _SettingsRepository = settingsRepository;
             _LoggerService = loggerService;
             _TelegramBot = telegramBot;
             _dialogService = dialogService;
+            _windowService = windowService;
 
             _ = LoadSettingsAsync();
         }
@@ -74,6 +77,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     StatusWorkTGBot = "Включить бота";
                 }
             }
+        }
+
+        [RelayCommand]
+        private void OpenJavaManagementWindow()
+        {
+            _windowService.OpenJavaManagement();
         }
 
         private async Task UpdateLogsAsync()

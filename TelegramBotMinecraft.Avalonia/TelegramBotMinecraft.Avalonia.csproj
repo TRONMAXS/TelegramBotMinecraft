@@ -35,4 +35,10 @@
     <PackageReference Include="Semi.Avalonia.DataGrid" Version="12.0.0" />
     <PackageReference Include="Semi.Avalonia.Dock" Version="12.0.0.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\JavaManagementWindow.axaml.cs">
+      <DependentUpon>JavaManagementWindow.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

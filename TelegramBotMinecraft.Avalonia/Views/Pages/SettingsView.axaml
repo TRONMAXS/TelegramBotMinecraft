@@ -157,8 +157,9 @@
                                 </StackPanel>
                                 <Grid>
                                     <Button
-                                        Margin="0,0,0,0"
+                                        Margin="0,3,0,0"
                                         HorizontalAlignment="Left"
+                                        Command="{Binding OpenJavaManagementWindowCommand}"
                                         Content="Управление Java" />
                                 </Grid>
                             </StackPanel>
@@ -194,7 +195,10 @@
             Grid.Row="1"
             Margin="3"
             VerticalAlignment="Bottom"
+            Background="#1F4E79"
+            BorderBrush="#2A6496"
             Command="{Binding SaveSettingsCommand}"
-            Content="Coxpaнить" />
+            Content="Coxpaнить"
+            Foreground="#FFFFFF" />
     </Grid>
 </UserControl>

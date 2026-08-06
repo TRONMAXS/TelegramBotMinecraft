@@ -1,0 +1,120 @@
+<Window
+    x:Class="TelegramBotMinecraft.Avalonia.Views.JavaManagementWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    Title="Java Management"
+    Width="800"
+    Height="500"
+    x:DataType="vm:JavaManagementViewModel"
+    CanResize="False"
+    Icon="/Assets/TelegramBotMinecraft-logo.ico"
+    WindowStartupLocation="CenterOwner">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                Grid.Column="0"
+                Width="95"
+                Height="28"
+                Command="{Binding OpenJavaDownloaderWindowCommand}"
+                Content="Добавить" />
+            <Button
+                Grid.Column="1"
+                Width="95"
+                Height="28"
+                Margin="10,0,10,0"
+                Command="{Binding DeleteSelectedJavaCommand}"
+                Content="Удалить" />
+
+            <Button
+                Grid.Column="2"
+                Width="95"
+                Height="28"
+                HorizontalAlignment="Right"
+                Command="{Binding UpdateJavaListCommand}"
+                Content="Обновить" />
+        </Grid>
+
+        <DataGrid
+            x:Name="JavaGrid"
+            Grid.Row="1"
+            Margin="0,3,0,3"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Stretch"
+            AutoGenerateColumns="False"
+            BorderBrush="Gray"
+            BorderThickness="1"
+            CanUserResizeColumns="False"
+            ColumnWidth="*"
+            FontSize="12"
+            GridLinesVisibility="All"
+            HorizontalScrollBarVisibility="Auto"
+            IsReadOnly="True"
+            ItemsSource="{Binding DownloadedJavaList}"
+            SelectedItem="{Binding SelectedJava}"
+            SelectionMode="Extended">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Width="Auto"
+                    Binding="{Binding Version}"
+                    Header="Версия" />
+                <DataGridTextColumn
+                    Width="Auto"
+                    Binding="{Binding Architecture}"
+                    Header="Архитектура" />
+                <DataGridTextColumn
+                    Width="Auto"
+                    MinWidth="800"
+                    Binding="{Binding Path}"
+                    Header="Путь" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DockPanel
+            Grid.Row="2"
+            Margin="0,3,0,3"
+            IsVisible="False"
+            LastChildFill="True">
+            <TextBlock
+                Width="60"
+                VerticalAlignment="Center"
+                Text="Поиск:" />
+            <TextBox Text="" />
+        </DockPanel>
+
+        <StackPanel
+            Grid.Row="3"
+            Margin="0,3,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+
+            <Button
+                Width="85"
+                Height="28"
+                HorizontalAlignment="Left"
+                Content="ОK" />
+            <Button
+                Width="85"
+                Height="28"
+                Margin="10,0,0,0"
+                HorizontalAlignment="Left"
+                Content="Отмена" />
+        </StackPanel>
+
+    </Grid>
+</Window>
