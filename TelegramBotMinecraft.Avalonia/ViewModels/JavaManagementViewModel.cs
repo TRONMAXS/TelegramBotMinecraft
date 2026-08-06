@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
 
@@ -11,10 +10,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class JavaManagementViewModel : ObservableObject
     {
-        private readonly IWindowService? _WindowService;
         private readonly JavaManagerService? _JavaManagerService;
-
-
 
         public ObservableCollection<JavaManager>? DownloadedJavaList { get; } = new();
 
@@ -22,9 +18,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private JavaManager? _selectedJava;
 
-        public JavaManagementViewModel(IWindowService? windowService, JavaManagerService? javaManagerService)
+        public JavaManagementViewModel(JavaManagerService? javaManagerService)
         {
-            _WindowService = windowService;
             _JavaManagerService = javaManagerService;
 
             LoadJavaDownloadedList();
@@ -41,12 +36,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 DownloadedJavaList?.Add(new JavaManager(java.Name, java.Version, java.Architecture, java.Path));
             }
-        }
-
-        [RelayCommand]
-        private void OpenJavaDownloaderWindow()
-        {
-            _WindowService?.OpenJavaDownloader();
         }
 
         [RelayCommand]

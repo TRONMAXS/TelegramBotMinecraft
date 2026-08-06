@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace TelegramBotMinecraft.Avalonia.Views
 {
-    public partial class JavaDownloadWindow : Window
+    public partial class JavaDownload : UserControl
     {
-        public JavaDownloadWindow()
+        public JavaDownload()
         {
             InitializeComponent();
         }

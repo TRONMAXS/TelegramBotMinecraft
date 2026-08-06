@@ -1,18 +1,16 @@
-<Window
-    x:Class="TelegramBotMinecraft.Avalonia.Views.JavaDownloadWindow"
+<UserControl
+    x:Class="TelegramBotMinecraft.Avalonia.Views.JavaDownload"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-    Title="Java Management"
-    Width="800"
-    Height="500"
+    d:DesignHeight="500"
+    d:DesignWidth="800"
     x:DataType="vm:JavaDownloadViewModel"
-    CanResize="False"
-    Icon="/Assets/TelegramBotMinecraft-logo.ico"
-    WindowStartupLocation="CenterOwner">
-    <Grid Margin="20">
+    mc:Ignorable="d">
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -99,7 +97,7 @@
                 Width="85"
                 Height="28"
                 Margin="10,0,0,0"
-                Command="{Binding CancelCommand}"
+                Command="{Binding $parent[Window].((vm:JavaManagerWindowViewModel)DataContext).CancelCommand}"
                 Content="Отмена"
                 DockPanel.Dock="Right" />
             <Button
@@ -111,4 +109,4 @@
         </DockPanel>
 
     </Grid>
-</Window>
+</UserControl>

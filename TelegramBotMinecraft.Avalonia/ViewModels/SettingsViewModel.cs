@@ -80,9 +80,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        private void OpenJavaManagementWindow()
+        private async Task OpenJavaManagementWindow()
         {
-            _windowService.OpenJavaManagement();
+            await _windowService.OpenJavaManagement();
         }
 
         private async Task UpdateLogsAsync()

@@ -1,0 +1,36 @@
+<Window
+    x:Class="TelegramBotMinecraft.Avalonia.Views.JavaManagerWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:TelegramBotMinecraft.Avalonia.Views"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    Title="Java Manager"
+    Width="800"
+    Height="500"
+    x:DataType="vm:JavaManagerWindowViewModel"
+    CanResize="False"
+    Icon="/Assets/TelegramBotMinecraft-logo.ico"
+    WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:JavaManagerWindowViewModel />
+    </Design.DataContext>
+
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+
+        <TabItem Header="Установленные версии">
+            <Grid Margin="20">
+                <views:JavaManagement DataContext="{Binding JavaManagementVm}" />
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Скачать Java">
+            <Grid Margin="20">
+                <views:JavaDownload DataContext="{Binding JavaDownloadVm}" />
+            </Grid>
+        </TabItem>
+    </TabControl>
+
+</Window>

@@ -37,8 +37,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\JavaManagementWindow.axaml.cs">
-      <DependentUpon>JavaManagementWindow.axaml</DependentUpon>
+    <Compile Update="Views\JavaManagerWindow.axaml.cs">
+      <DependentUpon>JavaManagerWindow.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\JavaDownload.axaml.cs">
+      <DependentUpon>JavaDownload.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\JavaManagement.axaml.cs">
+      <DependentUpon>JavaManagement.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>

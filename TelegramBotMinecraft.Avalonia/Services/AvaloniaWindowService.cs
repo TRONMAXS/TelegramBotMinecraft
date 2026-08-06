@@ -12,59 +12,31 @@ namespace TelegramBotMinecraft.Avalonia.Services
 {
     public class AvaloniaWindowService : IWindowService
     {
-        private readonly Func<IWindowService, JavaManagementViewModel> _viewModelJavaManagementFactory;
+        private readonly Func<JavaManagerWindowViewModel> _viewModelFactory;
 
-        private readonly Func<JavaDownloadViewModel> _viewModelJavaDownloadFactory;
-
-
-        public AvaloniaWindowService(Func<IWindowService, JavaManagementViewModel> viewModelJavaManagementFactory, Func<JavaDownloadViewModel> viewModelJavaDownloadFactory)
+        public AvaloniaWindowService(Func<JavaManagerWindowViewModel> viewModelFactory)
         {
-            _viewModelJavaManagementFactory = viewModelJavaManagementFactory ?? throw new ArgumentNullException(nameof(viewModelJavaManagementFactory));
-            _viewModelJavaDownloadFactory = viewModelJavaDownloadFactory ?? throw new ArgumentNullException(nameof(viewModelJavaDownloadFactory));
+            _viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
         }
 
         public async Task OpenJavaManagement()
         {
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                Window? ownerWindow = null;
-                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 {
-                    ownerWindow = desktop.MainWindow;
+                    throw new InvalidOperationException("Приложение запущено не в десктопном режиме.");
                 }
 
+                Window? ownerWindow = desktop.MainWindow;
                 if (ownerWindow == null)
                 {
                     throw new InvalidOperationException("Не удалось найти главное окно приложения.");
                 }
 
-                var dialog = new JavaManagementWindow
+                var dialog = new JavaManagerWindow
                 {
-                    DataContext = _viewModelJavaManagementFactory(this)
-                };
-
-                await dialog.ShowDialog(ownerWindow);
-            });
-        }
-
-        public async Task OpenJavaDownloader()
-        {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                Window? ownerWindow = null;
-                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                {
-                    ownerWindow = desktop.MainWindow;
-                }
-
-                if (ownerWindow == null)
-                {
-                    throw new InvalidOperationException("Не удалось найти главное окно приложения.");
-                }
-
-                var dialog = new JavaDownloadWindow
-                {
-                    DataContext = _viewModelJavaDownloadFactory()
+                    DataContext = _viewModelFactory()
                 };
 
                 await dialog.ShowDialog(ownerWindow);
