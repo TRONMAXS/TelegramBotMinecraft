@@ -25,7 +25,7 @@ namespace TelegramBotMinecraft.Core.Models
         public string? Sha1 { get; set; }
 
         [JsonPropertyName("size")]
-        public long? Size { get; set; }
+        public long Size { get; set; }
 
         [JsonPropertyName("url")]
         public string? Url { get; set; }

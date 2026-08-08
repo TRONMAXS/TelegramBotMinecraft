@@ -11,6 +11,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
     public partial class JavaManagementViewModel : ObservableObject
     {
         private readonly JavaManagerService? _JavaManagerService;
+        private readonly IDialogService? _dialogService;
 
         public ObservableCollection<JavaManager>? DownloadedJavaList { get; } = new();
 
@@ -18,9 +19,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private JavaManager? _selectedJava;
 
-        public JavaManagementViewModel(JavaManagerService? javaManagerService)
+        public JavaManagementViewModel(JavaManagerService? javaManagerService, IDialogService? dialogService)
         {
             _JavaManagerService = javaManagerService;
+            _dialogService = dialogService;
 
             LoadJavaDownloadedList();
         }
@@ -44,9 +46,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if(DownloadedJavaList == null) return;
             if(SelectedJava == null) return;
 
-            await _JavaManagerService.DeletingJavaFolder(SelectedJava.Name);
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить эту версию Java?");
 
-            LoadJavaDownloadedList();
+
+            if (result == true)
+            {
+                await _JavaManagerService.DeletingJavaFolder(SelectedJava.Name);
+
+                LoadJavaDownloadedList();
+            }
         }
 
         [RelayCommand]

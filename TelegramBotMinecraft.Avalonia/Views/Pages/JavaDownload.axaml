@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,3">
@@ -36,7 +37,7 @@
                 IsReadOnly="True"
                 ItemsSource="{Binding JavaList}"
                 SelectedItem="{Binding SelectedJava}"
-                SelectionMode="Extended">
+                SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="Auto"
@@ -59,7 +60,7 @@
                 IsReadOnly="True"
                 ItemsSource="{Binding JavaListInfo}"
                 SelectedItem="{Binding SelectedJavaInfo}"
-                SelectionMode="Extended">
+                SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="*"
@@ -82,8 +83,30 @@
 
         </Grid>
 
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    FontSize="12"
+                    Foreground="Gray"
+                    Text="{Binding DownloadProgressString}" />
+                <TextBlock
+                    Grid.Column="1"
+                    FontSize="12"
+                    Foreground="Gray"
+                    Text="{Binding DownloadFilesProgressString}" />
+            </Grid>
+            <ProgressBar
+                Height="4"
+                Margin="0,4,0,0"
+                Classes="Primary"
+                Value="{Binding DownloadProgressValue}" />
+        </StackPanel>
+
         <DockPanel
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="0,3,0,0"
             HorizontalAlignment="Stretch"
             LastChildFill="False">
@@ -97,7 +120,7 @@
                 Width="85"
                 Height="28"
                 Margin="10,0,0,0"
-                Command="{Binding $parent[Window].((vm:JavaManagerWindowViewModel)DataContext).CancelCommand}"
+                Command="{Binding CancelDownloadCommand}"
                 Content="Отмена"
                 DockPanel.Dock="Right" />
             <Button

@@ -21,7 +21,7 @@ public partial class MainWindow : Window
         var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService());
 
         var dialogService = new AvaloniaDialogService();
-        var windowService = new AvaloniaWindowService(() => new JavaManagerWindowViewModel(new JavaManagementViewModel(javaManager), new JavaDownloadViewModel(javaManager)));
+        var windowService = new AvaloniaWindowService(() => new JavaManagerWindowViewModel(new JavaManagementViewModel(javaManager, dialogService), new JavaDownloadViewModel(javaManager)));
 
         var sharedLogger = new LoggerService();
         var telegramBot = new TelegramBot(new SettingsRepository(), sharedLogger);

@@ -66,7 +66,7 @@
             IsReadOnly="True"
             ItemsSource="{Binding DownloadedJavaList}"
             SelectedItem="{Binding SelectedJava}"
-            SelectionMode="Extended">
+            SelectionMode="Single">
             <DataGrid.Columns>
                 <DataGridTextColumn
                     Width="Auto"

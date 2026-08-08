@@ -1,5 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading.Channels;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Services
@@ -24,105 +27,150 @@ namespace TelegramBotMinecraft.Core.Services
         }
 
 
-        public async Task JavaDownloader(string? javaName)
+        public async IAsyncEnumerable<(int Progress, int completedFiles, int AllFiles)> JavaDownloader(string? javaName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            var channel = Channel.CreateBounded<(int Progress, int Completed, int All)>(new BoundedChannelOptions(100)
+            {
+                FullMode = BoundedChannelFullMode.DropOldest,
+                SingleWriter = false,
+                SingleReader = true
+            });
+
+
+            long totalBytesDownloaded = 0;
+            int completedFilesCount = 0;
+            List<JavaFileTask> javaFileTasks = new();
+            string PathJavas = "";
+
+            string responseJavaJson = await _client.GetStringAsync(UrlJavaManifestJson);
+            var ManifestJavaJson = JsonSerializer.Deserialize<JavaManifest>(responseJavaJson);
+            if (ManifestJavaJson == null) { channel.Writer.Complete(); yield return (0, 0, 0); yield break; }
+
+            string responseMinecraftJson = await _client.GetStringAsync(UrlManifestJson);
+            var ManifestMinecraftJson = JsonSerializer.Deserialize<MinecraftManifest>(responseMinecraftJson);
+            if (ManifestMinecraftJson == null) { channel.Writer.Complete(); yield return (0, 0, 0); yield break; }
+
             try
             {
-                string responseJavaJson = await _client.GetStringAsync(UrlJavaManifestJson);
-                var ManifestJavaJson = JsonSerializer.Deserialize<JavaManifest>(responseJavaJson);
-                if (ManifestJavaJson == null) return;
-
-                string responseMinecraftJson = await _client.GetStringAsync(UrlManifestJson);
-                var ManifestMinecraftJson = JsonSerializer.Deserialize<MinecraftManifest>(responseMinecraftJson);
-                if (ManifestMinecraftJson == null) return;
-
-  /*              string? urlSelectedVersion = ManifestMinecraftJson.versions.FirstOrDefault(v => v.id == VersionSelected)?.url;
-                if (urlSelectedVersion == null) return;*/
-
-/*                string responseМуVerisonJson = await _client.GetStringAsync(urlSelectedVersion);
-                var ManifestVersionJson = JsonSerializer.Deserialize<VersionManifest>(responseМуVerisonJson);
-                if (ManifestVersionJson == null) return;*/
-
-                //int javaVersion = ManifestVersionJson.JavaVersion?.MajorVersion ?? 8;
-
                 string ArchOS = GetPlatformString();
-
                 string? urlSelectedJavaVersion = ManifestJavaJson[ArchOS][javaName].Select(entry => entry.Manifest.Url).FirstOrDefault() ?? string.Empty;
 
-                string responseSelectedJavaJson = await _client.GetStringAsync(urlSelectedJavaVersion);
-                var ManifestSelectedJavaJson = JsonSerializer.Deserialize<JavaFilesManifest>(responseSelectedJavaJson);
-                if (ManifestSelectedJavaJson == null) return;
+                var (filesToDownload, totalBytesToDownload) = await GetAllDownloadableFiles(urlSelectedJavaVersion);
+                javaFileTasks = filesToDownload;
 
-                string PathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
-                try
+                int totalFilesCount = javaFileTasks.Count(x => x.Type == "file");
+
+                PathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
+                if (totalBytesToDownload <= 0) totalBytesToDownload = 1;
+
+                _ = Task.Run(async () =>
                 {
-                    using (var semaphore = new SemaphoreSlim(4))
+                    try
                     {
-                        var downloadTasks = new List<Task>();
-
-                        foreach (var file in ManifestSelectedJavaJson.Files)
+                        using (var semaphore = new SemaphoreSlim(4))
                         {
-                            string pathFile = Path.Combine(PathJavas, file.Key);
+                            var downloadTasks = new List<Task>();
 
-                            if (file.Value.Type == "directory")
+                            foreach (var file in filesToDownload)
                             {
-                                Directory.CreateDirectory(pathFile);
-                                continue;
-                            }
+                                cancellationToken.ThrowIfCancellationRequested();
 
-                            if (file.Value.Type == "file")
-                            {
-                                if (file.Value.Downloads == null) continue;
+                                string pathFile = Path.Combine(PathJavas, file.Path);
 
-                                string? parentDirectory = Path.GetDirectoryName(pathFile);
-                                if (!string.IsNullOrEmpty(parentDirectory)) Directory.CreateDirectory(parentDirectory);
-
-                                file.Value.Downloads.TryGetValue("raw", out DownloadInfo? rawDownload);
-
-                                if (File.Exists(pathFile) && rawDownload != null)
+                                if (file.Type == "directory")
                                 {
-                                    string localSha1 = _hashService.GetFileSha1(pathFile);
-                                    if (localSha1 == rawDownload.Sha1) continue;
+                                    Directory.CreateDirectory(pathFile);
+                                    continue;
                                 }
 
-                                downloadTasks.Add(Task.Run(async () =>
+                                if (file.Type == "file")
                                 {
-                                    await semaphore.WaitAsync();
-                                    try
+                                    string? parentDirectory = Path.GetDirectoryName(pathFile);
+                                    if (!string.IsNullOrEmpty(parentDirectory)) Directory.CreateDirectory(parentDirectory);
+
+                                    if (File.Exists(pathFile) && file.RawSha1 != null)
                                     {
-                                        if (file.Value.Downloads.TryGetValue("lzma", out DownloadInfo? lzmaDownload) && lzmaDownload != null)
+                                        string localSha1 = _hashService.GetFileSha1(pathFile);
+                                        if (localSha1 == file.RawSha1)
                                         {
-                                            string lzmaPath = pathFile + ".lzma";
+                                            long current = Interlocked.Add(ref totalBytesDownloaded, file.RawSize);
+                                            int currentCompleted = Interlocked.Increment(ref completedFilesCount);
+                                            int percent = (int)((double)current * 100 / totalBytesToDownload);
 
-                                            await _downloader.DownloadFileAsync(lzmaDownload.Url, lzmaPath, lzmaDownload.Sha1);
-                                            await _decompressor.UnzipFile(lzmaPath, pathFile);
-                                        }
-                                        else if (rawDownload != null)
-                                        {
-
-                                            await _downloader.DownloadFileAsync(rawDownload.Url, pathFile, rawDownload.Sha1);
+                                            await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), currentCompleted, totalFilesCount), cancellationToken);
+                                            continue;
                                         }
                                     }
-                                    finally
+
+                                    downloadTasks.Add(Task.Run(async () =>
                                     {
-                                        semaphore.Release();
-                                    }
-                                }));
+                                        await semaphore.WaitAsync(cancellationToken);
+                                        try
+                                        {
+                                            if (file.TypeFile == "lzma")
+                                            {
+                                                string lzmaPath = pathFile + ".lzma";
+
+                                                await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, lzmaPath, file.NetworkSha1, cancellationToken))
+                                                {
+                                                    long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
+                                                    int percent = (int)((double)current * 100 / totalBytesToDownload);
+                                                    await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
+                                                }
+                                                await _decompressor.UnzipFile(lzmaPath, pathFile, cancellationToken);
+
+                                                if (File.Exists(lzmaPath)) File.Delete(lzmaPath);
+                                            }
+                                            else if (file.TypeFile == "raw")
+                                            {
+                                                await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, pathFile, file.NetworkSha1, cancellationToken))
+                                                {
+                                                    long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
+                                                    int percent = (int)((double)current * 100 / totalBytesToDownload);
+                                                    await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
+                                                }
+                                            }
+                                        }
+                                        finally
+                                        {
+                                            int currentCompleted = Interlocked.Increment(ref completedFilesCount);
+                                            semaphore.Release();
+
+                                            int finalPercent = (int)((double)Interlocked.Read(ref totalBytesDownloaded) * 100 / totalBytesToDownload);
+                                            await channel.Writer.WriteAsync((Math.Clamp(finalPercent, 0, 100), currentCompleted, totalFilesCount));
+                                        }
+                                    }, cancellationToken));
+                                }
                             }
+                            await Task.WhenAll(downloadTasks);
                         }
-                        await Task.WhenAll(downloadTasks);
-                        //Console.WriteLine($"Java {javaName} скачана");
+
+                        bool validate = await ValidateInstallation(filesToDownload, PathJavas);
+                        if (validate) await channel.Writer.WriteAsync((100, totalFilesCount, totalFilesCount));
+                        else await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
                     }
-                }
-                catch (Exception ex)
-                {
-                    //Console.WriteLine($"\n[Ошибка обработки файла: {ex.Message}");
-                }
+                    catch (OperationCanceledException)
+                    {
+                        if (Directory.Exists(PathJavas)) Directory.Delete(PathJavas, true);
+                    }
+                    catch (Exception)
+                    {
+                        await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
+                    }
+                    finally
+                    {
+                        channel.Writer.Complete();
+                    }
+                });
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
-                //Console.WriteLine("\nException Caught!");
-                //Console.WriteLine("Message :{0} ", e.Message);
+                channel.Writer.Complete();
+            }
+
+            await foreach (var progressReport in channel.Reader.ReadAllAsync(cancellationToken))
+            {
+                yield return progressReport;
             }
         }
 
@@ -221,6 +269,79 @@ namespace TelegramBotMinecraft.Core.Services
             }
         }
 
+        private async Task<(List<JavaFileTask> Tasks, long TotalSize)> GetAllDownloadableFiles(string? urlJava)
+        {
+            var tasks = new List<JavaFileTask>();
+            long totalSize = 0;
+
+            if (string.IsNullOrEmpty(urlJava)) return (tasks, 0);
+
+            string responseSelectedJavaJson = await _client.GetStringAsync(urlJava);
+            var ManifestSelectedJavaJson = JsonSerializer.Deserialize<JavaFilesManifest>(responseSelectedJavaJson);
+
+            if (ManifestSelectedJavaJson?.Files == null) return (tasks, 0);
+
+            foreach (var file in ManifestSelectedJavaJson.Files)
+            {
+                if (file.Value.Type == "directory")
+                {
+                    tasks.Add(new JavaFileTask
+                    {
+                        Type = file.Value.Type,
+                        Path = file.Key,
+                        Url = "",
+                        LzmaSize = 0,
+                        RawSize = 0,
+                        NetworkSha1 = "",
+                        RawSha1 = "",
+                        TypeFile = ""
+                    });
+                    continue;
+                }
+
+                if (file.Value.Type == "file")
+                {
+                    if (file.Value.Downloads == null) continue;
+
+                    file.Value.Downloads.TryGetValue("raw", out DownloadInfo? rawDownload);
+                    file.Value.Downloads.TryGetValue("lzma", out DownloadInfo? lzmaDownload);
+
+                    if (lzmaDownload != null)
+                    {
+                        tasks.Add(new JavaFileTask
+                        {
+                            Type = file.Value.Type,
+                            Path = file.Key,
+                            Url = lzmaDownload.Url,
+                            LzmaSize = lzmaDownload.Size,
+                            RawSize = rawDownload?.Size ?? 0,
+                            NetworkSha1 = lzmaDownload.Sha1,
+                            RawSha1 = rawDownload?.Sha1 ?? "",
+                            TypeFile = "lzma"
+                        });
+                        totalSize += lzmaDownload.Size;
+
+                    }
+                    else if (rawDownload != null)
+                    {
+                        tasks.Add(new JavaFileTask
+                        {
+                            Type = file.Value.Type,
+                            Path = file.Key,
+                            Url = rawDownload.Url,
+                            LzmaSize = 0,
+                            RawSize = rawDownload.Size,
+                            NetworkSha1 = rawDownload.Sha1,
+                            RawSha1 = rawDownload.Sha1,
+                            TypeFile = "raw"
+                        });
+                        totalSize += rawDownload.Size;
+                    }
+                }
+            }
+
+            return (tasks, totalSize);
+        }
 
         private string GetPlatformString()
         {
@@ -256,6 +377,53 @@ namespace TelegramBotMinecraft.Core.Services
             }
 
             return "unknown";
+        }
+
+        public async Task<bool> ValidateInstallation(List<JavaFileTask> expectedFiles, string javaFolderPath)
+        {
+            if (!Directory.Exists(javaFolderPath)) return false;
+
+            bool hasCorruptedLzma = Directory.GetFiles(javaFolderPath, "*.lzma", SearchOption.AllDirectories).Any();
+            if (hasCorruptedLzma) return false;
+
+            foreach (var file in expectedFiles)
+            {
+                if (file.Type != "file") continue;
+
+                string localFilePath = Path.Combine(javaFolderPath, file.Path);
+
+                if (!File.Exists(localFilePath)) return false;
+
+                var fileInfo = new FileInfo(localFilePath);
+                if (fileInfo.Length != file.RawSize) return false;
+
+                string localSha1 = _hashService.GetFileSha1(localFilePath);
+                if (localSha1 != file.RawSha1) return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ValidateDownloadedJava(string? javaName)
+        {
+            string responseJavaJson = await _client.GetStringAsync(UrlJavaManifestJson);
+            var ManifestJavaJson = JsonSerializer.Deserialize<JavaManifest>(responseJavaJson);
+            if (ManifestJavaJson == null) { return false; }
+
+            string responseMinecraftJson = await _client.GetStringAsync(UrlManifestJson);
+            var ManifestMinecraftJson = JsonSerializer.Deserialize<MinecraftManifest>(responseMinecraftJson);
+            if (ManifestMinecraftJson == null) { return false; }
+
+            string ArchOS = GetPlatformString();
+            string? urlSelectedJavaVersion = ManifestJavaJson[ArchOS][javaName].Select(entry => entry.Manifest.Url).FirstOrDefault() ?? string.Empty;
+
+            var (filesToDownload, totalBytesToDownload) = await GetAllDownloadableFiles(urlSelectedJavaVersion);
+
+            string PathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
+
+            bool validate = await ValidateInstallation(filesToDownload, PathJavas);
+            if (validate) return true;
+            else return false;
         }
     }
 }

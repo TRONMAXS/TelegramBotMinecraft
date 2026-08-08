@@ -1,14 +1,14 @@
 ﻿using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 
 namespace TelegramBotMinecraft.Core.Services
 {
     public class LzmaDecompressorService
     {
-        public async Task UnzipFile(string pathToFile, string targetFilePath)
+        public async Task UnzipFile(string pathToFile, string targetFilePath, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(pathToFile))
             {
-                //Console.WriteLine($"Файл архива не найден: {pathToFile}");
                 return;
             }
 
@@ -17,6 +17,8 @@ namespace TelegramBotMinecraft.Core.Services
                 using (FileStream inStream = new FileStream(pathToFile, FileMode.Open))
                 using (FileStream outStream = new FileStream(targetFilePath, FileMode.Create))
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var decoder = new SevenZip.Compression.LZMA.Decoder();
 
                     byte[] properties = new byte[5];
@@ -34,10 +36,7 @@ namespace TelegramBotMinecraft.Core.Services
 
                 File.Delete(pathToFile);
             }
-            catch (Exception ex)
-            {
-                //Console.WriteLine($"Ошибка SharpCompress: {ex.Message}");
-            }
+            catch { }
         }
     }
 }

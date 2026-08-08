@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace TelegramBotMinecraft.Core.Models
+﻿namespace TelegramBotMinecraft.Core.Models
 {
     public class JavaManager
     {

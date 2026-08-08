@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
@@ -20,6 +22,21 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         [ObservableProperty]
         private JavaInfoDownload? _selectedJavaInfo;
+
+
+        [ObservableProperty]
+        private bool? _isDownloading = false;
+
+        [ObservableProperty]
+        private string? _downloadProgressString;
+
+        [ObservableProperty]
+        private int? _downloadProgressValue;
+
+        [ObservableProperty]
+        private string? _downloadFilesProgressString;
+
+        private CancellationTokenSource? _cts;
 
         public JavaDownloadViewModel(JavaManagerService? javaManagerService)
         {
@@ -67,7 +84,69 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (SelectedJava == null || SelectedJavaInfo == null) return;
             if (JavaList == null || JavaListInfo == null) return;
 
-            await _JavaManagerService.JavaDownloader(SelectedJavaInfo.Name);
+            IsDownloading = true;
+            bool isSuccess = false;
+            DownloadProgressValue = 0;
+            int countDownloadedFiles = 0;
+            _cts = new CancellationTokenSource();
+
+
+
+            DownloadProgressString = "Проверка...";
+            DownloadFilesProgressString = "Файлы: 0/0";
+
+            bool validate = await _JavaManagerService.ValidateDownloadedJava(SelectedJavaInfo.Name);
+            if (validate)
+            {
+                DownloadProgressString = "Среда Java уже установлена!";
+                DownloadFilesProgressString = "Успешно!";
+                return;
+            }
+
+
+            DownloadProgressString = "Подготовка к скачиванию...";
+            DownloadFilesProgressString = "Файлы: 0/0";
+
+            try
+            {
+                await foreach (var currentProgress in _JavaManagerService.JavaDownloader(SelectedJavaInfo.Name, _cts.Token))
+                {
+                    if (currentProgress.Progress == -1)
+                    {
+                        DownloadProgressString = "Ошибка: файлы повреждены или не скачались. Попробуйте снова.";
+                        DownloadProgressValue = 0;
+                        countDownloadedFiles = 0;
+                        isSuccess = false;
+                        break;
+                    }
+
+                    DownloadProgressValue = currentProgress.Progress;
+                    countDownloadedFiles = currentProgress.completedFiles;
+                    DownloadProgressString = $"Скачивание и установка Java... {currentProgress.Progress}%";
+                    DownloadFilesProgressString = $"Файлы: {countDownloadedFiles}/{currentProgress.AllFiles}";
+
+                    if (currentProgress.Progress == 100) isSuccess = true;
+                }
+                if (isSuccess)
+                {
+                    DownloadProgressString = "Среда Java успешно установлена и проверена!";
+                    DownloadFilesProgressString = "Готово!";
+                }
+            }
+            catch (OperationCanceledException) 
+            { 
+                DownloadProgressString = "Загрузка успешно отменена.";
+                DownloadFilesProgressString = "Остановлено";
+                DownloadProgressValue = 0;
+
+            }
+            catch { DownloadProgressString = "Ошибка при установке Java компонентов."; }
+            finally 
+            { 
+                IsDownloading = false; 
+                _cts?.Dispose(); 
+                _cts = null; 
+            }
         }
 
         [RelayCommand]
@@ -75,6 +154,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             LoadJavaList();
             LoadJavaInfoList();
+        }
+
+        [RelayCommand]
+        private void CancelDownload()
+        {
+            _cts?.Cancel();
+
+            DownloadProgressString = "Скачивание отменено пользователем.";
+            IsDownloading = false;
         }
 
         partial void OnSelectedJavaChanged(JavaManager? value)
