@@ -20,6 +20,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly IDialogService _dialogService;
         private readonly IWindowService _windowService;
 
+        private readonly CancellationTokenSource _cts = new();
 
         [ObservableProperty]
         private Setting? _settings;
@@ -41,6 +42,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _windowService = windowService;
 
             _ = LoadSettingsAsync();
+
+            _ = _TelegramBot.BotAutostart();
+
+            _ = UpdateLogsAsync(_cts.Token);
         }
 
         private async Task LoadSettingsAsync()
@@ -64,8 +69,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 _TelegramBot.StartBotTelegram();
                 StatusWorkTGBot = "Выключить бота";
-
-                _ = UpdateLogsAsync();
             }
             else
             {
@@ -85,13 +88,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             await _windowService.OpenJavaManagement();
         }
 
-        private async Task UpdateLogsAsync()
+        private async Task UpdateLogsAsync(CancellationToken token)
         {
-            using var cts = new CancellationTokenSource();
 
             try
             {
-                await foreach (var logLine in _LoggerService.UpdateLogsBotAndProgram(cts.Token))
+                await foreach (var logLine in _LoggerService.UpdateLogsBotAndProgram(token))
                 {
                     if (logLine == null) continue;
                     Dispatcher.UIThread.Post(() =>

@@ -27,6 +27,16 @@ namespace TelegramBotMinecraft.Core.Services
             _LoggerService = loggerService;
         }
 
+        public async Task BotAutostart()
+        {
+            Setting? settings = await _SettingsRepository.GetAllSettings();
+            if (settings == null) return;
+
+            if(settings.AutoBot == 0) return;
+
+            _ = StartBotAsync();
+        }
+
         public void StartBotTelegram()
         {
             if (botClient == null && cts == null) _ = StartBotAsync();
