@@ -14,13 +14,9 @@
     Icon="/Assets/TelegramBotMinecraft-logo.ico"
     mc:Ignorable="d">
 
-    <Design.DataContext>
-        <vm:MainViewModel />
-    </Design.DataContext>
-
     <TabControl
         Margin="3,3,3,3"
-        SelectedIndex="3"
+        SelectedIndex="{Binding SelectPage}"
         Theme="{DynamicResource CardTabControl}">
 
         <TabControl.Styles>

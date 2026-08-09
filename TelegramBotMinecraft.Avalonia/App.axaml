@@ -1,13 +1,35 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:semi="https://irihi.tech/semi"
-             xmlns:local="using:TelegramBotMinecraft.Avalonia"
-             x:Class="TelegramBotMinecraft.Avalonia.App"
-             RequestedThemeVariant="Dark">
+<Application
+    x:Class="TelegramBotMinecraft.Avalonia.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TelegramBotMinecraft.Avalonia"
+    xmlns:semi="https://irihi.tech/semi"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    x:DataType="vm:MainViewModel"
+    RequestedThemeVariant="Dark">
 
     <Application.Styles>
         <semi:SemiTheme Locale="en-US" />
         <semi:DataGridSemiTheme />
         <semi:AvaloniaEditSemiTheme />
     </Application.Styles>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon
+                Command="{Binding ShowWindowCommand}"
+                Icon="/Assets/TelegramBotMinecraft-logo.ico"
+                ToolTipText="TelegramBotMinecraft">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Command="{Binding ShowWindowCommand}" Header="Открыть" />
+                        <NativeMenuItem Command="{Binding ShowSettingsCommand}" Header="Настройки" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Command="{Binding ExitApplicationCommand}" Header="Выйти" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+
 </Application>
