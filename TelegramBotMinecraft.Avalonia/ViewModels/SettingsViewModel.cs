@@ -19,6 +19,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly TelegramBot _TelegramBot;
         private readonly IDialogService _dialogService;
         private readonly IWindowService _windowService;
+        private readonly StartupManager _startupManager;
+
 
         private readonly CancellationTokenSource _cts = new();
 
@@ -33,13 +35,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
 
         public SettingsViewModel(SettingsRepository settingsRepository, LoggerService loggerService, 
-            TelegramBot telegramBot, IDialogService dialogService, IWindowService windowService)
+            TelegramBot telegramBot, IDialogService dialogService, IWindowService windowService, StartupManager startupManager)
         {
             _SettingsRepository = settingsRepository;
             _LoggerService = loggerService;
             _TelegramBot = telegramBot;
             _dialogService = dialogService;
             _windowService = windowService;
+            _startupManager = startupManager;
 
             _ = LoadSettingsAsync();
 
@@ -58,6 +61,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task SaveSettings()
         {
             await _SettingsRepository.SaveSettings(Settings);
+
+            if (Settings != null)
+            {
+                if (Settings.RunAtStartup == 1)
+                {
+                    _startupManager.EnableStartup();
+                }
+                else
+                {
+                    _startupManager.DisableStartup();
+                }
+            }
+            await LoadSettingsAsync();
         }
 
         [RelayCommand]

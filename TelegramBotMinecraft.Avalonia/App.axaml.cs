@@ -36,7 +36,7 @@ public partial class App : Application
             var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerStatusService(serverRepo), new ServerLogService(serverRepo), new ServerCommandService(serverRepo, serverManager), dialogService);
             var serversVm = new ServersViewModel(serverRepo, dialogService);
             var usersVm = new UsersViewModel(serverRepo, new UserRepository(), new CommandRepository(), dialogService);
-            var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService);
+            var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, new StartupManager());
 
             var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm, settingsRepo);
 

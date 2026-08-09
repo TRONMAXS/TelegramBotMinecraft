@@ -6,7 +6,7 @@ namespace TelegramBotMinecraft.Core.Database
 {
     public class ServerRepository
     {
-        private string Data = "Data Source=Data-test.db";
+        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
 
 
         public ServerRepository() { }
