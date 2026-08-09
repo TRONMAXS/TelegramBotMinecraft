@@ -19,6 +19,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         public int _selectPage = 0;
 
+        bool AttemptDisplayWindow = false;
+
         public MainViewModel(
             ConsoleViewModel consoleVm,
             ServersViewModel serversVm,
@@ -37,9 +39,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand]
         private void ShowWindow()
         {
+            if (AttemptDisplayWindow == true) return;
+            AttemptDisplayWindow = true;
+
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                if (desktop.MainWindow == null)
+                if (desktop.MainWindow == null && AttemptDisplayWindow == true)
                 {
                     var mainWindow = new Views.MainWindow
                     {
@@ -47,12 +52,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     };
                     desktop.MainWindow = mainWindow;
                     mainWindow.Show();
+                    AttemptDisplayWindow = false;
                 }
                 else
                 {
                     desktop.MainWindow.Show();
                     desktop.MainWindow.WindowState = WindowState.Normal;
                     desktop.MainWindow.Activate();
+                    AttemptDisplayWindow = false;
                 }
             }
         }
