@@ -44,46 +44,57 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
         private string? _botToken;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
+
         private int _autoBot;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         private int _trayOnStart;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         private int _runAtStartup;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         private int _autoReconnect;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         private int? _notifications;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
         private string? _proxyHost;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
         private string? _proxyPort;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
         private string? _proxyUsername;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
         private string? _proxyPassword;
 
@@ -155,6 +166,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 _startupManager.DisableStartup();
             }
+
+            await LoadSettingsAsync();
+        }
+
+
+        [RelayCommand(CanExecute = nameof(CanSave))]
+        private async Task CancelSettings()
+        {
+            if (_originalSettings == null) return;
 
             await LoadSettingsAsync();
         }
