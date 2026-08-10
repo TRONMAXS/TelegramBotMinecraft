@@ -30,35 +30,40 @@
                                 <TextBlock
                                     Width="150"
                                     VerticalAlignment="Center"
-                                    Text="BotToken:" />
+                                    Text="Токен бота:"
+                                    ToolTip.Tip="Уникальный ключ вашего бота, полученный от @BotFather. Никогда не передавайте его третьим лицам." />
                                 <TextBox
                                     Padding="5,4"
                                     Classes="revealPasswordButton"
+                                    IsEnabled="{Binding IsStartingBot}"
                                     PasswordChar="*"
                                     PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ"
                                     RevealPassword="False"
-                                    Text="{Binding Settings.BotToken}" />
+                                    Text="{Binding BotToken}" />
                             </DockPanel>
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.AutoBot}" />
+                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoBot}" />
                                 <TextBlock
                                     Margin="10,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Автозапуск бота" />
+                                    Text="Запускать бота при старте программы"
+                                    ToolTip.Tip="Автоматически включает Telegram-бота сразу после открытия приложения." />
                             </StackPanel>
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.AutoReconnect}" />
+                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoReconnect}" />
                                 <TextBlock
                                     Margin="10,0,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Авторестарт бота" />
+                                    Text="Автоматический перезапуск"
+                                    ToolTip.Tip="Если бот отключится из-за сбоя сети или ошибки серверов Telegram, программа сама попробует запустить его снова." />
                             </StackPanel>
                             <Button
                                 Margin="0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Bottom"
-                                Command="{Binding OffBotTelegramCommand}"
-                                Content="{Binding StatusWorkTGBot}" />
+                                Command="{Binding ManagingBotTelegramCommand}"
+                                Content="{Binding StatusWorkTGBot}"
+                                ToolTip.Tip="Запуск или полная остановка работы Telegram-бота и его функций." />
                         </StackPanel>
                     </GroupBox>
 
@@ -66,37 +71,39 @@
                         Padding="0"
                         FontFamily="Default"
                         FontSize="15"
-                        Header="Прокси (SOCKS5, HTTP)">
+                        Header="Прокси (SOCKS5, HTTP)"
+                        IsEnabled="{Binding IsStartingBot}"
+                        ToolTip.Tip="Используется для обхода блокировок или настройки безопасного соединения с серверами Telegram.">
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock
                                     Width="150"
                                     VerticalAlignment="Center"
-                                    Text="Хост / IP:" />
+                                    Text="IP-адрес / Хост:" />
                                 <TextBox
                                     Padding="5,4"
                                     PlaceholderText="127.0.0.1"
-                                    Text="{Binding Settings.ProxyHost}" />
+                                    Text="{Binding ProxyHost}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock
                                     Width="150"
                                     VerticalAlignment="Center"
-                                    Text="Port:" />
+                                    Text="Порт:" />
                                 <TextBox
                                     Padding="5,4"
                                     PlaceholderText="1080"
-                                    Text="{Binding Settings.ProxyPort}" />
+                                    Text="{Binding ProxyPort}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock
                                     Width="150"
                                     VerticalAlignment="Center"
-                                    Text="Admin:" />
+                                    Text="Пользователь:" />
                                 <TextBox
                                     Padding="5,4"
                                     PlaceholderText="Admin"
-                                    Text="{Binding Settings.ProxyUsername}" />
+                                    Text="{Binding ProxyUsername}" />
                             </DockPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock
@@ -109,7 +116,7 @@
                                     PasswordChar="*"
                                     PlaceholderText="12345"
                                     RevealPassword="False"
-                                    Text="{Binding Settings.ProxyPassword}" />
+                                    Text="{Binding ProxyPassword}" />
                             </DockPanel>
                         </StackPanel>
                     </GroupBox>
@@ -128,25 +135,28 @@
                         <Grid RowDefinitions="*, auto">
                             <StackPanel Spacing="8">
                                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.TrayOnStart}" />
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding TrayOnStart}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        Text="Сворачивать в трей при запуске" />
+                                        Text="Запускать свернутым в трей"
+                                        ToolTip.Tip="При старте программа не будет открывать окно на весь экран, а тихо запустится в системном трее (возле часов)." />
                                 </StackPanel>
                                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.RunAtStartup}" />
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding RunAtStartup}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        Text="Запуск с Windows" />
+                                        Text="Автозапуск при старте Windows"
+                                        ToolTip.Tip="Программа будет автоматически загружаться при каждом включении компьютера или сервера." />
                                 </StackPanel>
                                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Settings.Notifications}" />
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding Notifications}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        Text="Всплывающие уведомления" />
+                                        Text="Включить уведомления в программе"
+                                        ToolTip.Tip="Разрешить показывать всплывающие уведомления в углу окна программы при важных событиях (старт, ошибки, сохранение)." />
                                 </StackPanel>
                                 <StackPanel
                                     VerticalAlignment="Center"
@@ -156,7 +166,8 @@
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        Text="Автоматический выбор Java" />
+                                        Text="Автоматически искать установленную Java"
+                                        ToolTip.Tip="Программа сама найдет наиболее подходящую версию Java в системе для запуска игрового сервера Minecraft." />
                                 </StackPanel>
                                 <Grid>
                                     <Button
@@ -164,7 +175,7 @@
                                         HorizontalAlignment="Left"
                                         Command="{Binding OpenJavaManagementWindowCommand}"
                                         Content="Управление Java"
-                                        IsEnabled="False" />
+                                        ToolTip.Tip="Открыть менеджер для скачивания версий Java и ручной настройки путей к исполняемым файлам." />
                                 </Grid>
                             </StackPanel>
                         </Grid>
@@ -190,6 +201,7 @@
                             IsReadOnly="True"
                             ShowLineNumbers="True"
                             VerticalScrollBarVisibility="Auto"
+                            Watermark="Здесь будут отображаться логи бота и программы..."
                             WordWrap="False" />
                     </GroupBox>
                 </Grid>

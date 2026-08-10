@@ -24,8 +24,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private readonly CancellationTokenSource _cts = new();
 
-        [ObservableProperty]
-        private Setting? _settings;
+
+        public Setting? _originalSettings;
 
         [ObservableProperty]
         private string? _statusWorkTGBot = "Включить бота";
@@ -33,9 +33,66 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private TextDocument? logsBotAndProgram = new();
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsStartingBot))]
+        private bool _isOnBot;
 
-        public SettingsViewModel(SettingsRepository settingsRepository, LoggerService loggerService, 
-            TelegramBot telegramBot, IDialogService dialogService, IWindowService windowService, INotificationService notificationService, StartupManager startupManager)
+        public bool IsStartingBot => !IsOnBot;
+
+
+        #region Свойства Настроек для Связывания (UI)
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
+        private string? _botToken;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        private int _autoBot;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        private int _trayOnStart;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        private int _runAtStartup;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        private int _autoReconnect;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        private int? _notifications;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
+        private string? _proxyHost;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
+        private string? _proxyPort;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
+        private string? _proxyUsername;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ManagingBotTelegramCommand))]
+        private string? _proxyPassword;
+
+        #endregion
+
+        public SettingsViewModel(SettingsRepository settingsRepository, 
+            LoggerService loggerService, TelegramBot telegramBot, 
+            IDialogService dialogService, IWindowService windowService, 
+            INotificationService notificationService, StartupManager startupManager)
         {
             _SettingsRepository = settingsRepository;
             _LoggerService = loggerService;
@@ -54,42 +111,66 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadSettingsAsync()
         {
-            Setting settings = await _SettingsRepository.GetAllSettings();
-            if (settings != null) Settings = settings;
+            _originalSettings = await _SettingsRepository.GetAllSettings();
+            if (_originalSettings == null) return;
+
+            BotToken = _originalSettings.BotToken;
+            AutoBot = _originalSettings.AutoBot;
+            TrayOnStart = _originalSettings.TrayOnStart;
+            RunAtStartup = _originalSettings.RunAtStartup;
+            AutoReconnect = _originalSettings.AutoReconnect;
+            Notifications = _originalSettings.Notifications;
+            ProxyHost = _originalSettings.ProxyHost;
+            ProxyPort = _originalSettings.ProxyPort;
+            ProxyUsername = _originalSettings.ProxyUsername;
+            ProxyPassword = _originalSettings.ProxyPassword;
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private async Task SaveSettings()
         {
+            if (_originalSettings == null) return;
 
-            if (Settings != null)
+            _originalSettings.BotToken = BotToken;
+            _originalSettings.AutoBot = AutoBot;
+            _originalSettings.TrayOnStart = TrayOnStart;
+            _originalSettings.RunAtStartup = RunAtStartup;
+            _originalSettings.AutoReconnect = AutoReconnect;
+            _originalSettings.Notifications = Notifications;
+            _originalSettings.ProxyHost = ProxyHost;
+            _originalSettings.ProxyPort = ProxyPort;
+            _originalSettings.ProxyUsername = ProxyUsername;
+            _originalSettings.ProxyPassword = ProxyPassword;
+
+
+            await _SettingsRepository.SaveSettings(_originalSettings);
+
+            await _notificationService.ShowNotification("Сохранение", "Все настройки успешно применены и сохранены", "Success");
+
+            if (_originalSettings.RunAtStartup == 1)
             {
-                await _notificationService.ShowNotification("Сохранение", "Все настройки успешно применены и сохранены", "Success");
-
-                await _SettingsRepository.SaveSettings(Settings);
-
-                if (Settings.RunAtStartup == 1)
-                {
-                    _startupManager.EnableStartup();
-                }
-                else
-                {
-                    _startupManager.DisableStartup();
-                }
+                _startupManager.EnableStartup();
             }
+            else
+            {
+                _startupManager.DisableStartup();
+            }
+
             await LoadSettingsAsync();
         }
 
-        [RelayCommand]
-        private async Task OnOffBotTelegram()
+
+        [RelayCommand(CanExecute = nameof(CanStartOrStopBot))]
+        private async Task ManagingBotTelegram()
         {
-            if (Settings == null) return;
+            if (_originalSettings == null) return;
 
             if (StatusWorkTGBot == "Включить бота")
             {
                 await _notificationService.ShowNotification("Telegram бот", "Бот запускается", "Information");
                 _TelegramBot.StartBotTelegram();
                 StatusWorkTGBot = "Выключить бота";
+                IsOnBot = true;
             }
             else
             {
@@ -100,6 +181,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     await _notificationService.ShowNotification("Telegram бот", "Бот останавливается", "Warning");
                     _TelegramBot.StopBotTelegram();
                     StatusWorkTGBot = "Включить бота";
+                    IsOnBot = false;
                 }
             }
         }
@@ -133,6 +215,32 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 }
             }
             catch { }
+        }
+
+        private bool CanSave()
+        {
+            if (_originalSettings == null) return false;
+
+            return BotToken != _originalSettings.BotToken ||
+                   AutoBot != _originalSettings.AutoBot ||
+                   TrayOnStart != _originalSettings.TrayOnStart ||
+                   RunAtStartup != _originalSettings.RunAtStartup ||
+                   AutoReconnect != _originalSettings.AutoReconnect ||
+                   Notifications != _originalSettings.Notifications ||
+                   ProxyHost != _originalSettings.ProxyHost ||
+                   ProxyPort != _originalSettings.ProxyPort ||
+                   ProxyUsername != _originalSettings.ProxyUsername ||
+                   ProxyPassword != _originalSettings.ProxyPassword;
+        }
+        private bool CanStartOrStopBot()
+        {
+            if (_originalSettings == null) return false;
+
+            return BotToken == _originalSettings.BotToken &&
+          ProxyHost == _originalSettings.ProxyHost &&
+          ProxyPort == _originalSettings.ProxyPort &&
+          ProxyUsername == _originalSettings.ProxyUsername &&
+          ProxyPassword == _originalSettings.ProxyPassword;
         }
     }
 }
