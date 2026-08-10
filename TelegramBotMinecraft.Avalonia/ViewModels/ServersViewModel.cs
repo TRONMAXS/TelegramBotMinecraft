@@ -3,6 +3,7 @@ using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
@@ -23,8 +24,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
     public partial class ServersViewModel : ObservableObject
     {
         private readonly ServerRepository _ServerRepository;
-
         private readonly IDialogService _dialogService;
+        private readonly INotificationService _notificationService;
+
 
         public ObservableCollection<Server> Servers { get; } = new();
 
@@ -44,10 +46,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public bool IsEditorEnabled => SelectedServer != null || IsAddingNewServer;
 
-        public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService)
+        public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService, INotificationService notificationService)
         {
             _ServerRepository = serverRepository;
             _dialogService = dialogService;
+            _notificationService = notificationService;
+
             _ = LoadServersAsync();
         }
 
@@ -85,9 +89,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить сервер {SelectedServer.Name}?");
 
-
             if (result == true)
             {
+                await _notificationService.ShowNotification("Удаление", $"Сервер [{SelectedServer.Name}] был успешно удален", "Warning");
+
                 await _ServerRepository.DeleteServer(SelectedServer.Id);
 
                 SelectedServer = null;
@@ -100,8 +105,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (EditableServer == null) return;
 
-            if (IsAddingNewServer) await _ServerRepository.AddServer(EditableServer);
-            else await _ServerRepository.UpdateServer(EditableServer);
+            if (IsAddingNewServer) 
+            {
+                await _notificationService.ShowNotification("Новый сервер", $"Сервер [{EditableServer.Name}] успешно добавлен в список", "Success");
+                await _ServerRepository.AddServer(EditableServer);
+            }
+            else
+            {
+                await _notificationService.ShowNotification("Настройки сервера", $"Изменения конфигурации сервера [{EditableServer.Name}] успешно сохранены", "Success");
+                await _ServerRepository.UpdateServer(EditableServer);
+            }
 
             IsAddingNewServer = false;
             SelectedServer = null;
@@ -125,8 +138,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             if (EditableServer != null)
             {
-                EditableServer.PathServer = result;
+                await _notificationService.ShowNotification("Путь к серверу", $"Корневая папка сервера успешно привязана", "Success");
 
+                EditableServer.PathServer = result;
                 var temp = EditableServer;
                 EditableServer = null;
                 EditableServer = temp;

@@ -33,16 +33,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
     public partial class ConsoleViewModel : ObservableObject
     {
         private readonly MinecraftServerManager _MinecraftServerManager;
-
         private readonly ServerRepository _ServerRepository;
-
         private readonly ServerStatusService _ServerStatusService;
-
         private readonly ServerLogService _ServerLogService;
-
         private readonly ServerCommandService _ServerCommandService;
-
         private readonly IDialogService _dialogService;
+        private readonly INotificationService _notificationService;
+
 
 
         [ObservableProperty]
@@ -83,7 +80,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             ServerStatusService serverStatusService, 
             ServerLogService serverLogService,
             ServerCommandService serverCommandService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            INotificationService notificationService)
         {
             _MinecraftServerManager = minecraftServerManager;
             _ServerRepository = serverRepository;
@@ -91,6 +89,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _ServerLogService = serverLogService;
             _ServerCommandService = serverCommandService;
             _dialogService = dialogService;
+            _notificationService = notificationService;
 
             _ = LoadServersAsync();
             _ = MonitorServersAsync();
@@ -111,6 +110,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task StartServer()
         {
             if (SelectedServer == null) return;
+            await _notificationService.ShowNotification("Запуск сервера", $"Сервер [{SelectedServer.Name}] запускается...", "Information");
             await _MinecraftServerManager.StartServer(SelectedServer.Name);
         }
 
@@ -124,7 +124,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedServer.Name}?");
 
-            if (result == true) await _MinecraftServerManager.StopServer(SelectedServer.Name);
+            if (result == true) 
+            {
+                await _notificationService.ShowNotification("Остановка сервера", $"Сервер [{SelectedServer.Name}] останавливается...", "Warning");
+                await _MinecraftServerManager.StopServer(SelectedServer.Name);
+            }
         }
 
         [RelayCommand]

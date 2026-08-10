@@ -64,6 +64,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             if (Settings != null)
             {
+                await _notificationService.ShowNotification("Сохранение", "Все настройки успешно применены и сохранены", "Success");
+
                 await _SettingsRepository.SaveSettings(Settings);
 
                 if (Settings.RunAtStartup == 1)
@@ -85,6 +87,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             if (StatusWorkTGBot == "Включить бота")
             {
+                await _notificationService.ShowNotification("Telegram бот", "Бот запускается", "Information");
                 _TelegramBot.StartBotTelegram();
                 StatusWorkTGBot = "Выключить бота";
             }
@@ -94,6 +97,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
                 if (result == true)
                 {
+                    await _notificationService.ShowNotification("Telegram бот", "Бот останавливается", "Warning");
                     _TelegramBot.StopBotTelegram();
                     StatusWorkTGBot = "Включить бота";
                 }

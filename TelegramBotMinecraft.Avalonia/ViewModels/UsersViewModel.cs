@@ -23,6 +23,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly UserRepository _UserRepository;
         private readonly CommandRepository _CommandRepository;
         private readonly IDialogService _dialogService;
+        private readonly INotificationService _notificationService;
 
 
         public ObservableCollection<User> Users { get; } = new();
@@ -47,12 +48,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private int? UserOldId;
 
         public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, 
-            CommandRepository commandRepository, IDialogService dialogService)
+            CommandRepository commandRepository, IDialogService dialogService, INotificationService notificationService)
         {
             _ServerRepository = serverRepository;
             _UserRepository = userRepository;
             _CommandRepository = commandRepository;
             _dialogService = dialogService;
+            _notificationService = notificationService;
 
             _ = LoadServersAsync();
             _ = LoadUsersAsync();
@@ -137,6 +139,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if(UserName == null && UserId == null) return;
 
+            await _notificationService.ShowNotification("Пользователь добавлен", $"Пользователь [{UserName}] (ID: [{UserId}]) успешно добавлен", "Success");
+
             await _UserRepository.AddUser(UserName, UserId);
 
             UserName = null;
@@ -151,10 +155,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedUser == null) return;
 
-            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить пользователя {SelectedUser.Name} : {SelectedUser.Id}?");
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить пользователя [{SelectedUser.Name}]:[{SelectedUser.Id}]?");
 
             if (result == true)
             {
+                await _notificationService.ShowNotification("Пользователь удален", $"Пользователь [{SelectedUser.Name}] успешно удален", "Warning");
+
                 await _UserRepository.DeleteUser(SelectedUser.Id);
 
                 await LoadUsersAsync();
@@ -178,6 +184,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanEdit))]
         private async Task SaveUser()
         {
+            await _notificationService.ShowNotification("Пользователь обновлен", $"Пользователь [{UserName}] успешно обновлен", "Success");
+
             await _UserRepository.UpdateUser(UserName, UserId, UserOldId);
 
             UserName = null;
@@ -205,6 +213,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                                                 .Where(c => c.IsChecked)
                                                 .Select(c => c.Id)
                                                 .ToList();
+
+            await _notificationService.ShowNotification("Права доступа", $"Разрешения для серверов и команд успешно обновлены", "Success");
 
             await _ServerRepository.SaveUserServersAsync(SelectedUser.Id, selectedServers);       
             await _CommandRepository.SaveUserCommandsAsync(SelectedUser.Id, selectedCommands);
