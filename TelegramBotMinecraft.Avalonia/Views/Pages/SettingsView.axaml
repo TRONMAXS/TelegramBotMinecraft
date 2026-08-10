@@ -148,7 +148,10 @@
                                         VerticalAlignment="Center"
                                         Text="Всплывающие уведомления" />
                                 </StackPanel>
-                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    IsEnabled="False"
+                                    Orientation="Horizontal">
                                     <CheckBox VerticalAlignment="Center" IsChecked="{Binding}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
@@ -160,7 +163,8 @@
                                         Margin="0,3,0,0"
                                         HorizontalAlignment="Left"
                                         Command="{Binding OpenJavaManagementWindowCommand}"
-                                        Content="Управление Java" />
+                                        Content="Управление Java"
+                                        IsEnabled="False" />
                                 </Grid>
                             </StackPanel>
                         </Grid>
