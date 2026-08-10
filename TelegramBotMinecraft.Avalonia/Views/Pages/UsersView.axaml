@@ -42,7 +42,7 @@
                                 HorizontalScrollBarVisibility="Disabled"
                                 IsReadOnly="False"
                                 ItemsSource="{Binding Servers}"
-                                SelectionMode="Extended">
+                                SelectionMode="Single">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn
                                         Width="*"
@@ -98,7 +98,7 @@
                                 HorizontalScrollBarVisibility="Disabled"
                                 IsReadOnly="False"
                                 ItemsSource="{Binding Commands}"
-                                SelectionMode="Extended">
+                                SelectionMode="Single">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn
                                         Width="*"
@@ -169,7 +169,7 @@
                         IsReadOnly="True"
                         ItemsSource="{Binding Users}"
                         SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                        SelectionMode="Extended">
+                        SelectionMode="Single">
                         <DataGrid.Columns>
                             <DataGridTextColumn
                                 Width="*"
