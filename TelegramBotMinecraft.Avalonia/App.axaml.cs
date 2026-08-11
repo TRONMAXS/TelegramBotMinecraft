@@ -29,13 +29,15 @@ public partial class App : Application
             var serverManager = new MinecraftServerManager();
             var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService());
             var dialogService = new AvaloniaDialogService();
-            var windowService = new AvaloniaWindowService(() => new JavaManagerWindowViewModel(new JavaManagementViewModel(javaManager, dialogService), new JavaDownloadViewModel(javaManager)));
+            var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), 
+                                                                 new JavaDownloadViewModel(javaManager)),
+                                                                 (server) => new JavaArgumentManagerViewModel(serverRepo, server));
             var notificationService = new AvaloniaNotificationService(settingsRepo);
             var sharedLogger = new LoggerService();
             var telegramBot = new TelegramBot(settingsRepo, sharedLogger);
 
             var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerStatusService(serverRepo), new ServerLogService(serverRepo), new ServerCommandService(serverRepo, serverManager), dialogService, notificationService);
-            var serversVm = new ServersViewModel(serverRepo, dialogService, notificationService);
+            var serversVm = new ServersViewModel(serverRepo, dialogService, notificationService, javaManager, windowService);
             var usersVm = new UsersViewModel(serverRepo, new UserRepository(), new CommandRepository(), dialogService, notificationService);
             var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, notificationService, new StartupManager());
 

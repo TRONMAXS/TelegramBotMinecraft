@@ -86,22 +86,30 @@
                                         PlaceholderText="C:\Minecraft\Server\"
                                         Text="{Binding EditableServer.PathServer}" />
                                 </DockPanel>
-                                <DockPanel LastChildFill="True">
-                                    <TextBlock
-                                        Width="150"
-                                        VerticalAlignment="Center"
-                                        Text="Аргументы Java:" />
-                                    <Button
-                                        Width="101"
-                                        Margin="10,0,0,0"
-                                        Padding="15,4"
-                                        Content="Настроить"
-                                        DockPanel.Dock="Right" />
-                                    <TextBox
-                                        Padding="5,4"
-                                        PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui"
-                                        Text="{Binding EditableServer.JavaArgs}" />
-                                </DockPanel>
+								<Grid RowDefinitions="Auto, 8, Auto" Margin="0,5,0,0">
+									<Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+										<TextBlock Grid.Column="0"
+												   VerticalAlignment="Center"
+												   Margin="0"
+												   Text="Аргументы Java:" />
+
+										<Button Grid.Column="1"
+												Padding="15,6"
+												Classes="accent"
+												Command="{Binding OpenJavaArgumentsWindowCommand}"
+												Content="Настроить" />
+									</Grid>
+
+									<TextBox Grid.Row="2"
+											 Height="65"
+											 IsReadOnly="True"
+											 AcceptsReturn="True"
+											 TextWrapping="Wrap"
+											 ScrollViewer.VerticalScrollBarVisibility="Auto"
+											 Classes="console-output"
+											 PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui"
+											 Text="{Binding EditableServer.JavaArgs}" />
+								</Grid>
                             </StackPanel>
                         </GroupBox>
 
@@ -113,7 +121,7 @@
                             FontSize="15"
                             Header="Java">
                             <StackPanel Spacing="8">
-                                <DockPanel LastChildFill="False">
+                                <DockPanel LastChildFill="True">
                                     <TextBlock
                                         Width="150"
                                         VerticalAlignment="Center"
@@ -134,7 +142,7 @@
                                         <ComboBoxItem>Text Item 9</ComboBoxItem>
                                     </ComboBox>
                                 </DockPanel>
-                                <DockPanel LastChildFill="False">
+                                <DockPanel LastChildFill="True">
                                     <TextBlock
                                         Width="150"
                                         VerticalAlignment="Center"
@@ -142,22 +150,14 @@
                                     <ComboBox
                                         Width="300"
                                         Padding="5,4"
+                                        ItemsSource="{Binding Javas}"
                                         MaxDropDownHeight="300"
-                                        PlaceholderText="Java">
-                                        <ComboBoxItem>Text Item 1</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 2</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 3</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 4</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 5</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 6</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 7</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 8</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 9</ComboBoxItem>
-                                    </ComboBox>
+                                        PlaceholderText="Java" />
                                     <Button
                                         Width="111"
                                         Margin="10,0,0,0"
                                         Padding="15,4"
+                                        HorizontalAlignment="Right"
                                         Content="Управление" />
                                 </DockPanel>
                             </StackPanel>

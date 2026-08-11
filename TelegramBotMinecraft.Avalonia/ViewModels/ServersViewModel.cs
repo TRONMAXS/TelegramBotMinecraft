@@ -10,8 +10,10 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.Services;
@@ -26,9 +28,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly ServerRepository _ServerRepository;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
+        private readonly JavaManagerService? _JavaManagerService;
+        private readonly IWindowService _windowService;
 
 
         public ObservableCollection<Server> Servers { get; } = new();
+        public ObservableCollection<string> Javas { get; } = new();
 
 
         [ObservableProperty]
@@ -46,13 +51,18 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public bool IsEditorEnabled => SelectedServer != null || IsAddingNewServer;
 
-        public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService, INotificationService notificationService)
+        public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService, 
+            INotificationService notificationService, JavaManagerService? javaManagerService,
+            IWindowService windowService)
         {
             _ServerRepository = serverRepository;
             _dialogService = dialogService;
             _notificationService = notificationService;
+            _JavaManagerService = javaManagerService;
+            _windowService = windowService;
 
             _ = LoadServersAsync();
+            LoadJavaDownloadedList();
         }
 
         private async Task LoadServersAsync()
@@ -72,6 +82,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             Server serverSettings = await _ServerRepository.GetServerByName(Name);
             if (serverSettings != null) EditableServer = serverSettings;
+        }
+
+        private async void LoadJavaDownloadedList()
+        {
+            List<JavaManager> javaList = await _JavaManagerService.GetAllDownloadedJava();
+            if (javaList == null && javaList.Count > 0) return;
+
+            Javas?.Clear();
+
+            foreach (var java in javaList)
+            {
+                Javas?.Add(java.Version);
+            }
         }
 
         [RelayCommand]
@@ -145,6 +168,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 EditableServer = null;
                 EditableServer = temp;
             }
+        }
+
+        [RelayCommand]
+        private async Task OpenJavaArgumentsWindow()
+        {
+            if(EditableServer == null) return;
+            await _windowService.OpenJavaToServerArgumentManagement(EditableServer);
+
+            await LoadSettingsServerAsync(EditableServer.Name);
         }
 
 

@@ -214,7 +214,7 @@
             </Grid.ColumnDefinitions>
 
             <Button
-                Width="100"
+                Width="105"
                 Height="30"
                 Margin="3"
                 HorizontalAlignment="Center"
@@ -224,7 +224,7 @@
                 Content="Coxpaнить"
                 Foreground="#FFFFFF" />
             <Button
-                Width="100"
+                Width="105"
                 Height="30"
                 Margin="3"
                 HorizontalAlignment="Right"

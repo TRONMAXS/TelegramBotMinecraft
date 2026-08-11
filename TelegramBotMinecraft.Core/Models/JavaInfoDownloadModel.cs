@@ -29,5 +29,9 @@
             Version = version;
             Architecture = architecture;
         }
+        public JavaManager(string? version)
+        {
+            Version = version;
+        }
     }
 }

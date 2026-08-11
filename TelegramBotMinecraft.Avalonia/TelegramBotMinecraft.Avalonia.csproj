@@ -39,6 +39,9 @@
     <Compile Update="Views\Pages\JavaDownload.axaml.cs">
       <DependentUpon>JavaDownload.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\JavaArgumentManagerWindow.axaml.cs">
+      <DependentUpon>JavaArgumentManagerWindow.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Pages\JavaManagement.axaml.cs">
       <DependentUpon>JavaManagement.axaml</DependentUpon>
     </Compile>

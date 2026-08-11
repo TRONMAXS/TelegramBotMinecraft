@@ -1,0 +1,173 @@
+<Window
+    x:Class="TelegramBotMinecraft.Avalonia.Views.JavaArgumentManagerWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:TelegramBotMinecraft.Avalonia.Views"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    Title="Менеджер аргументов Java"
+    Width="800"
+    Height="500"
+    x:DataType="vm:JavaArgumentManagerViewModel"
+    CanResize="False"
+    Icon="/Assets/TelegramBotMinecraft-logo.ico"
+    WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:JavaArgumentManagerViewModel />
+    </Design.DataContext>
+
+    <Grid Margin="20" RowDefinitions="*, Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="20">
+                <GroupBox Padding="15" Header="Глобальные настройки">
+                    <StackPanel Margin="0,0,0,10" Spacing="5">
+                        <TextBlock
+                            Margin="0,0,0,5"
+                            Foreground="#aaaaaa"
+                            Text="Имя исполняемого файла (.jar):" />
+                        <TextBox
+                            Height="32"
+                            Text="{Binding JarFileName, Mode=TwoWay}"
+                            Watermark="Например: server.jar или paper.jar" />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox
+                    Classes="card"
+                    Header="Выделение оперативной памяти (ОЗУ)"
+                    IsVisible="{Binding IsMemorySliderVisible}">
+                    <StackPanel Spacing="12">
+
+                        <Grid ColumnDefinitions="*, *">
+                            <StackPanel
+                                Grid.Column="0"
+                                Margin="0,0,15,0"
+                                Spacing="5">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock
+                                        DockPanel.Dock="Right"
+                                        FontWeight="Bold"
+                                        Foreground="#3574F0"
+                                        Text="{Binding MinMemoryString, Mode=OneWay}" />
+                                    <TextBlock Margin="0" Text="Минимальная (-Xms):" />
+                                </DockPanel>
+
+                                <Slider
+                                    IsSnapToTickEnabled="True"
+                                    Maximum="32768"
+                                    Minimum="1024"
+                                    TickFrequency="1024"
+                                    TickPlacement="BottomRight"
+                                    Value="{Binding MinMemoryMb, Mode=TwoWay}" />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="15,0,0,0"
+                                Spacing="5">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock
+                                        DockPanel.Dock="Right"
+                                        FontWeight="Bold"
+                                        Foreground="#3574F0"
+                                        Text="{Binding MaxMemoryString, Mode=OneWay}" />
+                                    <TextBlock Margin="0" Text="Максимальная (-Xmx):" />
+                                </DockPanel>
+
+                                <Slider
+                                    IsSnapToTickEnabled="True"
+                                    Maximum="32768"
+                                    Minimum="1024"
+                                    TickFrequency="1024"
+                                    TickPlacement="BottomRight"
+                                    Value="{Binding MaxMemoryMb, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            FontSize="11"
+                            Foreground="#777777"
+                            Text="Рекомендуется выделять не более 75% от всей памяти ПК." />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Padding="15" Header="Параметры запуска сервера">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="5">
+                            <TextBlock Foreground="#aaaaaa" Text="Предустановленный режим работы:" />
+                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="{Binding PresetIndex, Mode=TwoWay}">
+                                <ComboBoxItem Content="Стандартный режим (Без дополнительных флагов)" />
+                                <ComboBoxItem Content="Оптимизация Aikar's Flags (Рекомендуется для игровых серверов)" />
+                                <ComboBoxItem Content="Дополнительные аргументы (Дописать к ползункам ОЗУ)" />
+                                <ComboBoxItem Content="Полностью своя строка запуска (Для модовых серверов и т.д.)" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsCustomArgsVisible}" Spacing="5">
+                            <TextBlock Text="Дополнительные флаги Java (допишутся к памяти):" />
+                            <TextBox
+                                Height="60"
+                                AcceptsReturn="True"
+                                Text="{Binding CustomArguments, Mode=TwoWay}"
+                                TextWrapping="Wrap"
+                                Watermark="Например: -XX:+UseZGC" />
+                        </StackPanel>
+
+                        <StackPanel IsVisible="{Binding IsFullCustomLineVisible}" Spacing="5">
+                            <TextBlock
+                                FontWeight="Bold"
+                                Foreground="#ef4444"
+                                Text="⚠️ Введите полную строку запуска (Включая память, пути и библиотеки):" />
+                            <TextBox
+                                Height="100"
+                                AcceptsReturn="True"
+                                Text="{Binding CustomArguments, Mode=TwoWay}"
+                                TextWrapping="Wrap"
+                                Watermark="Пример: @user_jvm_args.txt @libraries/net/neoforged/neoforge/21.1.230/win_args.txt" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Padding="15" Header="Результирующая строка аргументов">
+                    <StackPanel Spacing="8">
+                        <TextBox
+                            Height="80"
+                            FontFamily="Consolas,Monospace"
+                            FontSize="12"
+                            IsReadOnly="True"
+                            Text="{Binding FinalArguments, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid
+            Grid.Row="1"
+            Margin="0,10,0,0"
+            ColumnDefinitions="*, Auto">
+            <Button
+                Grid.Column="0"
+                Width="105"
+                Height="30"
+                HorizontalAlignment="Left"
+                Background="#1F4E79"
+                BorderBrush="#2A6496"
+                Command="{Binding SaveCommand}"
+                Content="Coxpaнить"
+                Foreground="#FFFFFF" />
+
+            <Button
+                Grid.Column="1"
+                Width="105"
+                Height="30"
+                HorizontalAlignment="Right"
+                Command="{Binding CancelCommand}"
+                Content="Отмена" />
+        </Grid>
+    </Grid>
+
+</Window>
