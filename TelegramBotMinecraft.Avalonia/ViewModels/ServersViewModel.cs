@@ -192,6 +192,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             await LoadSettingsServerAsync(EditableServer.Name);
         }
 
+        [RelayCommand]
+        private async Task OpenJavaManagementWindow()
+        {
+            await _windowService.OpenJavaManagement();
+        }
 
         private bool CanDelete() => SelectedServer != null && !IsAddingNewServer;
 

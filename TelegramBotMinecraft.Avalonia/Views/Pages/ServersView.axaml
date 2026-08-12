@@ -173,6 +173,7 @@
                                         Margin="10,0,0,0"
                                         Padding="15,4"
                                         HorizontalAlignment="Right"
+                                        Command="{Binding OpenJavaManagementWindowCommand}"
                                         Content="Управление" />
                                 </DockPanel>
                             </StackPanel>
