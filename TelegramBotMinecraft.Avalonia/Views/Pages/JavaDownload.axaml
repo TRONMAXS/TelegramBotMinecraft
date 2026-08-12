@@ -17,7 +17,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,3">
+        <Grid
+            Grid.Row="0"
+            Margin="0,0,0,3"
+            IsEnabled="{Binding IsDownloadedEnabled}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -82,7 +85,6 @@
             </DataGrid>
 
         </Grid>
-
 
         <StackPanel Grid.Row="1" Margin="0,0,0,10">
             <Grid ColumnDefinitions="*, Auto">

@@ -20,7 +20,7 @@
 
     <TabControl SelectedIndex="{Binding SelectedTabIndex}">
 
-        <TabItem Header="Установленные версии">
+        <TabItem Header="Установленные версии" IsEnabled="{Binding IsDownloadedEnabled}">
             <Grid Margin="20">
                 <views:JavaManagement DataContext="{Binding JavaManagementVm}" />
             </Grid>
