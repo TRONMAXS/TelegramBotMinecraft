@@ -1,5 +1,4 @@
 ﻿using CoreRCON;
-using Microsoft.Data.Sqlite;
 using System.Diagnostics;
 using System.Net;
 using TelegramBotMinecraft.Core.Database;
@@ -9,25 +8,38 @@ namespace TelegramBotMinecraft
 {
     public class MinecraftServerManager
     {
+        private readonly JavaRepository? _javaRepository;
+
+
         private Process? process = null;
         private int processId = -1;
 
         private Dictionary<string, Process> serverProcesses = new();
 
+        public MinecraftServerManager(JavaRepository javaRepository)
+        {
+            _javaRepository = javaRepository;
+        }
+
         public async Task<bool> StartServer(string ServerName)
         {
-            var ServerData = await GetServerData(ServerName);
+            var serverData = await GetServerData(ServerName);
+            if (serverData == null) return false;
 
-            if (ServerData.IdProcess == -1)
+            var javaData = await _javaRepository.GetJavaByName(serverData.JavaName);
+            if (javaData == null) return false;
+
+            if (serverData.IdProcess == -1)
             {
                 try
                 {
                     process = new Process();
                     process?.StartInfo = new ProcessStartInfo
                     {
-                        FileName = @"C:\Program Files\Java\jdk-25.0.3\bin\javaw.exe",
-                        WorkingDirectory = ServerData.PathServer,
-                        Arguments = ServerData.JavaArgs,
+                        //FileName = @"C:\Program Files\Java\jdk-25.0.3\bin\javaw.exe",
+                        FileName = javaData?.Path,
+                        WorkingDirectory = serverData.PathServer,
+                        Arguments = serverData.JavaArgs,
                         CreateNoWindow = true,
                         RedirectStandardInput = true,
                         UseShellExecute = false
@@ -100,6 +112,7 @@ namespace TelegramBotMinecraft
 
             Server.PathServer = serverData.PathServer ?? string.Empty;
             Server.JavaArgs = serverData.JavaArgs ?? string.Empty;
+            Server.JavaName = serverData.JavaName ?? string.Empty;
             Server.IdProcess = serverData.IdProcess;
             Server.RconEnable = serverData.RconEnable;
             Server.RconPort = serverData.RconPort;

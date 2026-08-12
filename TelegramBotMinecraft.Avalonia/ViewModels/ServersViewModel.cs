@@ -31,9 +31,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly JavaManagerService? _JavaManagerService;
         private readonly IWindowService _windowService;
 
-
         public ObservableCollection<Server> Servers { get; } = new();
-        public ObservableCollection<string> Javas { get; } = new();
+        public ObservableCollection<JavaManager> Javas { get; } = new();
 
 
         [ObservableProperty]
@@ -43,6 +42,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [NotifyPropertyChangedFor(nameof(IsEditorEnabled))]
         [NotifyCanExecuteChangedFor(nameof(DeleteButtonCommand))]
         private Server? _selectedServer;
+
+        [ObservableProperty]
+        private JavaManager? _selectedJava;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsEditorEnabled))]
@@ -62,7 +64,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _windowService = windowService;
 
             _ = LoadServersAsync();
-            LoadJavaDownloadedList();
         }
 
         private async Task LoadServersAsync()
@@ -80,20 +81,29 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadSettingsServerAsync(string Name)
         {
-            Server serverSettings = await _ServerRepository.GetServerByName(Name);
-            if (serverSettings != null) EditableServer = serverSettings;
-        }
-
-        private async void LoadJavaDownloadedList()
-        {
-            List<JavaManager> javaList = await _JavaManagerService.GetAllDownloadedJava();
-            if (javaList == null && javaList.Count > 0) return;
-
-            Javas?.Clear();
-
-            foreach (var java in javaList)
+            try
             {
-                Javas?.Add(java.Version);
+                Server serverSettings = await _ServerRepository.GetServerByName(Name);
+                if (serverSettings == null) return;
+                EditableServer = serverSettings;
+
+                List<JavaManager> javaList = await _JavaManagerService.GetAllDownloadedJava();
+                if (javaList == null) return;
+
+                Javas?.Clear();
+                foreach (var java in javaList)
+                {
+                    Javas?.Add(java);
+                }
+
+                if (Javas != null && !string.IsNullOrEmpty(EditableServer.JavaName))
+                {
+                    SelectedJava = Javas.FirstOrDefault(j => j.Name == EditableServer.JavaName);
+                }
+            }
+            catch (Exception ex)
+            {
+                //($"Ошибка загрузки настроек сервера: {ex.Message}");
             }
         }
 
@@ -127,6 +137,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task SaveButton()
         {
             if (EditableServer == null) return;
+            if (SelectedJava == null) return;
+
+            EditableServer.JavaName = SelectedJava.Name;
 
             if (IsAddingNewServer) 
             {
@@ -186,6 +199,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (value == null) return;
             _ = LoadSettingsServerAsync(value.Name);
+            
         }
     }
 }

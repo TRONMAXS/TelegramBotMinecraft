@@ -106,12 +106,14 @@
                 Width="85"
                 Height="28"
                 HorizontalAlignment="Left"
+                Command="{Binding OkCommand}"
                 Content="ОK" />
             <Button
                 Width="85"
                 Height="28"
                 Margin="10,0,0,0"
                 HorizontalAlignment="Left"
+                Command="{Binding CancelCommand}"
                 Content="Отмена" />
         </StackPanel>
 

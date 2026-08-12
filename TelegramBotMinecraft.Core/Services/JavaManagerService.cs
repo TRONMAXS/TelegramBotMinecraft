@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Channels;
+using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Services
@@ -13,17 +14,20 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly HashService _hashService;
         private readonly FileDownloaderService _downloader;
         private readonly LzmaDecompressorService _decompressor;
+        private readonly JavaRepository _javaRepository;
+
 
 
         private string UrlManifestJson = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
         private string UrlJavaManifestJson = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
 
-        public JavaManagerService(HttpClient client, HashService hashService, FileDownloaderService downloader, LzmaDecompressorService decompressor)
+        public JavaManagerService(HttpClient client, HashService hashService, FileDownloaderService downloader, LzmaDecompressorService decompressor, JavaRepository javaRepository)
         {
             _client = client;
             _hashService = hashService;
             _downloader = downloader;
             _decompressor = decompressor;
+            _javaRepository = javaRepository;
         }
 
 
@@ -424,6 +428,40 @@ namespace TelegramBotMinecraft.Core.Services
             bool validate = await ValidateInstallation(filesToDownload, PathJavas);
             if (validate) return true;
             else return false;
+        }
+
+        public async Task UpdateJavaInDb()
+        {
+            var listDownloadedJava = await GetAllDownloadedJava();
+            if (listDownloadedJava == null || listDownloadedJava.Count == 0) return;
+
+            var listJavaInDB = await _javaRepository.GetAllJava();
+            if (listJavaInDB == null || listJavaInDB.Count == 0) return;
+
+
+            var namesInDB = listJavaInDB.Select(j => j.Name).ToList();
+
+            List<JavaManager> listAddJava = listDownloadedJava
+                                        .Where(dj => !namesInDB.Contains(dj.Name) && 
+                                        !namesInDB.Contains(dj.Version) && 
+                                        !namesInDB.Contains(dj.Architecture) && 
+                                        !namesInDB.Contains(dj.Path))
+                                        .Select(dj => dj)
+                                        .ToList();
+
+            var namesOnDisk = listDownloadedJava.Select(dj => dj.Name).ToList();
+
+            List<JavaManager> listDellJava = listJavaInDB
+                                        .Where(j => !namesOnDisk.Contains(j.Name) &&
+                                        !namesOnDisk.Contains(j.Version) &&
+                                        !namesOnDisk.Contains(j.Architecture) &&
+                                        !namesOnDisk.Contains(j.Path))
+                                        .Select(j => j)
+                                        .ToList();
+
+            if (listDellJava != null || listDellJava.Count != 0) await _javaRepository.Delete(listDellJava);
+
+            if (listAddJava != null || listAddJava.Count != 0) await _javaRepository.Add(listAddJava);
         }
     }
 }

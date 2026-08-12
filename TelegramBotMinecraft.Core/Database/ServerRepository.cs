@@ -32,7 +32,8 @@ namespace TelegramBotMinecraft.Core.Database
                             reader["Connected"] as string,
                             reader["Path_Server"] as string,
                             reader["ID_Process"] == DBNull.Value ? -1 : Convert.ToInt32(reader["ID_Process"]),
-                            reader["Java_args"] as string,
+                            reader["Java_Args"] as string,
+                            reader["Java_Name"] as string,
                             reader["Rcon_Enable"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Rcon_Enable"]),
                             reader["Rcon_Port"] == DBNull.Value ? null : Convert.ToInt32(reader["Rcon_Port"]),
                             reader["Rcon_Pass"] == DBNull.Value ? null : reader["Rcon_Pass"].ToString()
@@ -89,7 +90,8 @@ namespace TelegramBotMinecraft.Core.Database
                             reader["Connected"] as string,
                             reader["Path_Server"] as string,
                             reader["ID_Process"] == DBNull.Value ? -1 : Convert.ToInt32(reader["ID_Process"]),
-                            reader["Java_args"] as string,
+                            reader["Java_Args"] as string,
+                            reader["Java_Name"] as string,
                             reader["Rcon_Enable"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Rcon_Enable"]),
                             reader["Rcon_Port"] == DBNull.Value ? null : Convert.ToInt32(reader["Rcon_Port"]),
                             reader["Rcon_Pass"] == DBNull.Value ? null : reader["Rcon_Pass"].ToString()
@@ -134,8 +136,8 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
-                          "VALUES (@Name, @Connected, @Path_Server, @Java_args, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
+                string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Java_Name, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
+                          "VALUES (@Name, @Connected, @Path_Server, @Java_args, @Java_Name, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
 
                 using (var connection = new SqliteConnection(Data))
                 {
@@ -147,7 +149,8 @@ namespace TelegramBotMinecraft.Core.Database
 
                         command.Parameters.AddWithValue("@Connected", server.Connected ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Path_Server", server.PathServer ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@Java_args", server.JavaArgs ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_Args", server.JavaArgs ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_Name", server.JavaName ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Rcon_Enable", server.RconEnable);
                         command.Parameters.AddWithValue("@Rcon_Port", server.RconPort.HasValue ? (object)server.RconPort.Value : DBNull.Value);
                         command.Parameters.AddWithValue("@Rcon_Pass", server.RconPass ?? (object)DBNull.Value);
@@ -180,9 +183,9 @@ namespace TelegramBotMinecraft.Core.Database
             try
             {
                 string sqlAddServer = "UPDATE Servers SET Name = @Name, Connected = @Connected, " +
-                    "Path_Server = @Path_Server, Java_args = @Java_args, " +
-                    "Rcon_Enable = @Rcon_Enable, Rcon_Port = @Rcon_Port, " +
-                    "Rcon_Pass = @Rcon_Pass " +
+                    "Path_Server = @Path_Server, Java_Args = @Java_Args, " +
+                    "Java_Name = @Java_Name, Rcon_Enable = @Rcon_Enable, " +
+                    "Rcon_Port = @Rcon_Port, Rcon_Pass = @Rcon_Pass " +
                     "WHERE ID = @ServerID";
 
                 using (var connection = new SqliteConnection(Data))
@@ -195,7 +198,8 @@ namespace TelegramBotMinecraft.Core.Database
 
                         command.Parameters.AddWithValue("@Connected", server.Connected ?? (object)server.Connected ?? DBNull.Value);
                         command.Parameters.AddWithValue("@Path_Server", server.PathServer ?? (object)server.PathServer ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@Java_args", server.JavaArgs ?? (object)server.JavaArgs ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_Args", server.JavaArgs ?? (object)server.JavaArgs ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Java_Name", server.JavaName ?? (object)server.JavaName ?? DBNull.Value);
                         command.Parameters.AddWithValue("@Rcon_Enable", server.RconEnable);
                         command.Parameters.AddWithValue("@Rcon_Port", server.RconPort.HasValue ? (object)server.RconPort.Value : DBNull.Value);
                         command.Parameters.AddWithValue("@Rcon_Pass", server.RconPass ?? (object)server.RconPass ?? DBNull.Value);

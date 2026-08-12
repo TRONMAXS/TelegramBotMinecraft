@@ -25,9 +25,10 @@ public partial class App : Application
             var httpClient = new HttpClient();
             var serverRepo = new ServerRepository();
             var settingsRepo = new SettingsRepository();
+            var javaRepo = new JavaRepository();
 
-            var serverManager = new MinecraftServerManager();
-            var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService());
+            var serverManager = new MinecraftServerManager(javaRepo);
+            var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo);
             var dialogService = new AvaloniaDialogService();
             var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), 
                                                                  new JavaDownloadViewModel(javaManager)),

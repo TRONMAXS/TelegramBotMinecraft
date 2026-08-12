@@ -12,6 +12,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private int _selectedTabIndex = 0;
 
+        [ObservableProperty]
+        private bool _isDownloadedEnabled = true;
+
+        public JavaManagerWindowViewModel(JavaManagementViewModel javaManagementViewModel, JavaDownloadViewModel javaDownloadViewModel)
+        {
+            JavaManagementVm = javaManagementViewModel;
+            JavaDownloadVm = javaDownloadViewModel;
+            JavaDownloadVm.SetParent(this);
+        }
+
         [RelayCommand]
         private void OpenJavaDownloaderWindow()
         {
@@ -23,11 +33,17 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             SelectedTabIndex = 0;
         }
-
-        public JavaManagerWindowViewModel(JavaManagementViewModel javaManagementViewModel, JavaDownloadViewModel javaDownloadViewModel)
+        partial void OnSelectedTabIndexChanged(int value)
         {
-            JavaManagementVm = javaManagementViewModel;
-            JavaDownloadVm = javaDownloadViewModel;
+            if (value == 0)
+            {
+                JavaManagementVm.LoadJavaDownloadedList();
+                JavaManagementVm.UpdateJavaDb();
+            }
+            else if (value == 1)
+            {
+                JavaDownloadVm.LoadJavaList();
+            }
         }
     }
 }

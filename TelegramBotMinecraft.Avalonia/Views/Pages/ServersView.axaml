@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:TelegramBotMinecraft.Core.Models"
     xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
     d:DesignHeight="730"
     d:DesignWidth="1220"
@@ -86,30 +87,33 @@
                                         PlaceholderText="C:\Minecraft\Server\"
                                         Text="{Binding EditableServer.PathServer}" />
                                 </DockPanel>
-								<Grid RowDefinitions="Auto, 8, Auto" Margin="0,5,0,0">
-									<Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-										<TextBlock Grid.Column="0"
-												   VerticalAlignment="Center"
-												   Margin="0"
-												   Text="Аргументы Java:" />
+                                <Grid Margin="0,5,0,0" RowDefinitions="Auto, 8, Auto">
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Margin="0"
+                                            VerticalAlignment="Center"
+                                            Text="Аргументы Java:" />
 
-										<Button Grid.Column="1"
-												Padding="15,6"
-												Classes="accent"
-												Command="{Binding OpenJavaArgumentsWindowCommand}"
-												Content="Настроить" />
-									</Grid>
+                                        <Button
+                                            Grid.Column="1"
+                                            Padding="15,6"
+                                            Classes="accent"
+                                            Command="{Binding OpenJavaArgumentsWindowCommand}"
+                                            Content="Настроить" />
+                                    </Grid>
 
-									<TextBox Grid.Row="2"
-											 Height="65"
-											 IsReadOnly="True"
-											 AcceptsReturn="True"
-											 TextWrapping="Wrap"
-											 ScrollViewer.VerticalScrollBarVisibility="Auto"
-											 Classes="console-output"
-											 PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui"
-											 Text="{Binding EditableServer.JavaArgs}" />
-								</Grid>
+                                    <TextBox
+                                        Grid.Row="2"
+                                        Height="65"
+                                        AcceptsReturn="True"
+                                        Classes="console-output"
+                                        IsReadOnly="True"
+                                        PlaceholderText="-Xmx4096M -Xms1024M -jar server.jar nogui"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        Text="{Binding EditableServer.JavaArgs}"
+                                        TextWrapping="Wrap" />
+                                </Grid>
                             </StackPanel>
                         </GroupBox>
 
@@ -152,7 +156,18 @@
                                         Padding="5,4"
                                         ItemsSource="{Binding Javas}"
                                         MaxDropDownHeight="300"
-                                        PlaceholderText="Java" />
+                                        PlaceholderText="Java"
+                                        SelectedItem="{Binding SelectedJava, Mode=TwoWay}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="models:JavaManager">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <TextBlock Text="{Binding Version}" />
+                                                    <TextBlock Text="-" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                     <Button
                                         Width="111"
                                         Margin="10,0,0,0"
