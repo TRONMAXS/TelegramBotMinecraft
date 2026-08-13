@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using System.Collections.Generic;
 using System.Net.Http;
 using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Avalonia.ViewModels;
@@ -26,20 +27,34 @@ public partial class App : Application
             var serverRepo = new ServerRepository();
             var settingsRepo = new SettingsRepository();
             var javaRepo = new JavaRepository();
+            var commandRepo = new CommandRepository();
+            var userRepo = new UserRepository();
 
-            var serverManager = new MinecraftServerManager(javaRepo);
+            var serverManager = new MinecraftServerManager(javaRepo, serverRepo);
+            var serverCommandService = new ServerCommandService(serverRepo, serverManager);
             var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo);
             var dialogService = new AvaloniaDialogService();
             var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), 
                                                                  new JavaDownloadViewModel(javaManager)),
                                                                  (server) => new JavaArgumentManagerViewModel(serverRepo, server));
             var notificationService = new AvaloniaNotificationService(settingsRepo);
-            var sharedLogger = new LoggerService();
-            var telegramBot = new TelegramBot(settingsRepo, sharedLogger);
 
-            var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerStatusService(serverRepo), new ServerLogService(serverRepo), new ServerCommandService(serverRepo, serverManager), dialogService, notificationService);
+            var strategies = new List<ICommandStrategy>
+            {
+                new StartCommandStrategy(),
+                new OnServerCommandStrategy(serverManager, serverRepo),
+                new OffServerCommandStrategy(serverManager, serverRepo),
+                new HelpCommandStrategy(commandRepo),
+                new ListServersCommandStrategy(serverRepo),
+            };
+            var commandContext = new CommandContext(strategies, commandRepo);
+
+            var sharedLogger = new LoggerService();
+            var telegramBot = new TelegramBot(settingsRepo, sharedLogger, commandContext);
+
+            var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerLogService(serverRepo), serverCommandService, dialogService, notificationService);
             var serversVm = new ServersViewModel(serverRepo, dialogService, notificationService, javaManager, windowService);
-            var usersVm = new UsersViewModel(serverRepo, new UserRepository(), new CommandRepository(), dialogService, notificationService);
+            var usersVm = new UsersViewModel(serverRepo, userRepo, commandRepo, dialogService, notificationService);
             var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, notificationService, new StartupManager());
 
             var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm, settingsRepo);

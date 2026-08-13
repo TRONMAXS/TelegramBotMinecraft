@@ -1,124 +1,262 @@
 ﻿using CoreRCON;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
+using System.Text.RegularExpressions;
 using TelegramBotMinecraft.Core.Database;
-using TelegramBotMinecraft.Core.Models;
+using static TelegramBotMinecraft.Core.Models.ServerStatusModel;
 
-namespace TelegramBotMinecraft
+namespace TelegramBotMinecraft.Core.Services
 {
     public class MinecraftServerManager
     {
-        private readonly JavaRepository? _javaRepository;
+        private readonly JavaRepository _javaRepository;
+        private readonly ServerRepository _serverRepository;
+
+        private readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
+        private readonly ConcurrentDictionary<string, ServerStatus> _currentStatuses = new();
+
+        public event Action<string, ServerStatus>? ServerStatusChanged;
+
+        private readonly Timer _backgroundCheckTimer;
+        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(5);
+
+        private readonly Regex startingRegex = new(@"Starting minecraft server", RegexOptions.Compiled);
+        private readonly Regex doneRegex = new(@"Done \(.*?\)!", RegexOptions.Compiled);
+        private readonly Regex stoppingRegex = new(@"Stopping the server", RegexOptions.Compiled);
+        private readonly Regex warningRegex = new(@"Can't keep up!", RegexOptions.Compiled);
 
 
-        private Process? process = null;
-        private int processId = -1;
-
-        private Dictionary<string, Process> serverProcesses = new();
-
-        public MinecraftServerManager(JavaRepository javaRepository)
+        public MinecraftServerManager(JavaRepository javaRepository, ServerRepository serverRepository)
         {
             _javaRepository = javaRepository;
+            _serverRepository = serverRepository;
+
+            _backgroundCheckTimer = new Timer(async _ => await ExecutionRecoveryCheckAsync(), null, TimeSpan.Zero, _checkInterval);
+
         }
 
-        public async Task<bool> StartServer(string ServerName)
+        public ServerStatus GetServerStatus(string serverName)
         {
-            var serverData = await GetServerData(ServerName);
+            return _currentStatuses.TryGetValue(serverName, out var status) ? status : ServerStatus.Offline;
+        }
+
+        private async Task ExecutionRecoveryCheckAsync()
+        {
+            var servers = await _serverRepository.GetAllServers();
+            if (servers == null) return;
+
+            foreach (var server in servers)
+            {
+                var processStatus = CheckProcessByPid(server.IdProcess);
+
+                ServerStatus finalStatus = ServerStatus.Offline;
+
+                if (processStatus == ServerStatus.Online)
+                {
+                    if (!_activeProcesses.ContainsKey(server.Name))
+                    {
+                        try
+                        {
+                            var existingProcess = Process.GetProcessById(server.IdProcess ?? 0);
+
+                            existingProcess.EnableRaisingEvents = true;
+                            existingProcess.Exited += async (s, e) => await HandleServerExit(server.Name);
+
+                            _activeProcesses[server.Name] = existingProcess;
+                        }
+                        catch { }
+                    }
+
+                    var logStatus = await CheckLogTail(server.PathServer);
+                    finalStatus = DetermineStatus(logStatus, processStatus);
+                }
+                else
+                {
+                    if (server.IdProcess != -1)
+                    {
+                        await _serverRepository.UpdateServer(server.Name, -1);
+                        _activeProcesses.TryRemove(server.Name, out _);
+                    }
+                    finalStatus = ServerStatus.Offline;
+                }
+
+                if (!_currentStatuses.TryGetValue(server.Name, out var oldStatus) || oldStatus != finalStatus)
+                {
+                    ChangeStatus(server.Name, finalStatus);
+                }
+            }
+        }
+
+        public async Task<bool> StartServer(string serverName)
+        {
+            if (GetServerStatus(serverName) != ServerStatus.Offline) return false;
+
+            var serverData = await _serverRepository.GetServerByName(serverName);
             if (serverData == null) return false;
 
             var javaData = await _javaRepository.GetJavaByName(serverData.JavaName);
             if (javaData == null) return false;
 
-            if (serverData.IdProcess == -1)
+            try
             {
-                try
+                ChangeStatus(serverName, ServerStatus.Starting);
+
+                var process = new Process
                 {
-                    process = new Process();
-                    process?.StartInfo = new ProcessStartInfo
+                    StartInfo = new ProcessStartInfo
                     {
-                        //FileName = @"C:\Program Files\Java\jdk-25.0.3\bin\javaw.exe",
-                        FileName = javaData?.Path,
+                        FileName = javaData.Path,
                         WorkingDirectory = serverData.PathServer,
                         Arguments = serverData.JavaArgs,
                         CreateNoWindow = true,
-                        RedirectStandardInput = true,
+                        RedirectStandardInput = false,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false,
                         UseShellExecute = false
-                    };
-                    process?.Start();
-                    processId = process.Id;
-                    serverProcesses[ServerName] = process;
-
-                    ServerRepository repository = new ServerRepository();
-                    await repository.UpdateServer(ServerName, processId);
-
-                    return true;
-                }
-                catch (Exception ex) { /*MessageBox.Show($"Ошибка при запуске: {ex.Message}");*/ return false; }
-            }
-            return false;
-        }
-
-        public async Task<bool> StopServer(string ServerName)
-        {
-            var ServerData = await GetServerData(ServerName);
-            try
-            {
-                if (serverProcesses.TryGetValue(ServerName, out var proc) && !proc.HasExited)
-                {
-                    await proc.StandardInput.WriteLineAsync("stop");
-                    await proc.StandardInput.FlushAsync();
-                }
-                else
-                {
-                    using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData.RconPort), ServerData.RconPass))
-                    {
-                        await rcon.SendCommandAsync("stop");
                     }
-                }
+                };
 
-                ServerRepository repository = new ServerRepository();
-                await repository.UpdateServer(ServerName, -1);
+                process.EnableRaisingEvents = true;
+                process.Exited += async (sender, e) => await HandleServerExit(serverName);
+
+                process.Start();
+
+                _activeProcesses[serverName] = process;
+                await _serverRepository.UpdateServer(serverName, process.Id);
 
                 return true;
             }
-            catch { return false; }
+            catch (Exception)
+            {
+                ChangeStatus(serverName, ServerStatus.Offline);
+                return false;
+            }
+        }
+
+        public async Task<bool> StopServer(string serverName)
+        {
+            var serverData = await _serverRepository.GetServerByName(serverName);
+            if (serverData == null) return false;
+
+            if (GetServerStatus(serverName) != ServerStatus.Online) return false;
+
+            try
+            {
+                if (serverData.RconEnable == 0) return false;
+
+                using var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(serverData.RconPort), serverData.RconPass);
+                await rcon.SendCommandAsync("stop");
+
+                ChangeStatus(serverName, ServerStatus.Stopping);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task SendCommand(string serverName, string command)
         {
-            var ServerData = await GetServerData(serverName);
+            var serverData = await _serverRepository.GetServerByName(serverName);
+            if (serverData == null) return;
 
-            if (serverProcesses.TryGetValue(serverName, out var proc) && !proc.HasExited)
+            if (serverData.RconEnable == 0) return;
+
+            using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(serverData.RconPort), serverData.RconPass))
             {
-                await proc.StandardInput.WriteLineAsync(command);
-                await proc.StandardInput.FlushAsync();
+                await rcon.SendCommandAsync(command);
             }
-            else
+
+        }
+
+        private async Task HandleServerExit(string serverName)
+        {
+            _activeProcesses.TryRemove(serverName, out _);
+            await _serverRepository.UpdateServer(serverName, -1);
+            ChangeStatus(serverName, ServerStatus.Offline);
+        }
+
+        private async Task<ServerStatus> CheckLogTail(string? pathServer)
+        {
+            string logFilePath = Path.Combine(pathServer ?? string.Empty, "logs", "latest.log");
+            if (!File.Exists(logFilePath)) return ServerStatus.Offline;
+
+            try
             {
-                using (var rcon = new RCON(IPAddress.Parse("127.0.0.1"), Convert.ToUInt16(ServerData.RconPort), ServerData.RconPass))
+                using var fs = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                if (fs.Length == 0) return ServerStatus.Offline;
+
+                long seekPosition = Math.Max(0, fs.Length - 4000);
+                fs.Seek(seekPosition, SeekOrigin.Begin);
+
+                using var reader = new StreamReader(fs);
+                var lines = new List<string>();
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
-                    await rcon.SendCommandAsync(command);
+                    lines.Add(line);
                 }
+
+                for (int i = lines.Count - 1; i >= 0; i--)
+                {
+                    string currentLine = lines[i];
+                    if (stoppingRegex.IsMatch(currentLine)) return ServerStatus.Offline;
+                    if (warningRegex.IsMatch(currentLine)) return ServerStatus.Warning;
+                    if (doneRegex.IsMatch(currentLine)) return ServerStatus.Online;
+                    if (startingRegex.IsMatch(currentLine)) return ServerStatus.Starting;
+                }
+
+                return ServerStatus.Offline;
+            }
+            catch
+            {
+                return ServerStatus.Offline;
             }
         }
 
-        public async Task<Server> GetServerData(string ServerName)
+        private void ChangeStatus(string serverName, ServerStatus newStatus)
         {
-            Server Server = new();
+            _currentStatuses[serverName] = newStatus;
+            ServerStatusChanged?.Invoke(serverName, newStatus);
+        }
 
-            ServerRepository repository = new ServerRepository();
-            var serverData = await repository.GetServerByName(ServerName);
-            if (serverData == null) return new Server();
+        private ServerStatus CheckProcessByPid(int? pid)
+        {
+            if (pid == null || pid <= 0) return ServerStatus.Offline; 
+            try 
+            { 
+                Process process = Process.GetProcessById(pid.Value); 
+                if (!process.HasExited) 
+                { 
+                    string procName = process.ProcessName.ToLower(); 
+                    if (procName.Contains("java") || procName.Contains("javaw")) return ServerStatus.Online; 
+                } return ServerStatus.Offline; 
+            } 
+            catch (ArgumentException) 
+            { 
+                return ServerStatus.Offline; 
+            }
+            catch 
+            { 
+                return ServerStatus.Offline; 
+            }
+        }
 
-            Server.PathServer = serverData.PathServer ?? string.Empty;
-            Server.JavaArgs = serverData.JavaArgs ?? string.Empty;
-            Server.JavaName = serverData.JavaName ?? string.Empty;
-            Server.IdProcess = serverData.IdProcess;
-            Server.RconEnable = serverData.RconEnable;
-            Server.RconPort = serverData.RconPort;
-            Server.RconPass = serverData.RconPass ?? string.Empty;
+        private ServerStatus DetermineStatus(ServerStatus logStatus, ServerStatus processStatus) 
+        {
+            if (processStatus == ServerStatus.Online && logStatus == ServerStatus.Online) return ServerStatus.Online; 
+            if (processStatus == ServerStatus.Online && logStatus == ServerStatus.Warning) return ServerStatus.Warning; 
+            if (processStatus == ServerStatus.Online && logStatus == ServerStatus.Starting) return ServerStatus.Starting; 
+            if (processStatus == ServerStatus.Online && logStatus == ServerStatus.Offline) return ServerStatus.Starting; 
+            return ServerStatus.Offline; 
+        }
 
-            return Server;
+        public void Dispose()
+        {
+            _backgroundCheckTimer?.Dispose();
         }
     }
 }

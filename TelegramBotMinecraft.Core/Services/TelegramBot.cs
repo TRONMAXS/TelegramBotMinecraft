@@ -14,6 +14,8 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly SettingsRepository? _SettingsRepository;
         private readonly LoggerService? _LoggerService;
 
+        private readonly CommandContext _commandContext;
+
         private TelegramBotClient? botClient;
         private HttpToSocks5Proxy? proxy;
 
@@ -23,12 +25,13 @@ namespace TelegramBotMinecraft.Core.Services
 
         private int restartAttempts = 0;
         private const int MaxRestartAttempts = 6;
-        private const int RestartDelayMs = 10000; 
+        private const int RestartDelayMs = 10000;
 
-        public TelegramBot(SettingsRepository settingsRepository, LoggerService loggerService)
+        public TelegramBot(SettingsRepository settingsRepository, LoggerService loggerService, CommandContext commandContext)
         {
             _SettingsRepository = settingsRepository;
             _LoggerService = loggerService;
+            _commandContext = commandContext;
         }
 
         public async Task BotAutostart()
@@ -225,11 +228,16 @@ namespace TelegramBotMinecraft.Core.Services
 
             var msg = update.Message;
             var messageAge = DateTime.UtcNow - msg.Date.ToUniversalTime();
-
             string text = msg.Text.Trim();
 
             bool isNewMessage = msg.Date >= BotStartTime;
+
             _LoggerService?.MessageChat(msg.Chat, msg.Text.Trim(), isNewMessage);
+
+            if (isNewMessage)
+            {
+                await _commandContext.HandleMessageAsync(bot, msg, token);
+            }
         }
 
         private async Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken token)

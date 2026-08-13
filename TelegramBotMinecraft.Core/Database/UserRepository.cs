@@ -1,9 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TelegramBotMinecraft.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TelegramBotMinecraft.Core.Database
 {

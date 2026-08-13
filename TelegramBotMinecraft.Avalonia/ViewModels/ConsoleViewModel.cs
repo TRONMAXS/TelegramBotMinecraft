@@ -1,30 +1,16 @@
 ﻿using Avalonia;
-using Avalonia.Automation;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Styling;
 using Avalonia.Threading;
-using AvaloniaEdit;
 using AvaloniaEdit.Document;
-using AvaloniaEdit.Editing;
-using AvaloniaEdit.Snippets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoreRCON.Parsers.Standard;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.ViewModels.Items;
 using TelegramBotMinecraft.Core.Database;
-using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
 using static TelegramBotMinecraft.Core.Models.ServerStatusModel;
 
@@ -32,14 +18,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class ConsoleViewModel : ObservableObject
     {
-        private readonly MinecraftServerManager _MinecraftServerManager;
-        private readonly ServerRepository _ServerRepository;
-        private readonly ServerStatusService _ServerStatusService;
-        private readonly ServerLogService _ServerLogService;
-        private readonly ServerCommandService _ServerCommandService;
+        private readonly MinecraftServerManager _minecraftServerManager;
+        private readonly ServerRepository _serverRepository;
+        private readonly ServerLogService _serverLogService;
+        private readonly ServerCommandService _serverCommandService;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
-
 
 
         [ObservableProperty]
@@ -77,32 +61,31 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public ConsoleViewModel(MinecraftServerManager minecraftServerManager, 
             ServerRepository serverRepository, 
-            ServerStatusService serverStatusService, 
             ServerLogService serverLogService,
             ServerCommandService serverCommandService,
             IDialogService dialogService,
             INotificationService notificationService)
         {
-            _MinecraftServerManager = minecraftServerManager;
-            _ServerRepository = serverRepository;
-            _ServerStatusService = serverStatusService;
-            _ServerLogService = serverLogService;
-            _ServerCommandService = serverCommandService;
+            _minecraftServerManager = minecraftServerManager;
+            _serverRepository = serverRepository;
+            _serverLogService = serverLogService;
+            _serverCommandService = serverCommandService;
             _dialogService = dialogService;
             _notificationService = notificationService;
 
+            _minecraftServerManager.ServerStatusChanged += OnServerStatusChanged;
             _ = LoadServersAsync();
-            _ = MonitorServersAsync();
         }
 
         private async Task LoadServersAsync()
         {
-            var serversNames = await _ServerRepository.GetAllServersIdAndName();
+            var serversNames = await _serverRepository.GetAllServersIdAndName();
             if (serversNames == null) return;
 
             foreach (var server in serversNames)
             {
-                Servers.Add(new ServerStatusItemViewModel(server.Id, server.Name));
+                var currentStatus = _minecraftServerManager.GetServerStatus(server.Name).ToString();
+                Servers.Add(new ServerStatusItemViewModel(server.Id, server.Name) { Status = currentStatus });
             }
         }
 
@@ -111,7 +94,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedServer == null) return;
             await _notificationService.ShowNotification("Запуск сервера", $"Сервер [{SelectedServer.Name}] запускается...", "Information");
-            await _MinecraftServerManager.StartServer(SelectedServer.Name);
+            await _minecraftServerManager.StartServer(SelectedServer.Name);
         }
 
         [RelayCommand(CanExecute = nameof(CanStopServer))]
@@ -119,15 +102,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedServer == null) return;
 
-            var ServerData = await _ServerRepository.GetServerByName(SelectedServer.Name);
+            var ServerData = await _serverRepository.GetServerByName(SelectedServer.Name);
             if (ServerData.IdProcess == -1) return;
 
             var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedServer.Name}?");
 
             if (result == true) 
             {
+                await _minecraftServerManager.StopServer(SelectedServer.Name);
                 await _notificationService.ShowNotification("Остановка сервера", $"Сервер [{SelectedServer.Name}] останавливается...", "Warning");
-                await _MinecraftServerManager.StopServer(SelectedServer.Name);
             }
         }
 
@@ -141,7 +124,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             TextCommand = string.Empty;
 
-            var response = await _ServerCommandService.SendCommandToServer(currentServerName, currentCommand);
+            var response = await _serverCommandService.SendCommandToServer(currentServerName, currentCommand);
 
             DateTime dateTime = DateTime.Now;
             string timeStr = dateTime.ToString("HH:mm:ss");
@@ -167,32 +150,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        private async Task UpdateStatusServer(string Name, string? status = null)
-        {
-            NameServer = Name;
-            var item = Servers.FirstOrDefault(x => x.Name == Name);
-            StatusServer = item.Status;
-        }
-
-        private async Task MonitorServersAsync()
-        {
-            while (true)
-            {
-                var statuses = await _ServerStatusService.CheckAllServers();
-
-                UpdateServers(statuses);
-
-                await Task.Delay(2000);
-            }
-        }
-
         private async Task UpdateServerLogsAsync(string Name)
         {
             LogsServer.Text = string.Empty;
 
             using var cts = new CancellationTokenSource();
 
-            await foreach (var logLine in _ServerLogService.UpdateConsoleServer(Name, cts.Token))
+            await foreach (var logLine in _serverLogService.UpdateConsoleServer(Name, cts.Token))
             {
                 if (logLine == null) continue;
                 Dispatcher.UIThread.Post(() =>
@@ -219,35 +183,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        private void UpdateServers(List<ServerStatusInfo> statuses)
-        {
-            foreach (var status in statuses)
-            {
-                foreach (var server in Servers)
-                {
-                    if (server.Name != status.Server) continue;
-                    switch (status.Status)
-                    {
-                        case ServerStatus.Online:
-                            server.Status = "Online";
-                            break;
-                        case ServerStatus.Offline:
-                            server.Status = "Offline";
-                            break;
-                        case ServerStatus.Starting:
-                            server.Status = "Starting";
-                            break;
-                        case ServerStatus.Stopping:
-                            server.Status = "Stopping";
-                            break;
-                        case ServerStatus.Warning:
-                            server.Status = "Warning";
-                            break;
-                    }
-                    if (SelectedServer != null && server.Name == SelectedServer.Name) _ = UpdateStatusServer(server.Name, server.Status);
-                }
-            }
-        }
 
         private bool CanStartServer()
         {
@@ -261,13 +196,36 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             return SelectedServer != null && SelectedServer.Status != "Offline";
         }
 
+        private void OnServerStatusChanged(string serverName, ServerStatus status)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var server = Servers.FirstOrDefault(x => x.Name == serverName);
+                if (server != null)
+                {
+                    server.Status = status.ToString();
+                    if (SelectedServer != null)
+                    {
+                        NameServer = serverName;
+                        StatusServer = status.ToString();
+                    }
+                }
+            });
+        }
 
         partial void OnSelectedServerChanged(ServerStatusItemViewModel? value)
         {
             if (value == null) return;
-            _ = UpdateStatusServer(value.Name);
+            NameServer = value.Name;
+            StatusServer = value.Status;
+
             _ = UpdateServerLogsAsync(value.Name);
             UpdateLogsRconServerAsync(value.Name);
+        }
+
+        public void Dispose()
+        {
+            _minecraftServerManager.ServerStatusChanged -= OnServerStatusChanged;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using Telegram.Bot.Types;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -98,6 +97,41 @@ namespace TelegramBotMinecraft.Core.Database
                             );
                         }
                     } 
+                }
+                return server;
+            }
+            catch (SqliteException ex) { return new Server(); }
+        }
+
+        public async Task<Server> GetServerByID(int id)
+        {
+            Server server = new Server();
+            try
+            {
+
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand("SELECT * FROM Servers WHERE ID = @ServerID", connection);
+                    command.Parameters.AddWithValue("@ServerID", id);
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            server = new Server(
+                            Convert.ToInt32(reader["ID"]),
+                            reader["Name"].ToString() ?? string.Empty,
+                            reader["Connected"] as string,
+                            reader["Path_Server"] as string,
+                            reader["ID_Process"] == DBNull.Value ? -1 : Convert.ToInt32(reader["ID_Process"]),
+                            reader["Java_Args"] as string,
+                            reader["Java_Name"] as string,
+                            reader["Rcon_Enable"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Rcon_Enable"]),
+                            reader["Rcon_Port"] == DBNull.Value ? null : Convert.ToInt32(reader["Rcon_Port"]),
+                            reader["Rcon_Pass"] == DBNull.Value ? null : reader["Rcon_Pass"].ToString()
+                            );
+                        }
+                    }
                 }
                 return server;
             }
@@ -271,6 +305,39 @@ namespace TelegramBotMinecraft.Core.Database
                     }
                 }
             }
+        }
+
+        public async Task<bool> HasAccessToServerAsync(int id)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand(@" SELECT EXISTS (
+                                                                      SELECT 1 
+                                                                      FROM Servers 
+                                                                      WHERE ID = @serverId );", connection);
+                    command.Parameters.AddWithValue("@serverId", id);
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (Convert.ToUInt32(reader[0]) == 0)
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (SqliteException ex) { return false; }
         }
     }
 }

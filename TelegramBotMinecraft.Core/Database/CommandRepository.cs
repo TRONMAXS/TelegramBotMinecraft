@@ -1,10 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Telegram.Bot.Types;
 using TelegramBotMinecraft.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TelegramBotMinecraft.Core.Database
 {
@@ -36,7 +31,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new List<Command>(); }
         }
 
-        public async Task<List<Command>> GetCommandsByUserIdAsync(int userId)
+        public async Task<List<Command>> GetCommandsByUserIdAsync(long userId)
         {
             List<Command> AllCommandsList = new List<Command>();
 
@@ -62,6 +57,41 @@ namespace TelegramBotMinecraft.Core.Database
                 return AllCommandsList;
             }
             catch (SqliteException ex) { return new List<Command>(); }
+        }
+
+        public async Task<bool> HasAccessToCommandAsync(long userId, int commandId)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand command = new SqliteCommand(@" SELECT EXISTS (
+                                                                      SELECT 1 
+                                                                      FROM UserCommands 
+                                                                      WHERE ID_User = @userId AND ID_Command = @commandId);", connection);
+                    command.Parameters.AddWithValue("@userId", userId);
+                    command.Parameters.AddWithValue("@commandId", commandId);
+
+
+                    using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (Convert.ToUInt32(reader[0]) == 0)
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (SqliteException ex) { return false; }
         }
 
         public async Task SaveUserCommandsAsync(int userId, List<int> commandsId)
