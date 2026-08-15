@@ -1,22 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Automation;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform.Storage;
-using Avalonia.Styling;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
@@ -66,12 +54,18 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _ = LoadServersAsync();
         }
 
+        public async Task Reload()
+        {
+            await LoadServersAsync();
+        }
+
         private async Task LoadServersAsync()
         {
-            Servers.Clear();
-            EditableServer = new Server();
             var serversNames = await _ServerRepository.GetAllServersIdAndName();
             if (serversNames == null) return;
+
+            EditableServer = new Server();
+            Servers.Clear();
 
             foreach (var server in serversNames)
             {
@@ -137,9 +131,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task SaveButton()
         {
             if (EditableServer == null) return;
-            if (SelectedJava == null) return;
-
-            EditableServer.JavaName = SelectedJava.Name;
+            if (SelectedJava != null) EditableServer.JavaName = SelectedJava.Name;
 
             if (IsAddingNewServer) 
             {
@@ -187,9 +179,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task OpenJavaArgumentsWindow()
         {
             if(EditableServer == null) return;
-            await _windowService.OpenJavaToServerArgumentManagement(EditableServer);
+            var result =  await _windowService.OpenJavaToServerArgumentManagement(EditableServer);
+            if (result == null) return;
 
-            await LoadSettingsServerAsync(EditableServer.Name);
+            if (EditableServer != null)
+            {
+                EditableServer.JavaArgs = result;
+                var temp = EditableServer;
+                EditableServer = null;
+                EditableServer = temp;
+            }
         }
 
         [RelayCommand]

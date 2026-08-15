@@ -61,15 +61,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
                 if (PresetIndex == 0)
                 {
-                    return $"{memoryFlags} -jar {jarFile}";
+                    return $"{memoryFlags} -jar {jarFile} nogui";
                 }
                 if (PresetIndex == 1)
                 {
                     string aikarFlags = "--add-modules=jdk.incubator.vector -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20";
-                    return $"{memoryFlags} {aikarFlags} -jar {jarFile}";
+                    return $"{memoryFlags} {aikarFlags} -jar {jarFile} nogui";
                 }
 
-                return $"{memoryFlags} {CustomArguments} -jar {jarFile}";
+                return $"{memoryFlags} {CustomArguments} -jar {jarFile} nogui";
             }
         }
 
@@ -167,19 +167,27 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (editableServer == null) return;
             if (_serverRepository == null) return;
 
-            editableServer.JavaArgs = FinalArguments;
+            string resultArgs = FinalArguments;
+
+            editableServer.JavaArgs = resultArgs;
             await _serverRepository.UpdateServer(editableServer);
 
-            Cancel();
+            CloseWindowWithResult(resultArgs);
         }
 
         [RelayCommand]
         private void Cancel()
         {
+            CloseWindowWithResult(string.Empty);
+        }
+
+        private void CloseWindowWithResult(string result)
+        {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var currentWindow = desktop.Windows.FirstOrDefault(w => w.DataContext == this);
-                currentWindow?.Close();
+
+                currentWindow?.Close(result);
             }
         }
     }

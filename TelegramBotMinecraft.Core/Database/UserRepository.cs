@@ -23,7 +23,7 @@ namespace TelegramBotMinecraft.Core.Database
                     {
                         while (await reader.ReadAsync())
                         {
-                            users.Add(new User(reader["Name"].ToString(), Convert.ToInt32(reader["ID_TG"])));
+                            users.Add(new User(reader["Name"].ToString(), Convert.ToInt64(reader["ID_TG"])));
                         }
                     }
                 }
@@ -32,7 +32,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new List<User>(); }
         }
 
-        public async Task GetUserByIdTg(string Id)
+        public async Task GetUserByIdTg(long Id)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return; }
         }
 
-        public async Task AddUser(string? name, int? id)
+        public async Task AddUser(string? name, long id)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task UpdateUser(string? name, int? newId, int? oldId)
+        public async Task UpdateUser(string? name, long newId, long oldId)
         {
             string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserNewId WHERE ID_TG = @UserOldId;";
             try
@@ -82,7 +82,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task DeleteUser(int? id)
+        public async Task DeleteUser(long id)
         {
             try
             {

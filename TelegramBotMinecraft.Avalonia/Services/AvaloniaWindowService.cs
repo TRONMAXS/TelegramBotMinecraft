@@ -47,9 +47,9 @@ namespace TelegramBotMinecraft.Avalonia.Services
             });
         }
 
-        public async Task OpenJavaToServerArgumentManagement(Server? server)
+        public async Task<string> OpenJavaToServerArgumentManagement(Server? server)
         {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 {
@@ -67,7 +67,7 @@ namespace TelegramBotMinecraft.Avalonia.Services
                     DataContext = _viewModelJavaArgumentManagerFactory(server)
                 };
 
-                await dialog.ShowDialog(ownerWindow);
+                return await dialog.ShowDialog<string>(ownerWindow) ?? string.Empty;
             });
         }
     }

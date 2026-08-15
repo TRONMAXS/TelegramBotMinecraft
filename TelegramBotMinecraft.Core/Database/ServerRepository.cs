@@ -138,7 +138,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return new Server(); }
         }
 
-        public async Task<List<Server>> GetServersByUserIdAsync(int userId)
+        public async Task<List<Server>> GetServersByUserIdAsync(long userId)
         {
             List<Server> AllServersList = new List<Server>();
 
@@ -170,8 +170,8 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_args, Java_Name, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
-                          "VALUES (@Name, @Connected, @Path_Server, @Java_args, @Java_Name, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
+                string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_Args, Java_Name, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
+                          "VALUES (@Name, @Connected, @Path_Server, @Java_Args, @Java_Name, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
 
                 using (var connection = new SqliteConnection(Data))
                 {
@@ -262,7 +262,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch { }
         }
 
-        public async Task SaveUserServersAsync(int userId, List<int> serversId)
+        public async Task SaveUserServersAsync(long userId, List<int> serversId)
         {
             using (var connection = new SqliteConnection(Data))
             {
@@ -307,7 +307,7 @@ namespace TelegramBotMinecraft.Core.Database
             }
         }
 
-        public async Task<bool> HasAccessToServerAsync(int id)
+        public async Task<bool> HasAccessToServerAsync(long userId, int serverId)
         {
             try
             {
@@ -315,10 +315,11 @@ namespace TelegramBotMinecraft.Core.Database
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(@" SELECT EXISTS (
-                                                                      SELECT 1 
-                                                                      FROM Servers 
-                                                                      WHERE ID = @serverId );", connection);
-                    command.Parameters.AddWithValue("@serverId", id);
+                                                                    SELECT 1 
+                                                                    FROM UserServers us 
+                                                                    WHERE us.ID_User = @userId AND us.ID_Server = @serverId);", connection);
+                    command.Parameters.AddWithValue("@userId", userId);
+                    command.Parameters.AddWithValue("@serverId", serverId);
 
                     using (SqliteDataReader reader = await command.ExecuteReaderAsync())
                     {

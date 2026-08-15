@@ -1,14 +1,9 @@
-﻿using Avalonia.Automation;
-using Avalonia.Styling;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using TelegramBotMinecraft.Avalonia.ViewModels.Items;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
@@ -43,9 +38,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private string? _userName;
 
         [ObservableProperty]
-        private int? _userId;
+        private long? _userId;
 
-        private int? UserOldId;
+        private long? _userOldId;
 
         public UsersViewModel(ServerRepository serverRepository, UserRepository userRepository, 
             CommandRepository commandRepository, IDialogService dialogService, INotificationService notificationService)
@@ -61,10 +56,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _ = LoadCommandsAsync();
         }
 
+        public async Task Reload()
+        {
+            await LoadServersAsync();
+            await LoadUsersAsync();
+            await LoadCommandsAsync();
+        }
+
         private async Task LoadServersAsync()
         {
             var servers = await _ServerRepository.GetAllServersIdAndName();
             if (servers == null) return;
+
+            Servers.Clear();
 
             foreach (var server in servers)
             {
@@ -92,13 +96,15 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             var commands = await _CommandRepository.GetAllCommandAsync();
             if (commands == null) return;
 
+            Commands.Clear();
+
             foreach (var command in commands)
             {
                 Commands.Add(new CommandItemViewModel(command.Id, command.CommandText));
             }
         }
 
-        private async Task LoadPermissionsUserAsync(int userId)
+        private async Task LoadPermissionsUserAsync(long userId)
         {
             if (SelectedUser == null) return;
 
@@ -137,11 +143,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanAdd))]
         private async Task AddUser()
         {
-            if(UserName == null && UserId == null) return;
+            if(UserName == null || UserId == null) return;
 
             await _notificationService.ShowNotification("Пользователь добавлен", $"Пользователь [{UserName}] (ID: [{UserId}]) успешно добавлен", "Success");
 
-            await _UserRepository.AddUser(UserName, UserId);
+            await _UserRepository.AddUser(UserName, (long)UserId);
 
             UserName = null;
             UserId = null;
@@ -177,20 +183,23 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             UserName = SelectedUser.Name;
             UserId = SelectedUser.Id;
-            UserOldId = SelectedUser.Id;
+            _userOldId = SelectedUser.Id;
         }
 
 
         [RelayCommand(CanExecute = nameof(CanEdit))]
         private async Task SaveUser()
         {
+            if(UserName == null || UserId == null || _userOldId == null) return;
+
+
             await _notificationService.ShowNotification("Пользователь обновлен", $"Пользователь [{UserName}] успешно обновлен", "Success");
 
-            await _UserRepository.UpdateUser(UserName, UserId, UserOldId);
+            await _UserRepository.UpdateUser(UserName, (long)UserId, (long)_userOldId);
 
             UserName = null;
             UserId = null;
-            UserOldId = null;
+            _userOldId = null;
 
             IsEditingUser = false;
 

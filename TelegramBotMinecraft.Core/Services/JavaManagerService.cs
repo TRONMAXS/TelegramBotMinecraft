@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -436,7 +435,13 @@ namespace TelegramBotMinecraft.Core.Services
             if (listDownloadedJava == null || listDownloadedJava.Count == 0) return;
 
             var listJavaInDB = await _javaRepository.GetAllJava();
-            if (listJavaInDB == null || listJavaInDB.Count == 0) return;
+            if (listJavaInDB == null || listJavaInDB.Count == 0)
+            {
+                List<JavaManager> listJava = listDownloadedJava.Select(dj => dj).ToList();
+
+                await _javaRepository.Add(listJava);
+                return;
+            }
 
 
             var namesInDB = listJavaInDB.Select(j => j.Name).ToList();
