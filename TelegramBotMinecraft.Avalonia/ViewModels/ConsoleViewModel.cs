@@ -77,10 +77,17 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _ = LoadServersAsync();
         }
 
+        public async Task Reload()
+        {
+            await LoadServersAsync();
+        }
+
         private async Task LoadServersAsync()
         {
             var serversNames = await _serverRepository.GetAllServersIdAndName();
             if (serversNames == null) return;
+
+            Servers.Clear();
 
             foreach (var server in serversNames)
             {
@@ -182,7 +189,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 LogsRcon.Insert(LogsRcon.TextLength, value);
             }
         }
-
 
         private bool CanStartServer()
         {

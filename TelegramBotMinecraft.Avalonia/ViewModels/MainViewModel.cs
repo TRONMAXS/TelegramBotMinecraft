@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using TelegramBotMinecraft.Core.Database;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -14,8 +13,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public UsersViewModel UsersVm { get; }
         public SettingsViewModel SettingsVm { get; }
 
-        private readonly SettingsRepository? _SettingsRepository;
-
         [ObservableProperty]
         public int _selectPage = 0;
 
@@ -25,15 +22,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             ConsoleViewModel consoleVm,
             ServersViewModel serversVm,
             UsersViewModel usersVm,
-            SettingsViewModel settingsVm,
-            SettingsRepository settingsRepository)
+            SettingsViewModel settingsVm)
         {
             ConsoleVm = consoleVm;
             ServersVm = serversVm;
             UsersVm = usersVm;
             SettingsVm = settingsVm;
 
-            _SettingsRepository = settingsRepository;
         }
 
         [RelayCommand]
@@ -77,6 +72,28 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.Shutdown();
+            }
+        }
+
+        partial void OnSelectPageChanged(int value)
+        {
+            if (value == null) return;
+
+            if (value == 0)
+            {
+                _ = ConsoleVm.Reload();
+            }
+            else if (value == 1)
+            {
+                _ = ServersVm.Reload();
+            }
+            else if (value == 2)
+            {
+                _ = UsersVm.Reload();
+            }
+            else if (value == 3)
+            {
+                _ = SettingsVm.Reload();
             }
         }
     }

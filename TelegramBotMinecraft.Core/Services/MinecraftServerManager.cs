@@ -33,7 +33,6 @@ namespace TelegramBotMinecraft.Core.Services
             _serverRepository = serverRepository;
 
             _backgroundCheckTimer = new Timer(async _ => await ExecutionRecoveryCheckAsync(), null, TimeSpan.Zero, _checkInterval);
-
         }
 
         public ServerStatus GetServerStatus(string serverName)
@@ -109,7 +108,7 @@ namespace TelegramBotMinecraft.Core.Services
                         FileName = javaData.Path,
                         WorkingDirectory = serverData.PathServer,
                         Arguments = serverData.JavaArgs,
-                        CreateNoWindow = true,
+                        CreateNoWindow = false,
                         RedirectStandardInput = false,
                         RedirectStandardOutput = false,
                         RedirectStandardError = false,

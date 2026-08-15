@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using TelegramBotMinecraft.Avalonia.Services;
 using TelegramBotMinecraft.Avalonia.ViewModels;
 using TelegramBotMinecraft.Avalonia.Views;
@@ -48,6 +49,7 @@ public partial class App : Application
                 new ListServersCommandStrategy(serverRepo),
             };
             var commandContext = new CommandContext(strategies, commandRepo);
+            _ = commandContext.InitializeAsync();
 
             var sharedLogger = new LoggerService();
             var telegramBot = new TelegramBot(settingsRepo, sharedLogger, commandContext);
@@ -57,15 +59,16 @@ public partial class App : Application
             var usersVm = new UsersViewModel(serverRepo, userRepo, commandRepo, dialogService, notificationService);
             var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, notificationService, new StartupManager());
 
-            var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm, settingsRepo);
+            var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm);
 
             DataContext = mainVm;
 
             _ = Task.Run(async () => await telegramBot.BotAutostart());
+
             bool hideOnStart = false;
             try
             {
-                var settings = settingsRepo.GetAllSettings().GetAwaiter().GetResult();
+                var settings = Task.Run(async () => await settingsRepo.GetAllSettings()).GetAwaiter().GetResult();
                 if (settings != null && settings.TrayOnStart == 1)
                 {
                     hideOnStart = true;
