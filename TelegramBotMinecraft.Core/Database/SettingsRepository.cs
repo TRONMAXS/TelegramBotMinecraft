@@ -1,7 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TelegramBotMinecraft.Core.Models;
 
 namespace TelegramBotMinecraft.Core.Database
@@ -97,6 +94,35 @@ namespace TelegramBotMinecraft.Core.Database
                     updateCommand.Parameters.AddWithValue("@TrayOnStart", settings?.TrayOnStart);
                     updateCommand.Parameters.AddWithValue("@RunAtStartup", settings?.RunAtStartup);
                     updateCommand.Parameters.AddWithValue("@Notifications", settings?.Notifications);
+
+                    await updateCommand.ExecuteNonQueryAsync();
+                }
+            }
+            catch { }
+        }
+
+        public async Task AddSettings(Setting? settings)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(Data))
+                {
+                    await connection.OpenAsync();
+                    SqliteCommand updateCommand = new SqliteCommand("INSERT INTO Settings" +
+                        "(ID, BotToken, AutoBot, AutoReconnect, ProxyHost, ProxyPort, ProxyUsername, ProxyPassword, TrayOnStart, RunAtStartup, Notifications)" +
+                        " VALUES (@ID, @BotToken, @AutoBot, @AutoReconnect, @ProxyHost, @ProxyPort, @ProxyUsername, @ProxyPassword, @TrayOnStart, @RunAtStartup, @Notifications);", connection);
+
+                    updateCommand.Parameters.AddWithValue("@ID", 1);
+                    updateCommand.Parameters.AddWithValue("@BotToken", (object?)settings?.BotToken ?? DBNull.Value);
+                    updateCommand.Parameters.AddWithValue("@AutoBot", (settings?.AutoBot == 1) ? 1 : 0);
+                    updateCommand.Parameters.AddWithValue("@AutoReconnect", (settings?.AutoReconnect == 1) ? 1 : 0);
+                    updateCommand.Parameters.AddWithValue("@ProxyHost", (object?)settings?.ProxyHost ?? DBNull.Value);
+                    updateCommand.Parameters.AddWithValue("@ProxyPort", (object?)settings?.ProxyPort ?? DBNull.Value);
+                    updateCommand.Parameters.AddWithValue("@ProxyUsername", (object?)settings?.ProxyUsername ?? DBNull.Value);
+                    updateCommand.Parameters.AddWithValue("@ProxyPassword", (object?)settings?.ProxyPassword ?? DBNull.Value);
+                    updateCommand.Parameters.AddWithValue("@TrayOnStart", (settings?.TrayOnStart == 1) ? 1 : 0);
+                    updateCommand.Parameters.AddWithValue("@RunAtStartup", (settings?.RunAtStartup == 1) ? 1 : 0);
+                    updateCommand.Parameters.AddWithValue("@Notifications", (settings?.Notifications == 1) ? 1 : 0);
 
                     await updateCommand.ExecuteNonQueryAsync();
                 }

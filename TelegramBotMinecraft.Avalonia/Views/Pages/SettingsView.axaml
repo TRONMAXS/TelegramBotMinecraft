@@ -23,8 +23,16 @@
                     <GroupBox
                         Padding="0"
                         FontFamily="Default"
-                        FontSize="15"
-                        Header="Настройки бота">
+                        FontSize="15">
+                        <GroupBox.Header>
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                                <TextBlock Text="Настройки бота" />
+                                <TextBlock Text="{Binding StatusWorkTGBot}" />
+                            </StackPanel>
+                        </GroupBox.Header>
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">
                                 <TextBlock
@@ -35,7 +43,7 @@
                                 <TextBox
                                     Padding="5,4"
                                     Classes="revealPasswordButton"
-                                    IsEnabled="{Binding IsStartingBot}"
+                                    IsEnabled="{Binding IsOnBot}"
                                     PasswordChar="*"
                                     PlaceholderText="123456789:ABCdefGHljklMNOpqrSTUvwxYZ"
                                     RevealPassword="False"
@@ -62,7 +70,7 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Bottom"
                                 Command="{Binding ManagingBotTelegramCommand}"
-                                Content="{Binding StatusWorkTGBot}"
+                                Content="{Binding ButtonTGBot}"
                                 ToolTip.Tip="Запуск или полная остановка работы Telegram-бота и его функций." />
                         </StackPanel>
                     </GroupBox>
@@ -72,7 +80,7 @@
                         FontFamily="Default"
                         FontSize="15"
                         Header="Прокси (SOCKS5, HTTP)"
-                        IsEnabled="{Binding IsStartingBot}"
+                        IsEnabled="{Binding IsOnBot}"
                         ToolTip.Tip="Используется для обхода блокировок или настройки безопасного соединения с серверами Telegram.">
                         <StackPanel Spacing="8">
                             <DockPanel LastChildFill="True">

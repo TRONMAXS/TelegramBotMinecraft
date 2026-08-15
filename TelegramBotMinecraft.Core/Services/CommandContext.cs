@@ -10,14 +10,23 @@ namespace TelegramBotMinecraft.Core.Services
 
         private readonly Dictionary<string, ICommandStrategy> _strategies = new();
 
+        private readonly IEnumerable<ICommandStrategy> _rawStrategies;
+
+
         public CommandContext(IEnumerable<ICommandStrategy> strategies, CommandRepository commandRepository)
         {
             _commandRepository = commandRepository;
+            _rawStrategies = strategies;
 
             foreach (var strategy in strategies)
             {
                 _strategies[strategy.CommandName.ToLower()] = strategy;
             }
+        }
+
+        public async Task InitializeAsync()
+        {
+            await _commandRepository.EnsureCommandsRegisteredAsync(_rawStrategies);
         }
 
         public async Task HandleMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)

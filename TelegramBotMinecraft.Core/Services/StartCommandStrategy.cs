@@ -13,7 +13,6 @@ namespace TelegramBotMinecraft.Core.Services
             await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: "Привет! Добро пожаловать в бота. Отправьте /help чтобы узнать больше команд.",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     cancellationToken: cancellationToken
             );
         }

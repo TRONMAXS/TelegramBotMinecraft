@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBotMinecraft.Core.Database;
 using static TelegramBotMinecraft.Core.Models.ServerStatusModel;
 
@@ -11,7 +12,7 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly ServerRepository _serverRepository;
 
 
-        public int CommandId => 2;
+        public int CommandId => 4;
         public string CommandName => "/on_server";
 
         public OnServerCommandStrategy(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository)
@@ -29,20 +30,18 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"Пожалуйста, укажите номер сервера. Пример: `{CommandName} 1 (Id сервера из таблицы)`",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    text: $"Пожалуйста, укажите номер сервера из /list",
                     cancellationToken: cancellationToken
                 );
                 return;
             }
 
             var ServerInfo = await _serverRepository.GetServerByID(serverId);
-            if (ServerInfo == null || !await _serverRepository.HasAccessToServerAsync(ServerInfo.Id))
+            if (ServerInfo == null || !await _serverRepository.HasAccessToServerAsync(message.Chat.Id, ServerInfo.Id))
             {
                 await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Сервер не найден!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
                 );
                 return;
@@ -53,24 +52,13 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" +
-                      $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
-                      $"**Статус сервера:** `{statusServer}`\n" +
-                      $"**IP для входа:** `{ServerInfo.Connected}`",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`\n" + $"**IP для входа:** `{ServerInfo.Connected}`",
+                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
 
                 return;
             }
-
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"Запрос на запуск сервера **№`{serverId}` - `{ServerInfo.Name}`** отправлен!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                cancellationToken: cancellationToken
-            );
-
 
             bool startingServer = await _minecraftServerManager.StartServer(ServerInfo.Name);
             if (startingServer != true)
@@ -78,7 +66,7 @@ namespace TelegramBotMinecraft.Core.Services
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: $"Сервер не запустился!",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
                 return;
@@ -87,7 +75,6 @@ namespace TelegramBotMinecraft.Core.Services
             var messageStarting = await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Сервер запускается...",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
@@ -96,7 +83,6 @@ namespace TelegramBotMinecraft.Core.Services
             var messageStatus = await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Статус сервера: {statusServer}",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
@@ -113,7 +99,6 @@ namespace TelegramBotMinecraft.Core.Services
                         chatId: message.Chat.Id,
                         messageId: messageStatus.MessageId,
                         text: "Превышено время ожидания запуска сервера!",
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
                     return;
@@ -129,7 +114,6 @@ namespace TelegramBotMinecraft.Core.Services
                         chatId: message.Chat.Id,
                         messageId: messageStatus.MessageId,
                         text: "Ошибка: сервер неожиданно перешел в офлайн во время запуска.",
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
                     return;
@@ -141,7 +125,6 @@ namespace TelegramBotMinecraft.Core.Services
                         chatId: message.Chat.Id,
                         messageId: messageStatus.MessageId,
                         text: $"Статус сервера: {statusServer}",
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
 
@@ -152,19 +135,14 @@ namespace TelegramBotMinecraft.Core.Services
             await botClient.EditMessageText(
                 chatId: message.Chat.Id,
                 messageId: messageStatus.MessageId,
-                text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" +
-                      $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
-                      $"**Статус сервера:** `{statusServer}`\n" +
-                      $"**IP для входа:** `{ServerInfo.Connected}`",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`\n" + $"**IP для входа:** `{ServerInfo.Connected}`",
+                parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
-            await botClient.EditMessageText(
+            await botClient.DeleteMessage(
                 chatId: message.Chat.Id,
                 messageId: messageStarting.MessageId,
-                text: $"Сервер успешно запущен!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
         }

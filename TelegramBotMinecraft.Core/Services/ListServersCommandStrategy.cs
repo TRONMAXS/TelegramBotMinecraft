@@ -1,5 +1,7 @@
 ﻿using Telegram.Bot;
+using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBotMinecraft.Core.Database;
 
 namespace TelegramBotMinecraft.Core.Services
@@ -8,7 +10,7 @@ namespace TelegramBotMinecraft.Core.Services
     {
         private readonly ServerRepository _serverRepository;
 
-        public int CommandId => 5;
+        public int CommandId => 3;
         public string CommandName => "/list";
 
         public ListServersCommandStrategy(ServerRepository serverRepository)
@@ -18,22 +20,29 @@ namespace TelegramBotMinecraft.Core.Services
 
         public async Task ExecuteAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
-            var listServers = await _serverRepository.GetAllServers();
-            if (listServers == null || listServers.Count == 0) return;
+            var listServers = await _serverRepository.GetServersByUserIdAsync(message.Chat.Id);
+            if (listServers == null || listServers.Count == 0)
+            {
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: $"Доступные сервера: отсутствуют",
+                    parseMode: ParseMode.Markdown,
+                    cancellationToken: cancellationToken
+                );
+
+                return;
+            }
 
             string answerText = "";
             foreach (var server in listServers)
             {
-                if (await _serverRepository.HasAccessToServerAsync(server.Id))
-                {
-                    answerText += $"`{server.Id}` - `{server.Name}`\n";
-                }
+                answerText += $"\n`{server.Id}` - `{server.Name}`";
             }
 
             await botClient.SendMessage(
                 chatId: message.Chat.Id,
-                text: $"Доступные сервера:\n{answerText}",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                text: $"Доступные сервера:{answerText}",
+                parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
         }

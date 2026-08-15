@@ -8,7 +8,7 @@ namespace TelegramBotMinecraft.Core.Services
     {
         private readonly CommandRepository _commandRepository;
 
-        public int CommandId => 4;
+        public int CommandId => 2;
         public string CommandName => "/help";
 
         public HelpCommandStrategy(CommandRepository commandRepository)
@@ -24,12 +24,15 @@ namespace TelegramBotMinecraft.Core.Services
             string answerText = "";
             foreach (var command in listCommand)
             {
-                answerText += $"{command.CommandText}\n";
+                answerText += $"\n{command.CommandText}";
+
             }
+
+            if (string.IsNullOrEmpty(answerText)) answerText = "отсутствуют";
 
             await botClient.SendMessage(
                 chatId: message.Chat.Id,
-                text: $"Доступные команды:\n{answerText}",
+                text:$"Доступные команды: {answerText}",
                 cancellationToken: cancellationToken
             );
         }

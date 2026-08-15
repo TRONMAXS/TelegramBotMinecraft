@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBotMinecraft.Core.Database;
 using static TelegramBotMinecraft.Core.Models.ServerStatusModel;
 
@@ -10,7 +11,7 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly MinecraftServerManager _minecraftServerManager;
         private readonly ServerRepository _serverRepository;
 
-        public int CommandId => 3;
+        public int CommandId => 5;
         public string CommandName => "/off_server";
 
         public OffServerCommandStrategy(MinecraftServerManager minecraftServerManager, ServerRepository serverRepository)
@@ -28,20 +29,19 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"Пожалуйста, укажите номер сервера. Пример: `{CommandName} 1 (Id сервера из таблицы)`",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    text: $"Пожалуйста, укажите номер сервера из /list",
                     cancellationToken: cancellationToken
                 );
                 return;
             }
 
             var ServerInfo = await _serverRepository.GetServerByID(serverId);
-            if (ServerInfo == null || !await _serverRepository.HasAccessToServerAsync(ServerInfo.Id))
+            if (ServerInfo == null || !await _serverRepository.HasAccessToServerAsync(message.Chat.Id, ServerInfo.Id))
             {
                 await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Сервер не найден!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
                 );
                 return;
@@ -52,22 +52,12 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" +
-                          $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
-                          $"**Статус сервера:** `{statusServer}`",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`",
+                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
                 return;
             }
-
-            await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"Запрос на остановку сервера **№`{serverId}` - `{ServerInfo.Name}`** отправлен!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                cancellationToken: cancellationToken
-            );
-
 
             bool stopingServer = await _minecraftServerManager.StopServer(ServerInfo.Name);
             if (stopingServer != true)
@@ -75,7 +65,7 @@ namespace TelegramBotMinecraft.Core.Services
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: $"Сервер не остановлен!",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
                 return;
@@ -84,7 +74,6 @@ namespace TelegramBotMinecraft.Core.Services
             var messageStoping = await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Сервер останавливается...",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
@@ -93,7 +82,6 @@ namespace TelegramBotMinecraft.Core.Services
             var messageStatus = await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Статус сервера: {statusServer}",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
@@ -110,7 +98,7 @@ namespace TelegramBotMinecraft.Core.Services
                         chatId: message.Chat.Id,
                         messageId: messageStatus.MessageId,
                         text: "Превышено время ожидания запуска сервера!",
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                        parseMode: ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
                     return;
@@ -126,7 +114,6 @@ namespace TelegramBotMinecraft.Core.Services
                         chatId: message.Chat.Id,
                         messageId: messageStatus.MessageId,
                         text: $"Статус сервера: {statusServer}",
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
 
@@ -137,18 +124,14 @@ namespace TelegramBotMinecraft.Core.Services
             await botClient.EditMessageText(
                 chatId: message.Chat.Id,
                 messageId: messageStatus.MessageId,
-                text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" +
-                      $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
-                      $"**Статус сервера:** `{statusServer}`",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`",
+                parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
 
-            await botClient.EditMessageText(
+            await botClient.DeleteMessage(
                 chatId: message.Chat.Id,
                 messageId: messageStoping.MessageId,
-                text: $"Сервер успешно остановлен!",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
         }

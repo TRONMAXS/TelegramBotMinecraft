@@ -8,36 +8,40 @@ using System.Threading.Tasks;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
+using static TelegramBotMinecraft.Core.Models.TgBotStatusModel;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
-    public partial class SettingsViewModel : ObservableObject
+    public partial class SettingsViewModel : ObservableObject, IDisposable
     {
-        private readonly SettingsRepository _SettingsRepository;
-        private readonly LoggerService _LoggerService;
-        private readonly TelegramBot _TelegramBot;
+        private readonly SettingsRepository _settingsRepository;
+        private readonly LoggerService _loggerService;
+        private readonly TelegramBot _telegramBot;
         private readonly IDialogService _dialogService;
         private readonly IWindowService _windowService;
         private readonly INotificationService _notificationService;
         private readonly StartupManager _startupManager;
 
 
-        private readonly CancellationTokenSource _cts = new();
+        private CancellationTokenSource _cts;
 
 
         public Setting? _originalSettings;
 
         [ObservableProperty]
-        private string? _statusWorkTGBot = "Включить бота";
+        [NotifyPropertyChangedFor(nameof(IsOnBot))]
+        private string? _statusWorkTGBot;
+
+        [ObservableProperty]
+        private string? _buttonTGBot = "Включить бота";
 
         [ObservableProperty]
         private TextDocument? logsBotAndProgram = new();
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsStartingBot))]
-        private bool _isOnBot;
 
-        public bool IsStartingBot => !IsOnBot;
+        public bool IsOnBot => !(StatusWorkTGBot == TgBotStatus.Starting.ToString() || 
+                                 StatusWorkTGBot == TgBotStatus.Online.ToString() || 
+                                 StatusWorkTGBot == TgBotStatus.Reloading.ToString());
 
 
         #region Свойства Настроек для Связывания (UI)
@@ -105,24 +109,48 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             IDialogService dialogService, IWindowService windowService, 
             INotificationService notificationService, StartupManager startupManager)
         {
-            _SettingsRepository = settingsRepository;
-            _LoggerService = loggerService;
-            _TelegramBot = telegramBot;
+            _settingsRepository = settingsRepository;
+            _loggerService = loggerService;
+            _telegramBot = telegramBot;
             _dialogService = dialogService;
             _windowService = windowService;
             _notificationService = notificationService;
             _startupManager = startupManager;
 
-            _ = LoadSettingsAsync();
+            _telegramBot.TgBotStatusChanged += OnTgBotStatusChanged;
+        }
 
-            _ = _TelegramBot.BotAutostart();
+        public async Task InitializeAsync()
+        {
+            try
+            {
+                if (_cts != null)
+                {
+                    await _cts.CancelAsync();
+                    _cts.Dispose();
+                }
+                _cts = new CancellationTokenSource();
 
-            _ = UpdateLogsAsync(_cts.Token);
+
+                await LoadSettingsAsync();
+
+                var token = _cts.Token;
+                _ = UpdateLogsAsync(token);
+            }
+            catch (Exception ex)
+            {
+                await _loggerService.ErrorBotInfo($"Ошибка инициализации настроек {ex}");
+            }
+        }
+
+        public async Task Reload()
+        {
+            await LoadSettingsAsync();
         }
 
         private async Task LoadSettingsAsync()
         {
-            _originalSettings = await _SettingsRepository.GetAllSettings();
+            _originalSettings = await _settingsRepository.GetAllSettings();
             if (_originalSettings == null) return;
 
             BotToken = _originalSettings.BotToken;
@@ -153,8 +181,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _originalSettings.ProxyUsername = ProxyUsername;
             _originalSettings.ProxyPassword = ProxyPassword;
 
+            if(_originalSettings.Id != 1) await _settingsRepository.AddSettings(_originalSettings);
 
-            await _SettingsRepository.SaveSettings(_originalSettings);
+            await _settingsRepository.SaveSettings(_originalSettings);
 
             await _notificationService.ShowNotification("Сохранение", "Все настройки успешно применены и сохранены", "Success");
 
@@ -185,12 +214,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (_originalSettings == null) return;
 
-            if (StatusWorkTGBot == "Включить бота")
+            if (StatusWorkTGBot == TgBotStatus.Offline.ToString())
             {
                 await _notificationService.ShowNotification("Telegram бот", "Бот запускается", "Information");
-                _TelegramBot.StartBotTelegram();
-                StatusWorkTGBot = "Выключить бота";
-                IsOnBot = true;
+                await _telegramBot.StartBotTelegram();
             }
             else
             {
@@ -199,9 +226,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 if (result == true)
                 {
                     await _notificationService.ShowNotification("Telegram бот", "Бот останавливается", "Warning");
-                    _TelegramBot.StopBotTelegram();
-                    StatusWorkTGBot = "Включить бота";
-                    IsOnBot = false;
+                    await _telegramBot.StopBotTelegram();
                 }
             }
         }
@@ -217,7 +242,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             try
             {
-                await foreach (var logLine in _LoggerService.UpdateLogsBotAndProgram(token))
+                await foreach (var logLine in _loggerService.UpdateLogsBotAndProgram(token))
                 {
                     if (logLine == null) continue;
                     Dispatcher.UIThread.Post(() =>
@@ -257,11 +282,46 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (_originalSettings == null) return false;
 
             return BotToken == _originalSettings.BotToken &&
-          ProxyHost == _originalSettings.ProxyHost &&
-          ProxyPort == _originalSettings.ProxyPort &&
-          ProxyUsername == _originalSettings.ProxyUsername &&
-          ProxyPassword == _originalSettings.ProxyPassword;
+              ProxyHost == _originalSettings.ProxyHost &&
+              ProxyPort == _originalSettings.ProxyPort &&
+              ProxyUsername == _originalSettings.ProxyUsername &&
+              ProxyPassword == _originalSettings.ProxyPassword;
+        }
+
+        private void OnTgBotStatusChanged(TgBotStatus status)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                StatusWorkTGBot = status.ToString();
+
+                if (status == TgBotStatus.Online)
+                {
+                    ButtonTGBot = "Выключить бота";
+                }
+                else if (status == TgBotStatus.Offline)
+                {
+                    ButtonTGBot = "Включить бота";
+                }
+
+                ManagingBotTelegramCommand.NotifyCanExecuteChanged();
+            });
+        }
+
+        public void Dispose()
+         {
+            _telegramBot.TgBotStatusChanged -= OnTgBotStatusChanged;
+
+            if (_cts != null)
+            {
+                try
+                {
+                    _cts.Cancel();
+                }
+                catch (ObjectDisposedException) {}
+
+                _cts.Dispose();
+                _cts = null;
+            }
         }
     }
 }
-    

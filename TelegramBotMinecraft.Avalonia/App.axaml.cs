@@ -61,6 +61,7 @@ public partial class App : Application
 
             DataContext = mainVm;
 
+            _ = Task.Run(async () => await telegramBot.BotAutostart());
             bool hideOnStart = false;
             try
             {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using TelegramBotMinecraft.Core.Models;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Core.Database
 {
@@ -94,7 +95,7 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return false; }
         }
 
-        public async Task SaveUserCommandsAsync(int userId, List<int> commandsId)
+        public async Task SaveUserCommandsAsync(long userId, List<int> commandsId)
         {
             using (var connection = new SqliteConnection(Data))
             {
@@ -135,6 +136,33 @@ namespace TelegramBotMinecraft.Core.Database
                         await transaction.RollbackAsync();
                         throw;
                     }
+                }
+            }
+        }
+
+        public async Task EnsureCommandsRegisteredAsync(IEnumerable<ICommandStrategy> strategies)
+        {
+            string sql = @"
+            INSERT OR IGNORE INTO Commands (ID, Command) 
+            VALUES (@Id, @Command);";
+
+            using (var connection = new SqliteConnection(Data))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    foreach (var strategy in strategies)
+                    {
+                        using (var command = new SqliteCommand(sql, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@Id", strategy.CommandId);
+                            command.Parameters.AddWithValue("@Command", strategy.CommandName);
+
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    }
+                    await transaction.CommitAsync();
                 }
             }
         }
