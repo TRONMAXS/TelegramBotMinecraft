@@ -14,10 +14,6 @@
     Icon="/Assets/TelegramBotMinecraft-logo.ico"
     WindowStartupLocation="CenterOwner">
 
-    <Design.DataContext>
-        <vm:JavaArgumentManagerViewModel />
-    </Design.DataContext>
-
     <Grid Margin="20" RowDefinitions="*, Auto">
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="20">
@@ -40,51 +36,27 @@
                     IsVisible="{Binding IsMemorySliderVisible}">
                     <StackPanel Spacing="12">
 
-                        <Grid ColumnDefinitions="*, *">
-                            <StackPanel
-                                Grid.Column="0"
-                                Margin="0,0,15,0"
-                                Spacing="5">
-                                <DockPanel LastChildFill="True">
-                                    <TextBlock
-                                        DockPanel.Dock="Right"
-                                        FontWeight="Bold"
-                                        Foreground="#3574F0"
-                                        Text="{Binding MinMemoryString, Mode=OneWay}" />
-                                    <TextBlock Margin="0" Text="Минимальная (-Xms):" />
-                                </DockPanel>
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="15,0,0,0"
+                            Spacing="5">
+                            <DockPanel LastChildFill="True">
+                                <TextBlock
+                                    DockPanel.Dock="Right"
+                                    FontWeight="Bold"
+                                    Foreground="#3574F0"
+                                    Text="{Binding MemoryString, Mode=OneWay}" />
+                                <TextBlock Margin="0" Text="Выделяемая память (Xms/Xmx):" />
+                            </DockPanel>
 
-                                <Slider
-                                    IsSnapToTickEnabled="True"
-                                    Maximum="32768"
-                                    Minimum="1024"
-                                    TickFrequency="1024"
-                                    TickPlacement="BottomRight"
-                                    Value="{Binding MinMemoryMb, Mode=TwoWay}" />
-                            </StackPanel>
-
-                            <StackPanel
-                                Grid.Column="1"
-                                Margin="15,0,0,0"
-                                Spacing="5">
-                                <DockPanel LastChildFill="True">
-                                    <TextBlock
-                                        DockPanel.Dock="Right"
-                                        FontWeight="Bold"
-                                        Foreground="#3574F0"
-                                        Text="{Binding MaxMemoryString, Mode=OneWay}" />
-                                    <TextBlock Margin="0" Text="Максимальная (-Xmx):" />
-                                </DockPanel>
-
-                                <Slider
-                                    IsSnapToTickEnabled="True"
-                                    Maximum="32768"
-                                    Minimum="1024"
-                                    TickFrequency="1024"
-                                    TickPlacement="BottomRight"
-                                    Value="{Binding MaxMemoryMb, Mode=TwoWay}" />
-                            </StackPanel>
-                        </Grid>
+                            <Slider
+                                IsSnapToTickEnabled="True"
+                                Maximum="32768"
+                                Minimum="1024"
+                                TickFrequency="1024"
+                                TickPlacement="BottomRight"
+                                Value="{Binding MemoryMb, Mode=TwoWay}" />
+                        </StackPanel>
                         <TextBlock
                             Margin="0,5,0,0"
                             FontSize="11"

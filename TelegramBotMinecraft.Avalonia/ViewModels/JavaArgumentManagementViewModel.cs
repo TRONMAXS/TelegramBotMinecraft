@@ -23,13 +23,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(FinalArguments))]
-        [NotifyPropertyChangedFor(nameof(MinMemoryString))]
-        private int _minMemoryMb = 1024;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(FinalArguments))]
-        [NotifyPropertyChangedFor(nameof(MaxMemoryString))]
-        private int _maxMemoryMb = 4096;
+        [NotifyPropertyChangedFor(nameof(MemoryString))]
+        private int _memoryMb = 4096;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(FinalArguments))]
@@ -56,7 +51,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     return CustomArguments;
                 }
 
-                string memoryFlags = $"-Xms{MinMemoryMb}M -Xmx{MaxMemoryMb}M";
+                string memoryFlags = $"-Xms{MemoryMb}M -Xmx{MemoryMb}M";
                 string jarFile = string.IsNullOrWhiteSpace(JarFileName) ? "server.jar" : JarFileName;
 
                 if (PresetIndex == 0)
@@ -73,23 +68,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
         }
 
-        public string MinMemoryString
+        public string MemoryString
         {
             get
             {
-                if (MinMemoryMb >= 1024 && MinMemoryMb % 1024 == 0)
-                    return $"{MinMemoryMb / 1024} ГБ";
-                return $"{MinMemoryMb} МБ";
-            }
-        }
-
-        public string MaxMemoryString
-        {
-            get
-            {
-                if (MaxMemoryMb >= 1024 && MaxMemoryMb % 1024 == 0)
-                    return $"{MaxMemoryMb / 1024} ГБ";
-                return $"{MaxMemoryMb} МБ";
+                if (MemoryMb >= 1024 && MemoryMb % 1024 == 0)
+                    return $"{MemoryMb / 1024} ГБ";
+                return $"{MemoryMb} МБ";
             }
         }
 
@@ -111,7 +96,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 int value = int.Parse(minMatch.Groups[1].Value);
                 string unit = minMatch.Groups[2].Value;
-                MinMemoryMb = unit == "G" ? value * 1024 : value;
+                MemoryMb = unit == "G" ? value * 1024 : value;
             }
 
             var maxMatch = Regex.Match(javaArgs, @"-Xmx(\d+)([MG])");
@@ -119,7 +104,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 int value = int.Parse(maxMatch.Groups[1].Value);
                 string unit = maxMatch.Groups[2].Value;
-                MaxMemoryMb = unit == "G" ? value * 1024 : value;
+                MemoryMb = unit == "G" ? value * 1024 : value;
             }
 
             var jarFileMatch = Regex.Match(javaArgs, @"-jar\s+(.*?\.jar)");
@@ -164,21 +149,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand]
         private async Task Save()
         {
-            if (editableServer == null) return;
-            if (_serverRepository == null) return;
-
-            string resultArgs = FinalArguments;
-
-            editableServer.JavaArgs = resultArgs;
-            await _serverRepository.UpdateServer(editableServer);
-
-            CloseWindowWithResult(resultArgs);
+            CloseWindowWithResult(FinalArguments);
         }
 
         [RelayCommand]
         private void Cancel()
         {
-            CloseWindowWithResult(string.Empty);
+            CloseWindowWithResult(editableServer.JavaArgs);
         }
 
         private void CloseWindowWithResult(string result)
