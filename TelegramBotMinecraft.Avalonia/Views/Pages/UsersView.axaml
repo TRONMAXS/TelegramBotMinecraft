@@ -181,7 +181,7 @@
                             <DataGridTextColumn
                                 Width="Auto"
                                 Binding="{Binding Id}"
-                                Header="Id" />
+                                Header="ID" />
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -223,7 +223,7 @@
                             <TextBox
                                 HorizontalAlignment="Stretch"
                                 IsReadOnly="False"
-                                PlaceholderText="Id"
+                                PlaceholderText="ID"
                                 Text="{Binding UserId}" />
                             <Button
                                 Margin="0,5,0,0"

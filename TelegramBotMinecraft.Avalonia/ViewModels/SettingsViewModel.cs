@@ -170,16 +170,16 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (_originalSettings == null) return;
 
-            _originalSettings.BotToken = BotToken;
+            _originalSettings.BotToken = BotToken.Trim();
             _originalSettings.AutoBot = AutoBot;
             _originalSettings.TrayOnStart = TrayOnStart;
             _originalSettings.RunAtStartup = RunAtStartup;
             _originalSettings.AutoReconnect = AutoReconnect;
             _originalSettings.Notifications = Notifications;
-            _originalSettings.ProxyHost = ProxyHost;
-            _originalSettings.ProxyPort = ProxyPort;
-            _originalSettings.ProxyUsername = ProxyUsername;
-            _originalSettings.ProxyPassword = ProxyPassword;
+            _originalSettings.ProxyHost = ProxyHost.Trim();
+            _originalSettings.ProxyPort = ProxyPort.Trim();
+            _originalSettings.ProxyUsername = ProxyUsername.Trim();
+            _originalSettings.ProxyPassword = ProxyPassword.Trim();
 
             if(_originalSettings.Id != 1) await _settingsRepository.AddSettings(_originalSettings);
 
@@ -213,6 +213,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task ManagingBotTelegram()
         {
             if (_originalSettings == null) return;
+
+            if (string.IsNullOrWhiteSpace(_originalSettings.BotToken))
+            {
+                await _notificationService.ShowNotification("Ошибка при запуске бота", 
+                    "Токен бота не может быть пустым", 
+                    "Error");
+                return;
+            }
 
             if (StatusWorkTGBot == TgBotStatus.Offline.ToString())
             {

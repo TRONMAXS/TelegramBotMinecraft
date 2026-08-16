@@ -50,36 +50,29 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task AddUser(string? name, long id)
         {
-            try
-            {
-                using (var connection = new SqliteConnection(Data))
-                {
-                    await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@UserName, @UserId);", connection);
-                    command.Parameters.AddWithValue("@UserName", name);
-                    command.Parameters.AddWithValue("@UserId", id);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
-            catch { }
+            using var connection = new SqliteConnection(Data);
+            await connection.OpenAsync();
+
+            using var command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@UserName, @UserId);", connection);
+            command.Parameters.AddWithValue("@UserName", name ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@UserId", id);
+
+            await command.ExecuteNonQueryAsync();
         }
 
         public async Task UpdateUser(string? name, long newId, long oldId)
         {
             string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserNewId WHERE ID_TG = @UserOldId;";
-            try
-            {
-                using (var connection = new SqliteConnection(Data))
-                {
-                    await connection.OpenAsync();
-                    SqliteCommand command = new SqliteCommand(sqlUpdateUser, connection);
-                    command.Parameters.AddWithValue("@UserName", name);
-                    command.Parameters.AddWithValue("@UserNewId", newId);
-                    command.Parameters.AddWithValue("@UserOldId", oldId);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
-            catch { }
+
+            using var connection = new SqliteConnection(Data);
+            await connection.OpenAsync();
+
+            using var command = new SqliteCommand(sqlUpdateUser, connection);
+            command.Parameters.AddWithValue("@UserName", name ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@UserNewId", newId);
+            command.Parameters.AddWithValue("@UserOldId", oldId);
+
+            await command.ExecuteNonQueryAsync();
         }
 
         public async Task DeleteUser(long id)

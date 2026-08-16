@@ -178,9 +178,7 @@ namespace TelegramBotMinecraft.Core.Database
                     await connection.OpenAsync();
                     using (SqliteCommand command = new SqliteCommand(sqlAddServer, connection))
                     {
-                        command.Parameters.AddWithValue("@ServerID", server.Id);
                         command.Parameters.AddWithValue("@Name", server.Name);
-
                         command.Parameters.AddWithValue("@Connected", server.Connected ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Path_Server", server.PathServer ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Java_Args", server.JavaArgs ?? (object)DBNull.Value);
@@ -193,7 +191,7 @@ namespace TelegramBotMinecraft.Core.Database
                     }
                 }
             }
-            catch { }
+            catch { throw; }
         }
 
         public async Task UpdateServer(string ServerName, int PID)
@@ -242,7 +240,7 @@ namespace TelegramBotMinecraft.Core.Database
                     }
                 }
             }
-            catch { }
+            catch { throw; }
         }
 
         public async Task DeleteServer(int Id)

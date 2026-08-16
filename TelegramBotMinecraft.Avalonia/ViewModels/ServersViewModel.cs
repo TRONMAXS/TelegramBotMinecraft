@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
@@ -108,8 +109,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 {
                     Javas?.Add(java);
                 }
-
-                if (Javas != null && !string.IsNullOrEmpty(EditableServer.JavaName))
+                if (EditableServer == null) return;
+                if (Javas != null && !string.IsNullOrWhiteSpace(EditableServer.JavaName))
                 {
                     SelectedJava = Javas.FirstOrDefault(j => j.Name == EditableServer.JavaName);
                 }
@@ -162,22 +163,48 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task SaveButton()
         {
             if (EditableServer == null) return;
+
+            if (EditableServer.Name != null) EditableServer.Name = EditableServer.Name.Trim();
+           
+            if (string.IsNullOrWhiteSpace(EditableServer.Name))
+            {
+                await _notificationService.ShowNotification("Ошибка при сохранении сервера",
+                    $"Имя сервера не может быть пустым.",
+                    "Error");
+                return;
+            }
+
             if (SelectedJava != null) EditableServer.JavaName = SelectedJava.Name;
-
-            if (IsAddingNewServer) 
+            try
             {
-                await _notificationService.ShowNotification("Новый сервер", $"Сервер [{EditableServer.Name}] успешно добавлен в список", "Success");
-                await _serverRepository.AddServer(EditableServer);
+                if (IsAddingNewServer)
+                {
+                    await _serverRepository.AddServer(EditableServer);
+                    await _notificationService.ShowNotification("Новый сервер", $"Сервер [{EditableServer.Name}] успешно добавлен в список", "Success");
+                }
+                else
+                {
+                    await _serverRepository.UpdateServer(EditableServer);
+                    await _notificationService.ShowNotification("Настройки сервера", $"Изменения конфигурации сервера [{EditableServer.Name}] успешно сохранены", "Success");
+                }
+                IsAddingNewServer = false;
+                SelectedServer = null;
+                await LoadServersAsync();
             }
-            else
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19 || ex.SqliteExtendedErrorCode == 2067)
             {
-                await _notificationService.ShowNotification("Настройки сервера", $"Изменения конфигурации сервера [{EditableServer.Name}] успешно сохранены", "Success");
-                await _serverRepository.UpdateServer(EditableServer);
+                await _notificationService.ShowNotification($"Ошибка при сохранении сервера",
+                    "Сервер с таким названием уже существует. Пожалуйста, выберите другое название.", 
+                    "Error");
             }
-
-            IsAddingNewServer = false;
-            SelectedServer = null;
-            await LoadServersAsync();
+            catch (Exception ex)
+            {
+                await _notificationService.ShowNotification(
+                    "Непредвиденная ошибка",
+                    $"Что-то пошло не так: {ex.Message}",
+                    "Error"
+                );
+            }
         }
 
         [RelayCommand]

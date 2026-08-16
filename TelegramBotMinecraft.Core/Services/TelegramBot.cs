@@ -61,6 +61,12 @@ namespace TelegramBotMinecraft.Core.Services
                 {
                     _loggerService?.MessageBotInfo("Обнаружен флаг автостарта. Инициализация фонового запуска бота...");
 
+                    if (string.IsNullOrWhiteSpace(settings.BotToken))
+                    {
+                        _loggerService?.ErrorBotInfo("Ошибка при запуске бота. Токен бота не может быть пустым");
+                        return;
+                    }
+
                     await StartBotAsync();
                 }
             }

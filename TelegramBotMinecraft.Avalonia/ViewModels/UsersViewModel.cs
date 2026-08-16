@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -143,16 +144,43 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanAdd))]
         private async Task AddUser()
         {
-            if(UserName == null || UserId == null) return;
+            if(UserName != null) UserName = UserName.Trim();
 
-            await _notificationService.ShowNotification("Пользователь добавлен", $"Пользователь [{UserName}] (ID: [{UserId}]) успешно добавлен", "Success");
+            if (string.IsNullOrWhiteSpace(UserName) || UserId == null)
+            {
+                await _notificationService.ShowNotification("Ошибка при сохранении пользователя",
+                    $"Имя или ID пользователя не могут быть пустыми.",
+                    "Error");
+                return;
+            }
 
-            await _UserRepository.AddUser(UserName, (long)UserId);
+            try
+            {
+                await _UserRepository.AddUser(UserName, (long)UserId);
 
-            UserName = null;
-            UserId = null;
+                await _notificationService.ShowNotification("Пользователь добавлен", 
+                    $"Пользователь [{UserName}] (ID: [{UserId}]) успешно добавлен", 
+                    "Success");
 
-            await LoadUsersAsync();
+                UserName = null;
+                UserId = null;
+
+                await LoadUsersAsync();
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19 || ex.SqliteExtendedErrorCode == 2067)
+            {
+                await _notificationService.ShowNotification($"Ошибка при сохранении пользователя", 
+                    "Пользователь с таким Telegram ID уже зарегистрирован. Пожалуйста, укажите другой id.", 
+                    "Error");
+            }
+            catch (Exception ex)
+            {
+                await _notificationService.ShowNotification(
+                    "Непредвиденная ошибка",
+                    $"Что-то пошло не так: {ex.Message}",
+                    "Error"
+                );
+            }
         }
 
 
@@ -190,21 +218,46 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanEdit))]
         private async Task SaveUser()
         {
-            if(UserName == null || UserId == null || _userOldId == null) return;
+            if (UserName != null) UserName = UserName.Trim();
 
+            if (string.IsNullOrWhiteSpace(UserName) || UserId == null || _userOldId == null)
+            {
+                await _notificationService.ShowNotification("Ошибка при сохранении пользователя",
+                    $"Имя или ID пользователя не могут быть пустыми.",
+                    "Error");
+                return;
+            }
 
-            await _notificationService.ShowNotification("Пользователь обновлен", $"Пользователь [{UserName}] успешно обновлен", "Success");
+            try
+            {
+                await _UserRepository.UpdateUser(UserName, (long)UserId, (long)_userOldId);
 
-            await _UserRepository.UpdateUser(UserName, (long)UserId, (long)_userOldId);
+                await _notificationService.ShowNotification("Пользователь обновлен", 
+                    $"Пользователь [{UserName}] успешно обновлен", 
+                    "Success");
 
-            UserName = null;
-            UserId = null;
-            _userOldId = null;
+                UserName = null;
+                UserId = null;
+                _userOldId = null;
+                IsEditingUser = false;
 
-            IsEditingUser = false;
-
-            await LoadUsersAsync();
-            await RefreshListServersAndCommads();
+                await LoadUsersAsync();
+                await RefreshListServersAndCommads();
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19 || ex.SqliteExtendedErrorCode == 2067)
+            {
+                await _notificationService.ShowNotification($"Ошибка при сохранении пользователя",
+                    "Пользователь с таким Telegram ID уже зарегистрирован. Пожалуйста, укажите другой id.", 
+                    "Error");
+            }
+            catch (Exception ex)
+            {
+                await _notificationService.ShowNotification(
+                    "Непредвиденная ошибка",
+                    $"Что-то пошло не так: {ex.Message}",
+                    "Error"
+                );
+            }
         }
 
 
