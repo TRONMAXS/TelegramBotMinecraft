@@ -5,8 +5,12 @@ namespace TelegramBotMinecraft.Core.Database
 {
     public class UserRepository
     {
+        private readonly string _connectionString;
 
-        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
+        public UserRepository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         public async Task<List<User>> GetAllUserNamesAndId()
         {
@@ -14,7 +18,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Users", connection);
@@ -36,7 +40,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Users WHERE ID = @UserID", connection);
@@ -50,7 +54,7 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task AddUser(string? name, long id)
         {
-            using var connection = new SqliteConnection(Data);
+            using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
 
             using var command = new SqliteCommand("INSERT INTO Users (Name, ID_TG) VALUES (@UserName, @UserId);", connection);
@@ -64,7 +68,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             string sqlUpdateUser = "UPDATE Users SET Name = @UserName, ID_TG = @UserNewId WHERE ID_TG = @UserOldId;";
 
-            using var connection = new SqliteConnection(Data);
+            using var connection = new SqliteConnection(_connectionString);
             await connection.OpenAsync();
 
             using var command = new SqliteCommand(sqlUpdateUser, connection);
@@ -79,7 +83,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("DELETE FROM Users WHERE (ID_TG) = @UserId;", connection);

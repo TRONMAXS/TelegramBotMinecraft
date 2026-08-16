@@ -139,7 +139,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _loggerService.ErrorBotInfo($"Ошибка инициализации настроек {ex}");
+                _loggerService.ErrorBotInfo($"Ошибка инициализации настроек {ex}");
             }
         }
 
@@ -170,18 +170,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (_originalSettings == null) return;
 
-            _originalSettings.BotToken = BotToken.Trim();
+            _originalSettings.BotToken = BotToken?.Trim() ?? string.Empty;
             _originalSettings.AutoBot = AutoBot;
             _originalSettings.TrayOnStart = TrayOnStart;
             _originalSettings.RunAtStartup = RunAtStartup;
             _originalSettings.AutoReconnect = AutoReconnect;
             _originalSettings.Notifications = Notifications;
-            _originalSettings.ProxyHost = ProxyHost.Trim();
-            _originalSettings.ProxyPort = ProxyPort.Trim();
-            _originalSettings.ProxyUsername = ProxyUsername.Trim();
-            _originalSettings.ProxyPassword = ProxyPassword.Trim();
+            _originalSettings.ProxyHost = ProxyHost?.Trim() ?? string.Empty;
+            _originalSettings.ProxyPort = ProxyPort?.Trim() ?? string.Empty;
+            _originalSettings.ProxyUsername = ProxyUsername?.Trim() ?? string.Empty;
+            _originalSettings.ProxyPassword = ProxyPassword?.Trim() ?? string.Empty;
 
-            if(_originalSettings.Id != 1) await _settingsRepository.AddSettings(_originalSettings);
+
+            if (_originalSettings.Id != 1) await _settingsRepository.AddSettings(_originalSettings);
 
             await _settingsRepository.SaveSettings(_originalSettings);
 

@@ -6,15 +6,19 @@ namespace TelegramBotMinecraft.Core.Database
 {
     public class CommandRepository
     {
-        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
+        private readonly string _connectionString;
 
+        public CommandRepository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
         public async Task<List<Command>> GetAllCommandAsync()
         {
             List<Command> AllCommandsList = new List<Command>();
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Commands", connection);
@@ -38,7 +42,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(@" SELECT c.ID, c.Command 
@@ -64,7 +68,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(@" SELECT EXISTS (
@@ -95,9 +99,9 @@ namespace TelegramBotMinecraft.Core.Database
             catch (SqliteException ex) { return false; }
         }
 
-        public async Task SaveUserCommandsAsync(long userId, List<int> commandsId)
+        public async Task SaveUserCommandsAsync(long userId, List<int> commandsId)  
         {
-            using (var connection = new SqliteConnection(Data))
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 using (var transaction = await connection.BeginTransactionAsync())
@@ -146,7 +150,7 @@ namespace TelegramBotMinecraft.Core.Database
             INSERT OR IGNORE INTO Commands (ID, Command) 
             VALUES (@Id, @Command);";
 
-            using (var connection = new SqliteConnection(Data))
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 await connection.OpenAsync();
 

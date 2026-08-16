@@ -15,18 +15,19 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly LzmaDecompressorService _decompressor;
         private readonly JavaRepository _javaRepository;
 
-
+        private readonly string _javaPath;
 
         private string UrlManifestJson = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
         private string UrlJavaManifestJson = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
 
-        public JavaManagerService(HttpClient client, HashService hashService, FileDownloaderService downloader, LzmaDecompressorService decompressor, JavaRepository javaRepository)
+        public JavaManagerService(HttpClient client, HashService hashService, FileDownloaderService downloader, LzmaDecompressorService decompressor, JavaRepository javaRepository, string javaPath)
         {
             _client = client;
             _hashService = hashService;
             _downloader = downloader;
             _decompressor = decompressor;
             _javaRepository = javaRepository;
+            _javaPath = javaPath;
         }
 
 
@@ -63,7 +64,7 @@ namespace TelegramBotMinecraft.Core.Services
 
                 int totalFilesCount = javaFileTasks.Count(x => x.Type == "file");
 
-                PathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
+                PathJavas = Path.Combine(_javaPath, javaName);
                 if (totalBytesToDownload <= 0) totalBytesToDownload = 1;
 
                 _ = Task.Run(async () =>
@@ -217,22 +218,14 @@ namespace TelegramBotMinecraft.Core.Services
 
             foreach (var entry in ManifestJavaJson[ArchOS][JavaArchitecture])
             {
-
                 InfoJava?.Add(new JavaInfoDownload(entry.Version.Name, JavaArchitecture, entry.Version.Released.Date.ToShortDateString(), "jre"));
-
             }
-            /*            var sorted = InfoJava
-                            .DistinctBy(x => x)
-                            .OrderByDescending(x => int.TryParse(x.Version, out int num) ? num : 0).ToList();*/
-
             return InfoJava;
         }
 
         public async Task<List<JavaManager>> GetAllDownloadedJava()
         {
             List<JavaManager> javaManagers = new();
-
-            string PathToFolderJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas");
 
             string ArchOS = GetPlatformString();
             if (ArchOS == "unknown") return javaManagers;
@@ -245,7 +238,7 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 if (entry.Key == "minecraft-java-exe") continue;
 
-                string PathJavas = Path.Combine(PathToFolderJavas, entry.Key, "bin", "javaw.exe");
+                string PathJavas = Path.Combine(_javaPath, entry.Key, "bin", "javaw.exe");
 
                 if(!Path.Exists(PathJavas)) continue;
 
@@ -260,7 +253,7 @@ namespace TelegramBotMinecraft.Core.Services
 
         public async Task DeletingJavaFolder(string? javaName)
         {
-            string pathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
+            string pathJavas = Path.Combine(_javaPath, javaName);
 
             if (Directory.Exists(pathJavas))
             {

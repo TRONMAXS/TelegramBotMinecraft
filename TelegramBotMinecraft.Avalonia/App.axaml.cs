@@ -2,7 +2,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TelegramBotMinecraft.Avalonia.Services;
@@ -24,16 +26,44 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            string appDataFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "TelegramBotMinecraft"
+            );
+
+            if (!Directory.Exists(appDataFolder))
+            {
+                Directory.CreateDirectory(appDataFolder);
+            }
+
+            string dbPath = Path.Combine(appDataFolder, "Data.db");
+            string backupDirPath = Path.Combine(appDataFolder, "DataBackup");
+            string logsDirPath = Path.Combine(appDataFolder, "Logs");
+            string javaDirPath = Path.Combine(appDataFolder, "Java");
+
+            if (!Directory.Exists(appDataFolder)) Directory.CreateDirectory(appDataFolder);
+            if (!Directory.Exists(backupDirPath)) Directory.CreateDirectory(backupDirPath);
+            if (!Directory.Exists(logsDirPath)) Directory.CreateDirectory(logsDirPath);
+            if (!Directory.Exists(javaDirPath)) Directory.CreateDirectory(javaDirPath);
+
+            string connectionString = $"Data Source={dbPath}";
+
             var httpClient = new HttpClient();
-            var serverRepo = new ServerRepository();
-            var settingsRepo = new SettingsRepository();
-            var javaRepo = new JavaRepository();
-            var commandRepo = new CommandRepository();
-            var userRepo = new UserRepository();
+            var sharedLogger = new LoggerService(logsDirPath);
+
+            var dbManager = new DatabaseManager(dbPath, backupDirPath, sharedLogger);
+
+            dbManager.Startup().GetAwaiter().GetResult();
+
+            var serverRepo = new ServerRepository(connectionString);
+            var settingsRepo = new SettingsRepository(connectionString);
+            var javaRepo = new JavaRepository(connectionString);
+            var commandRepo = new CommandRepository(connectionString);
+            var userRepo = new UserRepository(connectionString);
 
             var serverManager = new MinecraftServerManager(javaRepo, serverRepo);
             var serverCommandService = new ServerCommandService(serverRepo, serverManager);
-            var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo);
+            var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo, javaDirPath);
             var dialogService = new AvaloniaDialogService();
             var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), 
                                                                  new JavaDownloadViewModel(javaManager)),
@@ -51,7 +81,6 @@ public partial class App : Application
             var commandContext = new CommandContext(strategies, commandRepo);
             _ = commandContext.InitializeAsync();
 
-            var sharedLogger = new LoggerService();
             var telegramBot = new TelegramBot(settingsRepo, sharedLogger, commandContext);
 
             var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerLogService(serverRepo), serverCommandService, dialogService, notificationService);

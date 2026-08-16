@@ -5,10 +5,12 @@ namespace TelegramBotMinecraft.Core.Database
 {
     public class ServerRepository
     {
-        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
+        private readonly string _connectionString;
 
-
-        public ServerRepository() { }
+        public ServerRepository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
 
         public async Task<List<Server>> GetAllServers()
@@ -16,7 +18,7 @@ namespace TelegramBotMinecraft.Core.Database
             List<Server> AllServersList = new List<Server>();
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Servers", connection);
@@ -50,7 +52,7 @@ namespace TelegramBotMinecraft.Core.Database
             List<Server> ServersList = new List<Server>();
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT ID, Name FROM Servers", connection);
@@ -74,7 +76,7 @@ namespace TelegramBotMinecraft.Core.Database
             try
             {
 
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Servers WHERE Name = @ServerName", connection);
@@ -109,7 +111,7 @@ namespace TelegramBotMinecraft.Core.Database
             try
             {
 
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Servers WHERE ID = @ServerID", connection);
@@ -144,7 +146,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(@" SELECT s.ID, s.Name 
@@ -173,7 +175,7 @@ namespace TelegramBotMinecraft.Core.Database
                 string sqlAddServer = "INSERT INTO Servers (Name, Connected, Path_Server, Java_Args, Java_Name, Rcon_Enable, Rcon_Port, Rcon_Pass) " +
                           "VALUES (@Name, @Connected, @Path_Server, @Java_Args, @Java_Name, @Rcon_Enable, @Rcon_Port, @Rcon_Pass)";
 
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     using (SqliteCommand command = new SqliteCommand(sqlAddServer, connection))
@@ -198,7 +200,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("UPDATE Servers SET ID_Process = @ProcessId WHERE Name = @ServerName", connection);
@@ -220,7 +222,7 @@ namespace TelegramBotMinecraft.Core.Database
                     "Rcon_Port = @Rcon_Port, Rcon_Pass = @Rcon_Pass " +
                     "WHERE ID = @ServerID";
 
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     using (SqliteCommand command = new SqliteCommand(sqlAddServer, connection))
@@ -247,7 +249,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     using (SqliteCommand command = new SqliteCommand("DELETE FROM Servers WHERE ID = @Id", connection))
@@ -262,7 +264,7 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task SaveUserServersAsync(long userId, List<int> serversId)
         {
-            using (var connection = new SqliteConnection(Data))
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 using (var transaction = await connection.BeginTransactionAsync())
@@ -309,7 +311,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(@" SELECT EXISTS (

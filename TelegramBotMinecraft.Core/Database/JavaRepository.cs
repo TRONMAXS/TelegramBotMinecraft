@@ -6,7 +6,12 @@ namespace TelegramBotMinecraft.Core.Database
     public class JavaRepository
     {
 
-        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
+        private readonly string _connectionString;
+
+        public JavaRepository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         public async Task<List<JavaManager>> GetAllJava()
         {
@@ -14,7 +19,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Java", connection);
@@ -38,7 +43,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Java WHERE Name = @Name", connection);
@@ -58,7 +63,7 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task Add(List<JavaManager> javaList)
         {
-            using (var connection = new SqliteConnection(Data))
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 using (var transaction = await connection.BeginTransactionAsync())
@@ -100,7 +105,7 @@ namespace TelegramBotMinecraft.Core.Database
             string sqlUpdateUser = "UPDATE Java SET Name = @Name, Version = @Version, Architecture = @Architecture, Path = @Path WHERE Name = @OldName;";
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand(sqlUpdateUser, connection);
@@ -119,7 +124,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("DELETE FROM Java WHERE (Name) = @Name;", connection);
@@ -132,7 +137,7 @@ namespace TelegramBotMinecraft.Core.Database
 
         public async Task Delete(List<JavaManager> javaList)
         {
-            using (var connection = new SqliteConnection(Data))
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 using (var transaction = await connection.BeginTransactionAsync())

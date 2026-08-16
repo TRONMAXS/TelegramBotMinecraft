@@ -1,23 +1,42 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Core.Database
 {
     public class DatabaseManager
     {
-        static string PathMain = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data.db");
-        static string PathBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBuckup");
+        private readonly string _connectionString;
+        private readonly string _mainDbPath;
+        private readonly string _backupDirectoryPath;
+        private readonly LoggerService _loggerService;
 
-        public DatabaseManager()
+        public DatabaseManager(string mainDbPath, string backupDirectoryPath, LoggerService loggerService)
         {
+            _mainDbPath = mainDbPath;
+            _backupDirectoryPath = backupDirectoryPath;
+            _loggerService = loggerService;
 
+            _connectionString = $"Data Source={_mainDbPath}";
         }
 
-        private static async Task CheckOrCreateBD()
+        public async Task Startup()
+        {
+            await BackupDataBase();
+            DeleteOldBackups();
+            await CheckOrCreateBD();
+        }
+
+        private async Task CheckOrCreateBD()
         {
             try
             {
-                using (var connection = new SqliteConnection($"Data Source=Data.db"))
+                string? directory = Path.GetDirectoryName(_mainDbPath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     using (var enableForeignKeys = new SqliteCommand("PRAGMA foreign_keys = ON;", connection))
@@ -26,58 +45,97 @@ namespace TelegramBotMinecraft.Core.Database
                     }
 
                     string script = @"
-            CREATE TABLE IF NOT EXISTS Commands (
-                ID      INTEGER PRIMARY KEY NOT NULL UNIQUE,
-                Command TEXT    UNIQUE NOT NULL
-            );
+CREATE TABLE IF NOT EXISTS Settings (
+    ID            INTEGER PRIMARY KEY ON CONFLICT ROLLBACK
+                          UNIQUE,
+    BotToken      TEXT,
+    AutoBot       INTEGER NOT NULL
+                          DEFAULT (0),
+    TrayOnStart   INTEGER NOT NULL
+                          DEFAULT (0),
+    RunAtStartup  INTEGER NOT NULL
+                          DEFAULT (0),
+    AutoReconnect INTEGER NOT NULL
+                          DEFAULT (0),
+    Notifications INTEGER NOT NULL
+                          DEFAULT (0),
+    ProxyHost     TEXT,
+    ProxyPort     TEXT,
+    ProxyUsername TEXT,
+    ProxyPassword TEXT
+);
 
-            CREATE TABLE IF NOT EXISTS JavaVersions (
-                ID INTEGER NOT NULL UNIQUE PRIMARY KEY
-            );
+CREATE TABLE IF NOT EXISTS Servers (
+    ID          INTEGER PRIMARY KEY
+                        NOT NULL
+                        UNIQUE,
+    Name        TEXT    NOT NULL
+                        UNIQUE,
+    Connected   TEXT,
+    Path_Server TEXT,
+    ID_Process  INTEGER DEFAULT ( -1),
+    Java_Args   TEXT,
+    Java_Name   TEXT    REFERENCES Java (Name) ON DELETE SET NULL
+                                               ON UPDATE CASCADE,
+    Rcon_Enable INTEGER DEFAULT (0),
+    Rcon_Port   INTEGER DEFAULT (25575),
+    Rcon_Pass   TEXT
+);
 
-            CREATE TABLE IF NOT EXISTS Servers (
-                ID          INTEGER PRIMARY KEY NOT NULL UNIQUE,
-                Name        TEXT    NOT NULL UNIQUE,
-                Connected   TEXT,
-                Path_Server TEXT,
-                ID_Process  INTEGER DEFAULT (-1),
-                Java_args   TEXT,
-                Rcon_Enable INTEGER DEFAULT (0),
-                Rcon_Port   INTEGER,
-                Rcon_Pass   TEXT
-            );
+CREATE TABLE IF NOT EXISTS Users (
+    Name  TEXT    NOT NULL,
+    ID_TG INTEGER NOT NULL,
+    PRIMARY KEY (
+        ID_TG
+    )
+    ON CONFLICT ROLLBACK
+);
 
-            CREATE TABLE IF NOT EXISTS Settings (
-                ID             INTEGER PRIMARY KEY UNIQUE,
-                BotToken       TEXT    NOT NULL,
-                Auto_Bot       INTEGER NOT NULL DEFAULT (1),
-                TrayOnStart    INTEGER NOT NULL DEFAULT (0),
-                RunAtStartup   INTEGER NOT NULL DEFAULT (0),
-                AutoReconnect  INTEGER NOT NULL DEFAULT (1),
-                Notifications  INTEGER NOT NULL DEFAULT (1),
-                Proxy_Host     TEXT,
-                Proxy_Port     TEXT,
-                Proxy_Username TEXT,
-                Proxy_Password TEXT
-            );
+CREATE TABLE IF NOT EXISTS Commands (
+    ID      INTEGER PRIMARY KEY
+                    NOT NULL
+                    UNIQUE,
+    Command TEXT    UNIQUE
+                    NOT NULL
+);
 
-            CREATE TABLE IF NOT EXISTS Users (
-                ID    INTEGER PRIMARY KEY UNIQUE,
-                Name  TEXT    NOT NULL,
-                ID_TG INTEGER UNIQUE ON CONFLICT ROLLBACK NOT NULL
-            );
+CREATE TABLE IF NOT EXISTS Java (
+    Name         TEXT UNIQUE
+                      NOT NULL
+                      PRIMARY KEY ON CONFLICT ROLLBACK,
+    Version      TEXT UNIQUE
+                      NOT NULL,
+    Architecture TEXT,
+    Path         TEXT NOT NULL
+);
 
-            CREATE TABLE IF NOT EXISTS UserCommands (
-                ID_User    INTEGER REFERENCES Users (ID) ON DELETE CASCADE NOT NULL,
-                ID_Command INTEGER REFERENCES Commands (ID) ON DELETE CASCADE NOT NULL,
-                PRIMARY KEY (ID_User, ID_Command)
-            );
+CREATE TABLE IF NOT EXISTS UserCommands (
+    ID_User    INTEGER NOT NULL
+                       REFERENCES Users (ID_TG) ON DELETE CASCADE
+                                                ON UPDATE CASCADE,
+    ID_Command INTEGER NOT NULL
+                       REFERENCES Commands (ID) ON DELETE CASCADE,
+    PRIMARY KEY (
+        ID_User,
+        ID_Command
+    )
+);
 
-            CREATE TABLE IF NOT EXISTS UserServers (
-                ID_User   INTEGER REFERENCES Users (ID) ON DELETE CASCADE NOT NULL,
-                ID_Server INTEGER REFERENCES Servers (ID) ON DELETE CASCADE NOT NULL,
-                PRIMARY KEY (ID_User, ID_Server)
-            );";
+CREATE TABLE IF NOT EXISTS UserServers (
+    ID_User   INTEGER NOT NULL
+                      REFERENCES Users (ID_TG) ON DELETE CASCADE
+                                               ON UPDATE CASCADE,
+    ID_Server INTEGER NOT NULL
+                      REFERENCES Servers (ID) ON DELETE CASCADE,
+    PRIMARY KEY (
+        ID_User,
+        ID_Server
+    )
+);
+
+
+";
+            
                     using (var command = new SqliteCommand(script, connection))
                     {
                         await command.ExecuteNonQueryAsync();
@@ -86,36 +144,83 @@ namespace TelegramBotMinecraft.Core.Database
             }
             catch (Exception ex)
             {
-                //LoggerService.ErrorAppInfo($"Ошибка при инициализации БД: {ex.Message}");
+                _loggerService.ErrorAppInfo($"Ошибка при инициализации базы данных: {ex.Message}");
             }
         }
 
-        private static async Task BackupDataBase()
+        private async Task BackupDataBase()
         {
             try
             {
-                if (!File.Exists(PathMain)) return;
+                if (!File.Exists(_mainDbPath)) return;
 
-                if (!Directory.Exists(PathBackup))
+                if (!Directory.Exists(_backupDirectoryPath))
                 {
-                    Directory.CreateDirectory(PathBackup);
+                    Directory.CreateDirectory(_backupDirectoryPath);
                 }
 
-                using (var connection = new SqliteConnection($"Data Source={PathMain}"))
+                string backupFileName = $"Data-{DateTime.Now:yyyy_MM_dd_HH_mm_ss}.db";
+                string fullBackupFilePath = Path.Combine(_backupDirectoryPath, backupFileName);
+
+                string backupConnectionString = $"Data Source={fullBackupFilePath}";
+
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
-                    string currentBackupFilePath = Path.Combine(PathBackup, "DB-" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss") + ".db");
 
-                    using (var connectionBackup = new SqliteConnection($"Data Source={currentBackupFilePath}"))
+                    using (var connectionBackup = new SqliteConnection(backupConnectionString))
                     {
                         connection.BackupDatabase(connectionBackup);
                     }
-                    //LoggerService.MessageAppInfo("Бэкап прошел успешно: " + currentBackupFilePath);
+                    _loggerService.MessageAppInfo("Бэкап базы данных прошел успешно: " + fullBackupFilePath);
                 }
             }
             catch (Exception ex)
             {
-               //LoggerService.ErrorAppInfo($"Ошибка при создании бэкапа: {ex.Message}");
+                _loggerService.ErrorAppInfo($"Ошибка при создании бэкапа базы данных: {ex.Message}");
+            }
+        }
+
+        public void DeleteOldBackups()
+        {
+            int daysToKeep = 7;
+            try
+            {
+                if (!Directory.Exists(_backupDirectoryPath)) return;
+
+                string[] backupFiles = Directory.GetFiles(_backupDirectoryPath, "Data-*.db");
+                DateTime cutoffDate = DateTime.Now.AddDays(-daysToKeep);
+                int deletedCount = 0;
+
+                foreach (string filePath in backupFiles)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(filePath); // Например, "Data-2026_08_10_01_02_52"
+
+                    if (fileName.Length > 5)
+                    {
+                        string datePart = fileName.Substring(5); // Останется "2026_08_10_01_02_52"
+
+                        if (DateTime.TryParseExact(datePart, "yyyy_MM_dd_HH_mm_ss",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out DateTime backupDate))
+                        {
+                            if (backupDate < cutoffDate)
+                            {
+                                File.Delete(filePath);
+                                deletedCount++;
+                            }
+                        }
+                    }
+                }
+
+                if (deletedCount > 0)
+                {
+                    _loggerService.MessageAppInfo($"Очистка бэкапов: успешно удалено {deletedCount} старых файлов.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _loggerService.ErrorAppInfo($"Ошибка при удалении старых бэкапов: {ex.Message}");
             }
         }
     }

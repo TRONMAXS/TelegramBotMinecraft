@@ -5,7 +5,12 @@ namespace TelegramBotMinecraft.Core.Database
 {
     public class SettingsRepository
     {
-        private string Data = $"Data Source={Path.Combine(AppContext.BaseDirectory, "Data-test.db")}";
+        private readonly string _connectionString;
+
+        public SettingsRepository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         public async Task<Setting> GetAllSettings()
         {
@@ -13,7 +18,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT * FROM Settings", connection);
@@ -49,7 +54,7 @@ namespace TelegramBotMinecraft.Core.Database
 
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand command = new SqliteCommand("SELECT BotToken, ProxyHost, ProxyPort, ProxyUsername, ProxyPassword FROM Settings", connection);
@@ -77,7 +82,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand updateCommand = new SqliteCommand("UPDATE Settings SET " +
@@ -105,7 +110,7 @@ namespace TelegramBotMinecraft.Core.Database
         {
             try
             {
-                using (var connection = new SqliteConnection(Data))
+                using (var connection = new SqliteConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     SqliteCommand updateCommand = new SqliteCommand("INSERT INTO Settings" +
