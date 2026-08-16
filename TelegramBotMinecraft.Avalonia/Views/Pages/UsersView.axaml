@@ -139,8 +139,11 @@
                     Margin="0,15,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    Background="#1F4E79"
+                    BorderBrush="#2A6496"
                     Command="{Binding SavePermissionsCommand}"
-                    Content="Сохранить" />
+                    Content="Сохранить"
+                    Foreground="#FFFFFF" />
             </Grid>
 
         </GroupBox>

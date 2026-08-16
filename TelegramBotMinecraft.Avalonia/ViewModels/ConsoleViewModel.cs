@@ -79,6 +79,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public async Task Reload()
         {
+            LogsServer.Text = string.Empty;
+            NameServer = string.Empty;
+            StatusServer = string.Empty;
             await LoadServersAsync();
         }
 
@@ -91,8 +94,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             foreach (var server in serversNames)
             {
-                var currentStatus = _minecraftServerManager.GetServerStatus(server.Name).ToString();
-                Servers.Add(new ServerStatusItemViewModel(server.Id, server.Name) { Status = currentStatus });
+                var currentStatus = await _minecraftServerManager.GetServerStatus(server.Name);
+                Servers.Add(new ServerStatusItemViewModel(server.Id, server.Name) { Status = currentStatus.ToString() });
             }
         }
 

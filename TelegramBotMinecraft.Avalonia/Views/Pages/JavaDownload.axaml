@@ -128,9 +128,12 @@
             <Button
                 Width="85"
                 Height="28"
+                Background="#1F4E79"
+                BorderBrush="#2A6496"
                 Command="{Binding DownloadCommand}"
                 Content="Скачать"
-                DockPanel.Dock="Right" />
+                DockPanel.Dock="Right"
+                Foreground="#FFFFFF" />
         </DockPanel>
 
     </Grid>

@@ -106,8 +106,11 @@
                 Width="85"
                 Height="28"
                 HorizontalAlignment="Left"
+                Background="#1F4E79"
+                BorderBrush="#2A6496"
                 Command="{Binding OkCommand}"
-                Content="ОK" />
+                Content="ОK"
+                Foreground="#FFFFFF" />
             <Button
                 Width="85"
                 Height="28"

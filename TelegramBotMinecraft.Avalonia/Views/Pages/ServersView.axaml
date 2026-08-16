@@ -19,8 +19,23 @@
                 Padding="0"
                 VerticalAlignment="Stretch"
                 FontFamily="Default"
-                FontSize="15"
-                Header="Настройки сервера">
+                FontSize="15">
+                <GroupBox.Header>
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Настройки сервера" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Right"
+                            FontSize="12"
+                            FontWeight="Normal"
+                            Foreground="Coral"
+                            Text="{Binding TextWhenServerIsRunning}" />
+                        <TextBlock
+                            Margin="20,0,0,0"
+                            DockPanel.Dock="Left"
+                            Text="{Binding StatusServer}" />
+                    </DockPanel>
+                </GroupBox.Header>
                 <ScrollViewer
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -232,8 +247,11 @@
                             Spacing="10">
                             <Button
                                 MinWidth="100"
+                                Background="#1F4E79"
+                                BorderBrush="#2A6496"
                                 Command="{Binding SaveButtonCommand}"
-                                Content="Сохранить" />
+                                Content="Сохранить"
+                                Foreground="#FFFFFF" />
                             <Button
                                 MinWidth="100"
                                 Command="{Binding CancelButtonCommand}"

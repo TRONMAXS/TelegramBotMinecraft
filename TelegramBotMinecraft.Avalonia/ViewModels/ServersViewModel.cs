@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,19 @@ using System.Threading.Tasks;
 using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
+using static TelegramBotMinecraft.Core.Models.ServerStatusModel;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class ServersViewModel : ObservableObject
     {
-        private readonly ServerRepository _ServerRepository;
+        private readonly ServerRepository _serverRepository;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
-        private readonly JavaManagerService? _JavaManagerService;
+        private readonly JavaManagerService _javaManagerService;
         private readonly IWindowService _windowService;
+        private readonly MinecraftServerManager _minecraftServerManager;
+
 
         public ObservableCollection<Server> Servers { get; } = new();
         public ObservableCollection<JavaManager> Javas { get; } = new();
@@ -39,19 +43,32 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [NotifyCanExecuteChangedFor(nameof(DeleteButtonCommand))]
         private bool _isAddingNewServer;
 
-        public bool IsEditorEnabled => SelectedServer != null || IsAddingNewServer;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEditorEnabled))]
+        [NotifyCanExecuteChangedFor(nameof(DeleteButtonCommand))]
+        private string _statusServer = ServerStatus.Offline.ToString();
+
+        [ObservableProperty]
+        private string _textWhenServerIsRunning = string.Empty;
+
+        public bool IsEditorEnabled =>
+        (SelectedServer != null || IsAddingNewServer) &&
+        (StatusServer == ServerStatus.Offline.ToString());
 
         public ServersViewModel(ServerRepository serverRepository, IDialogService dialogService, 
-            INotificationService notificationService, JavaManagerService? javaManagerService,
-            IWindowService windowService)
+            INotificationService notificationService, JavaManagerService javaManagerService,
+            IWindowService windowService, MinecraftServerManager minecraftServerManager)
         {
-            _ServerRepository = serverRepository;
+            _serverRepository = serverRepository;
             _dialogService = dialogService;
             _notificationService = notificationService;
-            _JavaManagerService = javaManagerService;
+            _javaManagerService = javaManagerService;
             _windowService = windowService;
+            _minecraftServerManager = minecraftServerManager;
 
-            _ = LoadServersAsync();
+            _minecraftServerManager.ServerStatusChanged += OnServerStatusChanged;
+
+            Task.Run(async () => await LoadServersAsync());
         }
 
         public async Task Reload()
@@ -61,7 +78,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         private async Task LoadServersAsync()
         {
-            var serversNames = await _ServerRepository.GetAllServersIdAndName();
+            var serversNames = await _serverRepository.GetAllServersIdAndName();
             if (serversNames == null) return;
 
             EditableServer = new Server();
@@ -71,17 +88,19 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             {
                 Servers.Add(new Server(server.Id, server.Name));
             }
+            TextWhenServerIsRunning = string.Empty;
+            StatusServer = null;
         }
 
         private async Task LoadSettingsServerAsync(string Name)
         {
             try
             {
-                Server serverSettings = await _ServerRepository.GetServerByName(Name);
+                Server serverSettings = await _serverRepository.GetServerByName(Name);
                 if (serverSettings == null) return;
                 EditableServer = serverSettings;
 
-                List<JavaManager> javaList = await _JavaManagerService.GetAllDownloadedJava();
+                List<JavaManager> javaList = await _javaManagerService.GetAllDownloadedJava();
                 if (javaList == null) return;
 
                 Javas?.Clear();
@@ -93,6 +112,18 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 if (Javas != null && !string.IsNullOrEmpty(EditableServer.JavaName))
                 {
                     SelectedJava = Javas.FirstOrDefault(j => j.Name == EditableServer.JavaName);
+                }
+
+                var status = await _minecraftServerManager.GetServerStatus(Name);
+                StatusServer = status.ToString();
+
+                if (status == ServerStatus.Online)
+                {
+                    TextWhenServerIsRunning = "Сервер активен, чтобы изменить настройки выключите его!";
+                }
+                else if (status == ServerStatus.Offline)
+                {
+                    TextWhenServerIsRunning = string.Empty;
                 }
             }
             catch (Exception ex)
@@ -107,6 +138,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             SelectedServer = null;
             EditableServer = new Server();
             IsAddingNewServer = true;
+            StatusServer = ServerStatus.Offline.ToString();
+            TextWhenServerIsRunning = string.Empty;
         }
 
         [RelayCommand(CanExecute = nameof(CanDelete))]
@@ -115,16 +148,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (SelectedServer == null) return;
 
             var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите удалить сервер {SelectedServer.Name}?");
+            if (result != true) return;
 
-            if (result == true)
-            {
-                await _notificationService.ShowNotification("Удаление", $"Сервер [{SelectedServer.Name}] был успешно удален", "Warning");
+            await _notificationService.ShowNotification("Удаление", $"Сервер [{SelectedServer.Name}] был успешно удален", "Warning");
+            await _serverRepository.DeleteServer(SelectedServer.Id);
 
-                await _ServerRepository.DeleteServer(SelectedServer.Id);
+            Servers.Remove(SelectedServer);
+            SelectedServer = null;
 
-                SelectedServer = null;
-                await LoadServersAsync();
-            }
         }
 
         [RelayCommand]
@@ -136,12 +167,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (IsAddingNewServer) 
             {
                 await _notificationService.ShowNotification("Новый сервер", $"Сервер [{EditableServer.Name}] успешно добавлен в список", "Success");
-                await _ServerRepository.AddServer(EditableServer);
+                await _serverRepository.AddServer(EditableServer);
             }
             else
             {
                 await _notificationService.ShowNotification("Настройки сервера", $"Изменения конфигурации сервера [{EditableServer.Name}] успешно сохранены", "Success");
-                await _ServerRepository.UpdateServer(EditableServer);
+                await _serverRepository.UpdateServer(EditableServer);
             }
 
             IsAddingNewServer = false;
@@ -155,7 +186,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             IsAddingNewServer = false;
 
             if (SelectedServer != null) await LoadSettingsServerAsync(SelectedServer.Name);
-            else EditableServer = new Server();
+            else EditableServer = null;
         }
 
         [RelayCommand]
@@ -197,13 +228,40 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             await _windowService.OpenJavaManagement();
         }
 
-        private bool CanDelete() => SelectedServer != null && !IsAddingNewServer;
+        private bool CanDelete() => SelectedServer != null && !IsAddingNewServer && StatusServer == ServerStatus.Offline.ToString();
 
         partial void OnSelectedServerChanged(Server? value)
         {
-            if (value == null) return;
+            if (value == null)
+            {
+                EditableServer = null;
+                StatusServer = ServerStatus.Offline.ToString();
+                TextWhenServerIsRunning = string.Empty;
+                return;
+            }
+            TextWhenServerIsRunning = string.Empty;
             _ = LoadSettingsServerAsync(value.Name);
             
+        }
+
+        private void OnServerStatusChanged(string serverName, ServerStatus status)
+        {
+            if (SelectedServer != null && serverName == SelectedServer.Name)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    StatusServer = status.ToString();
+
+                    TextWhenServerIsRunning = status == ServerStatus.Online
+                    ? "Сервер активен, чтобы изменить настройки выключите его!"
+                    : string.Empty;
+                });
+            }
+        }
+
+        public void Dispose()
+        {
+            _minecraftServerManager.ServerStatusChanged -= OnServerStatusChanged;
         }
     }
 }

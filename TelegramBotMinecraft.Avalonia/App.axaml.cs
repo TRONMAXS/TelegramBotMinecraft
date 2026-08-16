@@ -55,7 +55,7 @@ public partial class App : Application
             var telegramBot = new TelegramBot(settingsRepo, sharedLogger, commandContext);
 
             var consoleVm = new ConsoleViewModel(serverManager, serverRepo, new ServerLogService(serverRepo), serverCommandService, dialogService, notificationService);
-            var serversVm = new ServersViewModel(serverRepo, dialogService, notificationService, javaManager, windowService);
+            var serversVm = new ServersViewModel(serverRepo, dialogService, notificationService, javaManager, windowService, serverManager);
             var usersVm = new UsersViewModel(serverRepo, userRepo, commandRepo, dialogService, notificationService);
             var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, notificationService, new StartupManager());
 

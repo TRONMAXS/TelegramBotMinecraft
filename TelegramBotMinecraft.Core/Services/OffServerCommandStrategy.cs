@@ -47,7 +47,7 @@ namespace TelegramBotMinecraft.Core.Services
                 return;
             }
 
-            var statusServer = _minecraftServerManager.GetServerStatus(ServerInfo.Name);
+            var statusServer = await _minecraftServerManager.GetServerStatus(ServerInfo.Name);
             if (statusServer == ServerStatus.Offline)
             {
                 await botClient.SendMessage(
@@ -77,7 +77,7 @@ namespace TelegramBotMinecraft.Core.Services
                 cancellationToken: cancellationToken
             );
 
-            statusServer = _minecraftServerManager.GetServerStatus(ServerInfo.Name);
+            statusServer = await _minecraftServerManager.GetServerStatus(ServerInfo.Name);
 
             var messageStatus = await botClient.SendMessage(
                 chatId: message.Chat.Id,
@@ -106,7 +106,7 @@ namespace TelegramBotMinecraft.Core.Services
 
                 await Task.Delay(2000, cancellationToken);
 
-                statusServer = _minecraftServerManager.GetServerStatus(ServerInfo.Name);
+                statusServer = await _minecraftServerManager.GetServerStatus(ServerInfo.Name);
 
                 if (statusServer != lastStatus)
                 {

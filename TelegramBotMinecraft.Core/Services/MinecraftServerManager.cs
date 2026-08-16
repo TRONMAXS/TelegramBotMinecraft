@@ -35,7 +35,7 @@ namespace TelegramBotMinecraft.Core.Services
             _backgroundCheckTimer = new Timer(async _ => await ExecutionRecoveryCheckAsync(), null, TimeSpan.Zero, _checkInterval);
         }
 
-        public ServerStatus GetServerStatus(string serverName)
+        public async Task<ServerStatus> GetServerStatus(string serverName)
         {
             return _currentStatuses.TryGetValue(serverName, out var status) ? status : ServerStatus.Offline;
         }
@@ -89,7 +89,7 @@ namespace TelegramBotMinecraft.Core.Services
 
         public async Task<bool> StartServer(string serverName)
         {
-            if (GetServerStatus(serverName) != ServerStatus.Offline) return false;
+            if (await GetServerStatus(serverName) != ServerStatus.Offline) return false;
 
             var serverData = await _serverRepository.GetServerByName(serverName);
             if (serverData == null) return false;
@@ -138,7 +138,7 @@ namespace TelegramBotMinecraft.Core.Services
             var serverData = await _serverRepository.GetServerByName(serverName);
             if (serverData == null) return false;
 
-            if (GetServerStatus(serverName) != ServerStatus.Online) return false;
+            if (await GetServerStatus(serverName) != ServerStatus.Online) return false;
 
             try
             {
