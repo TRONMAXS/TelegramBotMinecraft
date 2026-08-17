@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -15,10 +16,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private bool _isDownloadedEnabled = true;
 
+        public Action? CloseAction { get; set; }
+
         public JavaManagerWindowViewModel(JavaManagementViewModel javaManagementViewModel, JavaDownloadViewModel javaDownloadViewModel)
         {
             JavaManagementVm = javaManagementViewModel;
             JavaDownloadVm = javaDownloadViewModel;
+            JavaManagementVm.SetParent(this);
             JavaDownloadVm.SetParent(this);
         }
 
@@ -33,6 +37,12 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             SelectedTabIndex = 0;
         }
+
+        public void CloseWindow()
+        {
+            CloseAction?.Invoke();
+        }
+
         partial void OnSelectedTabIndexChanged(int value)
         {
             if (value == 0)

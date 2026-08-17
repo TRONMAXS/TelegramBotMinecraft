@@ -38,10 +38,15 @@ namespace TelegramBotMinecraft.Avalonia.Services
                     throw new InvalidOperationException("Не удалось найти главное окно приложения.");
                 }
 
-                var dialog = new JavaManagerWindow
+                var dialog = new JavaManagerWindow();
+                var viewModel = _viewModelJavaManagerFactory();
+
+                if (viewModel is JavaManagerWindowViewModel javaVm)
                 {
-                    DataContext = _viewModelJavaManagerFactory()
-                };
+                    javaVm.CloseAction = () => dialog.Close();
+                }
+
+                dialog.DataContext = viewModel;
 
                 await dialog.ShowDialog(ownerWindow);
             });

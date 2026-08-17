@@ -148,18 +148,9 @@
                                     <ComboBox
                                         Width="300"
                                         Padding="5,4"
+                                        IsEnabled="False"
                                         MaxDropDownHeight="300"
-                                        PlaceholderText="Minecraft">
-                                        <ComboBoxItem>Text Item 1</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 2</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 3</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 4</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 5</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 6</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 7</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 8</ComboBoxItem>
-                                        <ComboBoxItem>Text Item 9</ComboBoxItem>
-                                    </ComboBox>
+                                        PlaceholderText="Minecraft" />
                                 </DockPanel>
                                 <DockPanel LastChildFill="True">
                                     <TextBlock

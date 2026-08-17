@@ -16,7 +16,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,10">
@@ -52,7 +51,7 @@
         <DataGrid
             x:Name="JavaGrid"
             Grid.Row="1"
-            Margin="0,3,0,3"
+            Margin="0"
             HorizontalAlignment="Left"
             VerticalAlignment="Stretch"
             AutoGenerateColumns="False"
@@ -84,41 +83,16 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <DockPanel
+        <Button
             Grid.Row="2"
-            Margin="0,3,0,3"
-            IsVisible="False"
-            LastChildFill="True">
-            <TextBlock
-                Width="60"
-                VerticalAlignment="Center"
-                Text="Поиск:" />
-            <TextBox Text="" />
-        </DockPanel>
-
-        <StackPanel
-            Grid.Row="3"
-            Margin="0,3,0,0"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
-
-            <Button
-                Width="85"
-                Height="28"
-                HorizontalAlignment="Left"
-                Background="#1F4E79"
-                BorderBrush="#2A6496"
-                Command="{Binding OkCommand}"
-                Content="ОK"
-                Foreground="#FFFFFF" />
-            <Button
-                Width="85"
-                Height="28"
-                Margin="10,0,0,0"
-                HorizontalAlignment="Left"
-                Command="{Binding CancelCommand}"
-                Content="Отмена" />
-        </StackPanel>
-
+			Margin="0,10,0,0"
+            Width="85"
+            Height="28"
+            HorizontalAlignment="Center"
+            Background="#1F4E79"
+            BorderBrush="#2A6496"
+            Command="{Binding OkCommand}"
+            Content="ОK"
+            Foreground="#FFFFFF" />
     </Grid>
 </UserControl>

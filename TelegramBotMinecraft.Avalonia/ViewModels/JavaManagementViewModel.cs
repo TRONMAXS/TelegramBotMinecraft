@@ -1,12 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
-using TelegramBotMinecraft.Core.Database;
 using TelegramBotMinecraft.Core.Models;
 using TelegramBotMinecraft.Core.Services;
 
@@ -17,8 +13,9 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private readonly JavaManagerService? _javaManagerService;
         private readonly IDialogService? _dialogService;
 
-        public ObservableCollection<JavaManager>? DownloadedJavaList { get; } = new();
+        private JavaManagerWindowViewModel? _parent;
 
+        public ObservableCollection<JavaManager>? DownloadedJavaList { get; } = new();
 
         [ObservableProperty]
         private JavaManager? _selectedJava;
@@ -30,6 +27,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             LoadJavaDownloadedList();
             UpdateJavaDb();
+        }
+        public void SetParent(JavaManagerWindowViewModel parent)
+        {
+            _parent = parent;
         }
 
         public async void LoadJavaDownloadedList()
@@ -59,35 +60,26 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 await _javaManagerService.DeletingJavaFolder(SelectedJava.Name);
 
                 LoadJavaDownloadedList();
-                UpdateJavaDb();
+                await UpdateJavaDb();
             }
         }
 
         [RelayCommand]
-        private void UpdateJavaList()
+        private async Task UpdateJavaList()
         {
             LoadJavaDownloadedList();
-            UpdateJavaDb();
+            await UpdateJavaDb();
         }
 
         [RelayCommand]
         private async Task Ok()
         {
-            UpdateJavaDb();
-            Cancel();
+            await UpdateJavaDb();
+
+            _parent?.CloseWindow();
         }
 
-        [RelayCommand]
-        private void Cancel()
-        {
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                var currentWindow = desktop.Windows.FirstOrDefault(w => w.DataContext == this);
-                currentWindow?.Close();
-            }
-        }
-
-        public async void UpdateJavaDb()
+        public async Task UpdateJavaDb()
         {
             await _javaManagerService.UpdateJavaInDb();
         }

@@ -101,19 +101,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 if (serverSettings == null) return;
                 EditableServer = serverSettings;
 
-                List<JavaManager> javaList = await _javaManagerService.GetAllDownloadedJava();
-                if (javaList == null) return;
-
-                Javas?.Clear();
-                foreach (var java in javaList)
-                {
-                    Javas?.Add(java);
-                }
-                if (EditableServer == null) return;
-                if (Javas != null && !string.IsNullOrWhiteSpace(EditableServer.JavaName))
-                {
-                    SelectedJava = Javas.FirstOrDefault(j => j.Name == EditableServer.JavaName);
-                }
+                await LoadJavaListAsync();
 
                 var status = await _minecraftServerManager.GetServerStatus(Name);
                 StatusServer = status.ToString();
@@ -130,6 +118,23 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             catch (Exception ex)
             {
                 //($"Ошибка загрузки настроек сервера: {ex.Message}");
+            }
+        }
+
+        private async Task LoadJavaListAsync()
+        {
+            List<JavaManager> javaList = await _javaManagerService.GetAllDownloadedJava();
+            if (javaList == null) return;
+
+            Javas?.Clear();
+            foreach (var java in javaList)
+            {
+                Javas?.Add(java);
+            }
+            if (EditableServer == null) return;
+            if (Javas != null && !string.IsNullOrWhiteSpace(EditableServer.JavaName))
+            {
+                SelectedJava = Javas.FirstOrDefault(j => j.Name == EditableServer.JavaName);
             }
         }
 
@@ -253,6 +258,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task OpenJavaManagementWindow()
         {
             await _windowService.OpenJavaManagement();
+            await LoadJavaListAsync();
         }
 
         private bool CanDelete() => SelectedServer != null && !IsAddingNewServer && StatusServer == ServerStatus.Offline.ToString();

@@ -54,127 +54,130 @@ namespace TelegramBotMinecraft.Core.Services
             var ManifestMinecraftJson = JsonSerializer.Deserialize<MinecraftManifest>(responseMinecraftJson);
             if (ManifestMinecraftJson == null) { channel.Writer.Complete(); yield return (0, 0, 0); yield break; }
 
-            try
+            string ArchOS = GetPlatformString();
+            string? urlSelectedJavaVersion = ManifestJavaJson[ArchOS][javaName].Select(entry => entry.Manifest.Url).FirstOrDefault() ?? string.Empty;
+
+            var (filesToDownload, totalBytesToDownload) = await GetAllDownloadableFiles(urlSelectedJavaVersion);
+            javaFileTasks = filesToDownload;
+
+            int totalFilesCount = javaFileTasks.Count(x => x.Type == "file");
+
+            PathJavas = Path.Combine(_javaPath, javaName);
+            if (totalBytesToDownload <= 0) totalBytesToDownload = 1;
+
+
+
+            Task backgroundDownloadTask = Task.Run(async () =>
             {
-                string ArchOS = GetPlatformString();
-                string? urlSelectedJavaVersion = ManifestJavaJson[ArchOS][javaName].Select(entry => entry.Manifest.Url).FirstOrDefault() ?? string.Empty;
-
-                var (filesToDownload, totalBytesToDownload) = await GetAllDownloadableFiles(urlSelectedJavaVersion);
-                javaFileTasks = filesToDownload;
-
-                int totalFilesCount = javaFileTasks.Count(x => x.Type == "file");
-
-                PathJavas = Path.Combine(_javaPath, javaName);
-                if (totalBytesToDownload <= 0) totalBytesToDownload = 1;
-
-                _ = Task.Run(async () =>
+                try
                 {
-                    try
+                    using (var semaphore = new SemaphoreSlim(4))
                     {
-                        using (var semaphore = new SemaphoreSlim(4))
+                        var downloadTasks = new List<Task>();
+
+                        foreach (var file in filesToDownload)
                         {
-                            var downloadTasks = new List<Task>();
+                            cancellationToken.ThrowIfCancellationRequested();
 
-                            foreach (var file in filesToDownload)
+                            string pathFile = Path.Combine(PathJavas, file.Path);
+
+                            if (file.Type == "directory")
                             {
-                                cancellationToken.ThrowIfCancellationRequested();
+                                Directory.CreateDirectory(pathFile);
+                                continue;
+                            }
 
-                                string pathFile = Path.Combine(PathJavas, file.Path);
+                            if (file.Type == "file")
+                            {
+                                string? parentDirectory = Path.GetDirectoryName(pathFile);
+                                if (!string.IsNullOrEmpty(parentDirectory)) Directory.CreateDirectory(parentDirectory);
 
-                                if (file.Type == "directory")
+                                if (File.Exists(pathFile) && file.RawSha1 != null)
                                 {
-                                    Directory.CreateDirectory(pathFile);
-                                    continue;
+                                    string localSha1 = _hashService.GetFileSha1(pathFile);
+                                    if (localSha1 == file.RawSha1)
+                                    {
+                                        long current = Interlocked.Add(ref totalBytesDownloaded, file.RawSize);
+                                        int currentCompleted = Interlocked.Increment(ref completedFilesCount);
+                                        int percent = (int)((double)current * 100 / totalBytesToDownload);
+
+                                        await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), currentCompleted, totalFilesCount), cancellationToken);
+                                        continue;
+                                    }
                                 }
 
-                                if (file.Type == "file")
+                                downloadTasks.Add(Task.Run(async () =>
                                 {
-                                    string? parentDirectory = Path.GetDirectoryName(pathFile);
-                                    if (!string.IsNullOrEmpty(parentDirectory)) Directory.CreateDirectory(parentDirectory);
-
-                                    if (File.Exists(pathFile) && file.RawSha1 != null)
+                                    await semaphore.WaitAsync(cancellationToken);
+                                    try
                                     {
-                                        string localSha1 = _hashService.GetFileSha1(pathFile);
-                                        if (localSha1 == file.RawSha1)
+                                        if (file.TypeFile == "lzma")
                                         {
-                                            long current = Interlocked.Add(ref totalBytesDownloaded, file.RawSize);
-                                            int currentCompleted = Interlocked.Increment(ref completedFilesCount);
-                                            int percent = (int)((double)current * 100 / totalBytesToDownload);
+                                            string lzmaPath = pathFile + ".lzma";
 
-                                            await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), currentCompleted, totalFilesCount), cancellationToken);
-                                            continue;
+                                            await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, lzmaPath, file.NetworkSha1, cancellationToken))
+                                            {
+                                                long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
+                                                int percent = (int)((double)current * 100 / totalBytesToDownload);
+                                                await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
+                                            }
+                                            await _decompressor.UnzipFile(lzmaPath, pathFile, cancellationToken);
+
+                                            if (File.Exists(lzmaPath)) File.Delete(lzmaPath);
+                                        }
+                                        else if (file.TypeFile == "raw")
+                                        {
+                                            await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, pathFile, file.NetworkSha1, cancellationToken))
+                                            {
+                                                long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
+                                                int percent = (int)((double)current * 100 / totalBytesToDownload);
+                                                await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
+                                            }
                                         }
                                     }
-
-                                    downloadTasks.Add(Task.Run(async () =>
+                                    finally
                                     {
-                                        await semaphore.WaitAsync(cancellationToken);
-                                        try
-                                        {
-                                            if (file.TypeFile == "lzma")
-                                            {
-                                                string lzmaPath = pathFile + ".lzma";
+                                        int currentCompleted = Interlocked.Increment(ref completedFilesCount);
+                                        semaphore.Release();
 
-                                                await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, lzmaPath, file.NetworkSha1, cancellationToken))
-                                                {
-                                                    long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
-                                                    int percent = (int)((double)current * 100 / totalBytesToDownload);
-                                                    await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
-                                                }
-                                                await _decompressor.UnzipFile(lzmaPath, pathFile, cancellationToken);
-
-                                                if (File.Exists(lzmaPath)) File.Delete(lzmaPath);
-                                            }
-                                            else if (file.TypeFile == "raw")
-                                            {
-                                                await foreach (var bytesRead in _downloader.DownloadFileAsync(file.Url, pathFile, file.NetworkSha1, cancellationToken))
-                                                {
-                                                    long current = Interlocked.Add(ref totalBytesDownloaded, bytesRead);
-                                                    int percent = (int)((double)current * 100 / totalBytesToDownload);
-                                                    await channel.Writer.WriteAsync((Math.Clamp(percent, 0, 100), completedFilesCount, totalFilesCount), cancellationToken);
-                                                }
-                                            }
-                                        }
-                                        finally
-                                        {
-                                            int currentCompleted = Interlocked.Increment(ref completedFilesCount);
-                                            semaphore.Release();
-
-                                            int finalPercent = (int)((double)Interlocked.Read(ref totalBytesDownloaded) * 100 / totalBytesToDownload);
-                                            await channel.Writer.WriteAsync((Math.Clamp(finalPercent, 0, 100), currentCompleted, totalFilesCount));
-                                        }
-                                    }, cancellationToken));
-                                }
+                                        int finalPercent = (int)((double)Interlocked.Read(ref totalBytesDownloaded) * 100 / totalBytesToDownload);
+                                        await channel.Writer.WriteAsync((Math.Clamp(finalPercent, 0, 100), currentCompleted, totalFilesCount));
+                                    }
+                                }, cancellationToken));
                             }
-                            await Task.WhenAll(downloadTasks);
                         }
+                        await Task.WhenAll(downloadTasks);
+                    }
 
-                        bool validate = await ValidateInstallation(filesToDownload, PathJavas);
-                        if (validate) await channel.Writer.WriteAsync((100, totalFilesCount, totalFilesCount));
-                        else await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        if (Directory.Exists(PathJavas)) Directory.Delete(PathJavas, true);
-                    }
-                    catch (Exception)
-                    {
-                        await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
-                    }
-                    finally
-                    {
-                        channel.Writer.Complete();
-                    }
-                });
-            }
-            catch (HttpRequestException)
-            {
-                channel.Writer.Complete();
-            }
+                    bool validate = await ValidateInstallation(filesToDownload, PathJavas);
+                    if (validate) await channel.Writer.WriteAsync((100, totalFilesCount, totalFilesCount));
+                    else await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception)
+                {
+                    await channel.Writer.WriteAsync((-1, completedFilesCount, totalFilesCount));
+                }
+                finally
+                {
+                    channel.Writer.Complete();
+                }
+            });
 
-            await foreach (var progressReport in channel.Reader.ReadAllAsync(cancellationToken))
+            try
             {
-                yield return progressReport;
+                await foreach (var progressReport in channel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    yield return progressReport;
+                }
+            }
+            finally
+            {
+                try
+                {
+                    await backgroundDownloadTask;
+                }
+                catch { }
             }
         }
 
@@ -259,7 +262,18 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 try
                 {
-                    Directory.Delete(pathJavas, true);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        try
+                        {
+                            Directory.Delete(pathJavas, true);
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            await Task.Delay(1000);
+                        }
+                    }
                 }
                 catch {}
             }
@@ -457,9 +471,9 @@ namespace TelegramBotMinecraft.Core.Services
                                         .Select(j => j)
                                         .ToList();
 
-            if (listDellJava != null || listDellJava.Count != 0) await _javaRepository.Delete(listDellJava);
+            if (listDellJava != null && listDellJava.Count != 0) await _javaRepository.Delete(listDellJava);
 
-            if (listAddJava != null || listAddJava.Count != 0) await _javaRepository.Add(listAddJava);
+            if (listAddJava != null && listAddJava.Count != 0) await _javaRepository.Add(listAddJava);
         }
     }
 }

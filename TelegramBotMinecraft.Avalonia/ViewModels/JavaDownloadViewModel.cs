@@ -14,7 +14,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
     public partial class JavaDownloadViewModel : ObservableObject
     {
-        private readonly JavaManagerService _JavaManagerService;
+        private readonly JavaManagerService _javaManagerService;
         private JavaManagerWindowViewModel? _parent;
 
         public ObservableCollection<JavaManager>? JavaList { get; } = new();
@@ -54,7 +54,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
         public JavaDownloadViewModel(JavaManagerService javaManagerService)
         {
-            _JavaManagerService = javaManagerService;
+            _javaManagerService = javaManagerService;
             LoadJavaList();
         }
 
@@ -76,7 +76,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             SelectedJava = null;
             SelectedJavaInfo = null;
 
-            List<JavaManager> javaList = await _JavaManagerService.GetAllAvailableNamesJava();
+            List<JavaManager> javaList = await _javaManagerService.GetAllAvailableNamesJava();
             if (javaList == null) return;
 
             JavaList?.Clear();
@@ -98,7 +98,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             if (SelectedJava == null) return;
             if (JavaList == null) return;
 
-            List<JavaInfoDownload> javaInfoList = await _JavaManagerService.GetAllInfoSelectedJava(SelectedJava.Architecture);
+            List<JavaInfoDownload> javaInfoList = await _javaManagerService.GetAllInfoSelectedJava(SelectedJava.Architecture);
             if (javaInfoList == null) return;
 
 
@@ -118,7 +118,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             DownloadProgressString = "Проверка...";
             DownloadFilesProgressString = "Файлы: 0/0";
 
-            bool validate = await _JavaManagerService.ValidateDownloadedJava(SelectedJavaInfo.Name);
+            bool validate = await _javaManagerService.ValidateDownloadedJava(SelectedJavaInfo.Name);
             if (validate)
             {
                 DownloadProgressString = "Среда Java уже установлена!";
@@ -141,7 +141,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 await Task.Run(async () =>
                 {
                     if(SelectedJavaInfo == null) return;
-                    var downloader = _JavaManagerService.JavaDownloader(SelectedJavaInfo.Name, _cts.Token)
+                    var downloader = _javaManagerService.JavaDownloader(SelectedJavaInfo.Name, _cts.Token)
                                     .ConfigureAwait(false);
 
                     await foreach (var currentProgress in downloader)
@@ -160,7 +160,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             DownloadProgressValue = currentProgress.Progress;
-                            int countDownloadedFiles = currentProgress.completedFiles;
+                            countDownloadedFiles = currentProgress.completedFiles;
                             DownloadProgressString = $"Скачивание и установка Java... {currentProgress.Progress}%";
                             DownloadFilesProgressString = $"Файлы: {countDownloadedFiles}/{currentProgress.AllFiles}";
                         });
@@ -172,16 +172,35 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 {
                     DownloadProgressString = "Среда Java успешно установлена и проверена!";
                     DownloadFilesProgressString = "Готово!";
-                    await _JavaManagerService.UpdateJavaInDb();
+                    await _javaManagerService.UpdateJavaInDb();
+                }
+                else if (_cts.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(_cts.Token);
                 }
             }
             catch (OperationCanceledException)
             {
-                DownloadProgressString = "Загрузка успешно отменена.";
+                DownloadProgressString = "Загрузка отменена. Очистка временных файлов...";
                 DownloadFilesProgressString = "Остановлено";
                 DownloadProgressValue = 0;
+
+                if (!string.IsNullOrWhiteSpace(SelectedJavaInfo.Name))
+                {
+                    await _javaManagerService.DeletingJavaFolder(SelectedJavaInfo.Name);
+                }
+
+                DownloadProgressString = "Загрузка успешно отменена.";
             }
-            catch { DownloadProgressString = "Ошибка при установке Java компонентов."; }
+            catch 
+            { 
+                DownloadProgressString = "Ошибка при установке Java компонентов.";
+
+                if (!string.IsNullOrWhiteSpace(SelectedJavaInfo.Name))
+                {
+                    await _javaManagerService.DeletingJavaFolder(SelectedJavaInfo.Name);
+                }
+            }
             finally
             {
                 IsDownloading = false;
@@ -198,7 +217,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanDownloading))]
-        private void CancelDownload()
+        private async Task CancelDownload()
         {
             if (!IsDownloading || _cts == null) return;
             _cts?.Cancel();

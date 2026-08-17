@@ -14,20 +14,16 @@
     Icon="/Assets/TelegramBotMinecraft-logo.ico"
     WindowStartupLocation="CenterOwner">
 
-    <Design.DataContext>
-        <vm:JavaManagerWindowViewModel />
-    </Design.DataContext>
-
     <TabControl SelectedIndex="{Binding SelectedTabIndex}">
 
         <TabItem Header="Установленные версии" IsEnabled="{Binding IsDownloadedEnabled}">
-            <Grid Margin="20">
+            <Grid Margin="10">
                 <views:JavaManagement DataContext="{Binding JavaManagementVm}" />
             </Grid>
         </TabItem>
 
         <TabItem Header="Скачать Java">
-            <Grid Margin="20">
+            <Grid Margin="10">
                 <views:JavaDownload DataContext="{Binding JavaDownloadVm}" />
             </Grid>
         </TabItem>
