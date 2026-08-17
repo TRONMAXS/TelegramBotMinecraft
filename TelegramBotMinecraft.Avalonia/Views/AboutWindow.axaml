@@ -1,0 +1,71 @@
+<Window
+    x:Class="TelegramBotMinecraft.Avalonia.Views.AboutWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
+    Title="О программе"
+    Width="280"
+    Height="360"
+    x:DataType="vm:AboutViewModel"
+    CanResize="False"
+    Icon="/Assets/TelegramBotMinecraft-logo.ico"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="20" RowDefinitions="*, Auto">
+        <StackPanel
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="10">
+
+            <Image
+                Grid.Row="1"
+                Width="64"
+                Height="64"
+                Margin="0,15,0,15"
+                Source="/Assets/TelegramBotMinecraft-logo.ico" />
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="20"
+                FontWeight="Bold"
+                Text="TelegramBotMinecraft" />
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="13"
+                Foreground="Gray"
+                Text="Версия: 1.0.0-alpha.1" />
+
+            <TextBlock
+                Margin="0,5,0,5"
+                FontSize="13"
+                Foreground="{DynamicResource SystemBaseHighColor}"
+                Text="Панель управления серверами Minecraft с интеграцией Telegram-бота."
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+
+            <HyperlinkButton
+                HorizontalAlignment="Center"
+                Background="Transparent"
+                BorderThickness="0"
+                Content="Открыть GitHub репозиторий"
+                Cursor="Hand"
+                Foreground="#007ACC"
+                NavigateUri="https://github.com/TRONMAXS/TelegramBotMinecraft" />
+        </StackPanel>
+
+
+        <Button
+            Grid.Row="1"
+            Width="90"
+            Padding="5,6"
+            HorizontalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            Command="{Binding OnClose}"
+            Content="Закрыть" />
+    </Grid>
+
+</Window>

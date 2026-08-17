@@ -24,6 +24,7 @@
                     <NativeMenu>
                         <NativeMenuItem Command="{Binding ShowWindowCommand}" Header="Открыть" />
                         <NativeMenuItem Command="{Binding ShowSettingsCommand}" Header="Настройки" />
+                        <NativeMenuItem Command="{Binding ShowAboutWindowCommand}" Header="О программе" />
                         <NativeMenuItemSeparator />
                         <NativeMenuItem Command="{Binding ExitApplicationCommand}" Header="Выйти" />
                     </NativeMenu>

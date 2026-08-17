@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36109.1
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11903.348 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupTelegramBotMinecraft", "..\SetupTelegramBotMinecraft\SetupTelegramBotMinecraft.vdproj", "{532E2B92-EBEA-9733-7765-A1A0F331311D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyInstallerActions", "..\MyInstallerActions\MyInstallerActions.csproj", "{F92F9E87-97B2-4D78-A9ED-DA014D158C12}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBotMinecraft.Avalonia", "TelegramBotMinecraft.Avalonia\TelegramBotMinecraft.Avalonia.csproj", "{06BE8065-3C8C-42D4-AA02-42ED2750B23E}"
 EndProject
@@ -27,18 +25,6 @@ Global
 		{532E2B92-EBEA-9733-7765-A1A0F331311D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{532E2B92-EBEA-9733-7765-A1A0F331311D}.Release|x64.ActiveCfg = Release|x64
 		{532E2B92-EBEA-9733-7765-A1A0F331311D}.Release|x86.ActiveCfg = Release|x86
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|x64.Build.0 = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Debug|x86.Build.0 = Debug|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|x64.ActiveCfg = Release|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|x64.Build.0 = Release|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|x86.ActiveCfg = Release|Any CPU
-		{F92F9E87-97B2-4D78-A9ED-DA014D158C12}.Release|x86.Build.0 = Release|Any CPU
 		{06BE8065-3C8C-42D4-AA02-42ED2750B23E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{06BE8065-3C8C-42D4-AA02-42ED2750B23E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06BE8065-3C8C-42D4-AA02-42ED2750B23E}.Debug|x64.ActiveCfg = Debug|Any CPU

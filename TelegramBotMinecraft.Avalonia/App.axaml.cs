@@ -65,9 +65,9 @@ public partial class App : Application
             var serverCommandService = new ServerCommandService(serverRepo, serverManager);
             var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo, javaDirPath);
             var dialogService = new AvaloniaDialogService();
-            var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), 
-                                                                 new JavaDownloadViewModel(javaManager)),
-                                                                 (server) => new JavaArgumentManagerViewModel(serverRepo, server));
+            var windowService = new AvaloniaWindowService( () => new JavaManagerWindowViewModel( new JavaManagementViewModel(javaManager, dialogService), new JavaDownloadViewModel(javaManager)),
+                                                                 (server) => new JavaArgumentManagerViewModel(serverRepo, server),
+                                                                 () => new AboutViewModel());
             var notificationService = new AvaloniaNotificationService(settingsRepo);
 
             var strategies = new List<ICommandStrategy>
@@ -88,7 +88,7 @@ public partial class App : Application
             var usersVm = new UsersViewModel(serverRepo, userRepo, commandRepo, dialogService, notificationService);
             var settingsVm = new SettingsViewModel(settingsRepo, sharedLogger, telegramBot, dialogService, windowService, notificationService, new StartupManager());
 
-            var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm);
+            var mainVm = new MainViewModel(consoleVm, serversVm, usersVm, settingsVm, windowService);
 
             DataContext = mainVm;
 

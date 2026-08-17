@@ -7,5 +7,7 @@ namespace TelegramBotMinecraft.Core.Services
         Task OpenJavaManagement();
 
         Task<string> OpenJavaToServerArgumentManagement(Server? server);
+
+        Task OpenAboutDialogAsync();
     }
 }

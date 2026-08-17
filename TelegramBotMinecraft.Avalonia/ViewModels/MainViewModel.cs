@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
+using TelegramBotMinecraft.Core.Services;
 
 namespace TelegramBotMinecraft.Avalonia.ViewModels
 {
@@ -13,6 +15,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public UsersViewModel UsersVm { get; }
         public SettingsViewModel SettingsVm { get; }
 
+        private readonly IWindowService _windowService;
+
         [ObservableProperty]
         public int _selectPage = 0;
 
@@ -22,17 +26,18 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             ConsoleViewModel consoleVm,
             ServersViewModel serversVm,
             UsersViewModel usersVm,
-            SettingsViewModel settingsVm)
+            SettingsViewModel settingsVm,
+            IWindowService windowService)
         {
             ConsoleVm = consoleVm;
             ServersVm = serversVm;
             UsersVm = usersVm;
             SettingsVm = settingsVm;
-
+            _windowService = windowService;
         }
 
         [RelayCommand]
-        private void ShowWindow()
+        private async Task ShowWindow()
         {
             if (AttemptDisplayWindow == true) return;
             AttemptDisplayWindow = true;
@@ -64,6 +69,13 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             ShowWindow();
             SelectPage = 3;
+        }
+
+        [RelayCommand]
+        public async Task ShowAboutWindow()
+        {
+            await ShowWindow();
+            await _windowService.OpenAboutDialogAsync();
         }
 
         [RelayCommand]
