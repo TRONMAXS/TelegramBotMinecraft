@@ -26,7 +26,6 @@ namespace TelegramBotMinecraft.Core.Services
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: $"Доступные сервера: отсутствуют",
-                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
 
@@ -36,13 +35,13 @@ namespace TelegramBotMinecraft.Core.Services
             string answerText = "";
             foreach (var server in listServers)
             {
-                answerText += $"\n`{server.Id}` - `{server.Name}`";
+                answerText += $"\n<code>{server.Id}</code> - <code>{server.Name}</code>";
             }
 
             await botClient.SendMessage(
                 chatId: message.Chat.Id,
-                text: $"Доступные сервера:{answerText}",
-                parseMode: ParseMode.Markdown,
+                text: $"Доступные сервера: {answerText}",
+                parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
         }

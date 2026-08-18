@@ -30,7 +30,9 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"Пожалуйста, укажите номер сервера из /list",
+                    text: $"Пожалуйста, укажите номер сервера из /list\n" +
+                          $"Пример: <code>/on_server 1</code>",
+                    parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken
                 );
                 return;
@@ -52,8 +54,11 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`\n" + $"**IP для входа:** `{ServerInfo.Connected}`",
-                    parseMode: ParseMode.Markdown,
+                    text: $"СЕРВЕР: <code>{ServerInfo.Id}</code> - <code>{ServerInfo.Name}</code>\n" +
+                          $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
+                          $"Статус сервера: <code>{statusServer}</code>\n" +
+                          $"Адрес сервера для входа: <code>{ServerInfo.Connected}</code>",
+                    parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken
                 );
 
@@ -66,7 +71,6 @@ namespace TelegramBotMinecraft.Core.Services
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: $"Сервер не запустился!",
-                    parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
                 return;
@@ -82,7 +86,8 @@ namespace TelegramBotMinecraft.Core.Services
 
             var messageStatus = await botClient.SendMessage(
                 chatId: message.Chat.Id,
-                text: $"Статус сервера: {statusServer}",
+                text: $"Статус сервера: <code>{statusServer}</code>",
+                parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
 
@@ -135,8 +140,11 @@ namespace TelegramBotMinecraft.Core.Services
             await botClient.EditMessageText(
                 chatId: message.Chat.Id,
                 messageId: messageStatus.MessageId,
-                text: $"**СЕРВЕР:** `{ServerInfo.Id}` - `{ServerInfo.Name}`\n" + $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" + $"**Статус сервера:** `{statusServer}`\n" + $"**IP для входа:** `{ServerInfo.Connected}`",
-                parseMode: ParseMode.Markdown,
+                text: $"СЕРВЕР: <code>{ServerInfo.Id}</code> - <code>{ServerInfo.Name}</code>\n" +
+                      $"▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n" +
+                      $"Статус сервера: <code>{statusServer}</code>\n" +
+                      $"Адрес сервера для входа: <code>{ServerInfo.Connected}</code>",
+                parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
 
