@@ -18,9 +18,12 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly CommandContext _commandContext;
 
         private TelegramBotClient? _botClient;
+
         private HttpToSocks5Proxy? proxy;
+        private int _consecutiveNetworkErrors = 0;
 
         private CancellationTokenSource? _cts;
+        private CancellationTokenSource? _reconnectCts;
 
         private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -29,6 +32,7 @@ namespace TelegramBotMinecraft.Core.Services
         private TgBotStatus botStatus = TgBotStatus.Offline;
 
         public event Action<TgBotStatus>? TgBotStatusChanged;
+        public event Action<bool>? BotCrashed;
 
         private readonly Timer _backgroundCheckTimer;
         private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(5);
@@ -57,7 +61,7 @@ namespace TelegramBotMinecraft.Core.Services
             {
                 var settings = await _settingsRepository.GetAllSettings();
 
-                if (settings != null && settings.AutoReconnect == 1)
+                if (settings != null && settings.AutoBot == 1)
                 {
                     _loggerService?.MessageBotInfo("Обнаружен флаг автостарта. Инициализация фонового запуска бота...");
 
@@ -81,9 +85,12 @@ namespace TelegramBotMinecraft.Core.Services
             Setting? settings = await _settingsRepository.GetAllSettings();
             if (settings == null) return;
 
+
             if (settings.AutoReconnect == 0)
             {
                 _loggerService?.ErrorBotInfo("Авторестарт отключен в настройках. Бот остановлен.");
+                restartAttempts = 0;
+                BotCrashed?.Invoke(false);
                 ChangeStatus(TgBotStatus.Offline);
                 return;
             }
@@ -93,6 +100,7 @@ namespace TelegramBotMinecraft.Core.Services
                 _loggerService?.ErrorBotInfo("Критическая ошибка. Автоматический перезапуск отменен. Проверьте настройки.");
                 ChangeStatus(TgBotStatus.Offline);
                 restartAttempts = 0;
+                BotCrashed?.Invoke(false);
                 return;
             }
 
@@ -101,19 +109,56 @@ namespace TelegramBotMinecraft.Core.Services
                 ChangeStatus(TgBotStatus.Reloading);
                 restartAttempts++;
 
+                BotCrashed?.Invoke(true);
+
                 _loggerService?.ErrorBotInfo($"Ожидание {RestartDelayMs / 1000} сек перед попыткой рестарта ({restartAttempts}/{MaxRestartAttempts})...");
 
-                await Task.Delay(RestartDelayMs);
+                _reconnectCts?.Dispose();
+                _reconnectCts = new CancellationTokenSource();
 
-                _loggerService?.ErrorBotInfo($"Попытка автоматического перезапуска...");
+                try
+                {
+                    await Task.Delay(RestartDelayMs, _reconnectCts.Token);
 
-                await StartBotAsync();
+                    BotCrashed?.Invoke(false);
+
+                    _loggerService?.ErrorBotInfo($"Попытка автоматического перезапуска...");
+                    await StartBotAsync();
+                }
+                catch (OperationCanceledException){ }
+                finally
+                {
+                    _reconnectCts?.Dispose();
+                    _reconnectCts = null;
+                }
             }
             else
             {
                 _loggerService?.ErrorBotInfo($"Превышено максимальное количество попыток рестарта ({MaxRestartAttempts}). Требуется ручное вмешательство.");
+                BotCrashed?.Invoke(false);
                 ChangeStatus(TgBotStatus.Offline);
                 restartAttempts = 0;
+            }
+        }
+
+        public void CancelReconnection()
+        {
+            if (_reconnectCts != null && !_reconnectCts.IsCancellationRequested)
+            {
+                _reconnectCts.Cancel();
+                _loggerService?.ErrorBotInfo("Автоматический перезапуск отменен пользователем.");
+
+                restartAttempts = 0;
+                ChangeStatus(TgBotStatus.Offline);
+
+                BotCrashed?.Invoke(false);
+            }
+            if (_cts != null && !_cts.IsCancellationRequested)
+            {
+                _cts.Cancel();
+
+                ChangeStatus(TgBotStatus.Offline);
+                BotCrashed?.Invoke(false);
             }
         }
 
@@ -191,18 +236,20 @@ namespace TelegramBotMinecraft.Core.Services
                     cancellationToken: _cts.Token
                 );
 
+                BotCrashed?.Invoke(false);
                 restartAttempts = 0;
+                _consecutiveNetworkErrors = 0;
 
                 _loggerService?.StartBotInfo(me.FirstName, me.Username);
                 ChangeStatus(TgBotStatus.Online);
             }
-            catch (HttpRequestException)
+            catch (ArgumentException ex)
             {
-                _loggerService?.ErrorBotInfo("Ошибка сети/прокси при запуске бота.");
+                _loggerService?.ErrorBotInfo($"Неверный формат токена: {ex.Message}");
                 SilentCleanup();
                 ChangeStatus(TgBotStatus.Offline);
-                shouldTriggerCrash = true;
-                isCritical = false;
+                shouldTriggerCrash = false;
+                isCritical = true;
             }
             catch (ApiRequestException apiEx)
             {
@@ -213,6 +260,15 @@ namespace TelegramBotMinecraft.Core.Services
                 SilentCleanup();
                 ChangeStatus(isCritical ? TgBotStatus.Offline : TgBotStatus.Warning);
                 shouldTriggerCrash = !isCritical;
+            }
+            catch (RequestException reqEx)
+            {
+                _loggerService?.ErrorBotInfo($"Ошибка сети/прокси при запуске бота: {reqEx.Message}");
+
+                SilentCleanup();
+                ChangeStatus(TgBotStatus.Offline);
+                shouldTriggerCrash = true;
+                isCritical = false;
             }
             catch (Exception ex)
             {
@@ -229,6 +285,7 @@ namespace TelegramBotMinecraft.Core.Services
 
             if (shouldTriggerCrash)
             {
+                BotCrashed?.Invoke(!isCritical);
                 await OnBotCrash(isCritical);
             }
         }
@@ -268,13 +325,54 @@ namespace TelegramBotMinecraft.Core.Services
 
             if (isNewMessage)
             {
-                await _commandContext.HandleMessageAsync(bot, msg, token);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _commandContext.HandleMessageAsync(bot, msg, token);
+                    }
+                    catch (Exception ex)
+                    {
+                        _loggerService?.ErrorBotInfo($"Ошибка при обработке команды: {ex.Message}");
+                    }
+                }, token);
             }
         }
 
         private async Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken token)
         {
             if (token.IsCancellationRequested) return;
+
+            if (ex is RequestException reqEx)
+            {
+                Interlocked.Increment(ref _consecutiveNetworkErrors);
+
+                if (_consecutiveNetworkErrors <= 4)
+                {
+                    _loggerService?.ErrorBotInfo($"[Сеть] Временный сбой соединения #{_consecutiveNetworkErrors} (ожидание авто-реконнекта): {reqEx.Message}");
+
+                    ChangeStatus(TgBotStatus.Warning);
+
+                    int delaySeconds = _consecutiveNetworkErrors * 3;
+                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds), token);
+
+                    return;
+                }
+
+                _loggerService?.ErrorBotInfo($"[Сеть] Прокси или сеть недоступны длительное время ({_consecutiveNetworkErrors} сбоев подряд). Бот останавливается для полной перезагрузки.");
+
+                _ = Task.Run(async () =>
+                {
+                    await StopBotTelegram();
+                    await OnBotCrash(false);
+                });
+                return;
+            }
+
+            if (ex is not RequestException)
+            {
+                Interlocked.Exchange(ref _consecutiveNetworkErrors, 0);
+            }
 
             if (ex is ApiRequestException apiEx)
             {
@@ -288,6 +386,7 @@ namespace TelegramBotMinecraft.Core.Services
 
                         _ = Task.Run(async () =>
                         {
+                            BotCrashed?.Invoke(false);
                             await StopBotTelegram();
                         });
                         return;
@@ -298,6 +397,18 @@ namespace TelegramBotMinecraft.Core.Services
                         return;
                     }
                 }
+
+                if (apiEx.ErrorCode == 401)
+                {
+                    _loggerService?.ErrorBotInfo($"Критическая ошибка API [401 Unauthorized]. Токен отозван. Бот останавливается.");
+                    _ = Task.Run(async () =>
+                    {
+                        await StopBotTelegram();
+                        BotCrashed?.Invoke(false);
+                        await OnBotCrash(true);
+                    });
+                    return;
+                }
             }
 
             string error = ex switch
@@ -306,7 +417,7 @@ namespace TelegramBotMinecraft.Core.Services
                 _ => ex.ToString()
             };
 
-            _loggerService?.ErrorBotInfo(error);
+            _loggerService?.ErrorBotInfo($"[Критический сбой] {error}");
 
             _ = Task.Run(async () =>
             {

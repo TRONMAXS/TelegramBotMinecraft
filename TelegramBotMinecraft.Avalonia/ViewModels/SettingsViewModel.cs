@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia;
+using Avalonia.Threading;
 using AvaloniaEdit.Document;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,6 +39,10 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         private TextDocument? logsBotAndProgram = new();
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ForcedStopBotCommand))]
+        private bool _isBotCrashed = false;
+
 
         public bool IsOnBot => !(StatusWorkTGBot == TgBotStatus.Starting.ToString() || 
                                  StatusWorkTGBot == TgBotStatus.Online.ToString() || 
@@ -55,7 +60,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveSettingsCommand))]
         [NotifyCanExecuteChangedFor(nameof(CancelSettingsCommand))]
-
         private int _autoBot;
 
         [ObservableProperty]
@@ -118,6 +122,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _startupManager = startupManager;
 
             _telegramBot.TgBotStatusChanged += OnTgBotStatusChanged;
+            _telegramBot.BotCrashed += OnBotCrashed;
         }
 
         public async Task InitializeAsync()
@@ -220,12 +225,14 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 await _notificationService.ShowNotification("Ошибка при запуске бота", 
                     "Токен бота не может быть пустым", 
                     "Error");
+                _loggerService.ErrorBotInfo("Ошибка при запуске бота. Токен бота не может быть пустым!");
                 return;
             }
 
             if (StatusWorkTGBot == TgBotStatus.Offline.ToString())
             {
                 await _notificationService.ShowNotification("Telegram бот", "Бот запускается", "Information");
+                _loggerService.InfoBotInfo("Telegram бот запускается...");
                 await _telegramBot.StartBotTelegram();
             }
             else
@@ -238,12 +245,24 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                     await _telegramBot.StopBotTelegram();
                 }
             }
-        }
+       }
 
         [RelayCommand]
         private async Task OpenJavaManagementWindow()
         {
             await _windowService.OpenJavaManagement();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanForcedStopBot))]
+        private async Task ForcedStopBot()
+        {
+            var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить перезагрузку Telegram бота?");
+
+            if (result == true)
+            {
+                _telegramBot.CancelReconnection();
+                await _notificationService.ShowNotification("Telegram бот", "Перезапуск бота успешно отменен", "Warning");
+            }
         }
 
         private async Task UpdateLogsAsync(CancellationToken token)
@@ -290,12 +309,17 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (_originalSettings == null) return false;
 
-            return BotToken == _originalSettings.BotToken &&
+            return !(StatusWorkTGBot == TgBotStatus.Reloading.ToString() || 
+                StatusWorkTGBot == TgBotStatus.Starting.ToString()) && 
+
+                (BotToken == _originalSettings.BotToken &&
               ProxyHost == _originalSettings.ProxyHost &&
               ProxyPort == _originalSettings.ProxyPort &&
               ProxyUsername == _originalSettings.ProxyUsername &&
-              ProxyPassword == _originalSettings.ProxyPassword;
+              ProxyPassword == _originalSettings.ProxyPassword);
         }
+        private bool CanForcedStopBot() => IsBotCrashed;
+
 
         private void OnTgBotStatusChanged(TgBotStatus status)
         {
@@ -316,9 +340,18 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             });
         }
 
+        private void OnBotCrashed(bool isBotCrashed)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsBotCrashed = isBotCrashed;
+            });
+        }
+
         public void Dispose()
          {
             _telegramBot.TgBotStatusChanged -= OnTgBotStatusChanged;
+            _telegramBot.BotCrashed -= OnBotCrashed;
 
             if (_cts != null)
             {

@@ -65,13 +65,20 @@
                                     Text="Автоматический перезапуск"
                                     ToolTip.Tip="Если бот отключится из-за сбоя сети или ошибки серверов Telegram, программа сама попробует запустить его снова." />
                             </StackPanel>
-                            <Button
-                                Margin="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Bottom"
-                                Command="{Binding ManagingBotTelegramCommand}"
-                                Content="{Binding ButtonTGBot}"
-                                ToolTip.Tip="Запуск или полная остановка работы Telegram-бота и его функций." />
+                            <Grid>
+                                <Button
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    Command="{Binding ManagingBotTelegramCommand}"
+                                    Content="{Binding ButtonTGBot}"
+                                    ToolTip.Tip="Запуск или полная остановка работы Telegram-бота и его функций." />
+                                <Button
+                                    Margin="0"
+                                    HorizontalAlignment="Right"
+                                    Command="{Binding ForcedStopBotCommand}"
+                                    Content="СТОП"
+                                    ToolTip.Tip="Принудительная остановка" />
+                            </Grid>
                         </StackPanel>
                     </GroupBox>
 
@@ -215,12 +222,7 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" VerticalAlignment="Bottom">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
+        <Grid Grid.Row="1">
             <Button
                 Width="105"
                 Height="30"

@@ -63,6 +63,10 @@ namespace TelegramBotMinecraft.Core.Services
         {
             Log($"[{DateTime.Now:HH:mm:ss}] [BOT] [INFO]: Бот {FirstNameBot} [@{UsernameBot}]: успешно авторизован и запущен");
         }
+        public void InfoBotInfo(string Message)
+        {
+            Log($"[{DateTime.Now:HH:mm:ss}] [BOT] [INFO]: {Message}");
+        }
 
         public void ErrorBotInfo(string Message)
         {
