@@ -80,6 +80,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public async Task Reload()
         {
             LogsServer.Text = string.Empty;
+            LogsRcon.Text = string.Empty;
             NameServer = string.Empty;
             StatusServer = string.Empty;
             await LoadServersAsync();

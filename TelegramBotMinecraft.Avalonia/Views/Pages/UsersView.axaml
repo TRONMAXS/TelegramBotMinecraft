@@ -197,9 +197,12 @@
                             Content="Изменить"
                             FontSize="12" />
                         <Button
+                            Background="#1F4E79"
+                            BorderBrush="#2A6496"
                             Command="{Binding SaveUserCommand}"
                             Content="Сохранить"
-                            FontSize="12" />
+                            FontSize="12"
+                            Foreground="#FFFFFF" />
                         <Button
                             Command="{Binding DeleteUserCommand}"
                             Content="Удалить"

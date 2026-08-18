@@ -75,6 +75,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         public async Task Reload()
         {
             await LoadServersAsync();
+            Javas.Clear();
         }
 
         private async Task LoadServersAsync()

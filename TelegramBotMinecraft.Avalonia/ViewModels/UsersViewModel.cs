@@ -165,7 +165,7 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 UserName = null;
                 UserId = null;
 
-                await LoadUsersAsync();
+                await Reload();
             }
             catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19 || ex.SqliteExtendedErrorCode == 2067)
             {
