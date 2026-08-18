@@ -429,7 +429,7 @@ namespace TelegramBotMinecraft.Core.Services
 
             var (filesToDownload, totalBytesToDownload) = await GetAllDownloadableFiles(urlSelectedJavaVersion);
 
-            string PathJavas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Javas", javaName);
+            string PathJavas = Path.Combine(_javaPath, javaName);
 
             bool validate = await ValidateInstallation(filesToDownload, PathJavas);
             if (validate) return true;
