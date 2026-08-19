@@ -61,7 +61,7 @@ public partial class App : Application
             var commandRepo = new CommandRepository(connectionString);
             var userRepo = new UserRepository(connectionString);
 
-            var serverManager = new MinecraftServerManager(javaRepo, serverRepo);
+            var serverManager = new MinecraftServerManager(javaRepo, serverRepo, sharedLogger);
             var serverCommandService = new ServerCommandService(serverRepo, serverManager);
             var javaManager = new JavaManagerService(httpClient, new HashService(), new FileDownloaderService(httpClient), new LzmaDecompressorService(), javaRepo, javaDirPath);
             var dialogService = new AvaloniaDialogService();

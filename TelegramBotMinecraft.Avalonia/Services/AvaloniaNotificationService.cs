@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
+using Avalonia.Threading;
 using System;
 using System.Threading.Tasks;
 using TelegramBotMinecraft.Core.Database;
@@ -46,12 +47,19 @@ namespace TelegramBotMinecraft.Avalonia.Services
                     _ => NotificationType.Information
                 };
 
-                _notificationManager.Show(new Notification(
-                    title: title,
-                    message: text,
-                    type: typeNoti,
-                    expiration: TimeSpan.FromSeconds(5)
-                ));
+                 Dispatcher.UIThread.Post(() =>
+                 {
+                     try
+                     {
+                         _notificationManager.Show(new Notification(
+                             title: title,
+                             message: text,
+                             type: typeNoti,
+                             expiration: TimeSpan.FromSeconds(5)
+                         ));
+                     }
+                     catch { }
+                });
 
             }
         }

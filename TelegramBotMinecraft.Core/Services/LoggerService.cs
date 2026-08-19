@@ -27,7 +27,7 @@ namespace TelegramBotMinecraft.Core.Services
                 {
                     if (string.IsNullOrEmpty(logLine)) continue;
 
-                    await SaveLog(logLine);
+                    _ = SaveLog(logLine);
 
                     yield return logLine;
                 }

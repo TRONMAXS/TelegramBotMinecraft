@@ -19,7 +19,6 @@ namespace TelegramBotMinecraft.Core.Services
 
         private TelegramBotClient? _botClient;
 
-        private HttpToSocks5Proxy? proxy;
         private int _consecutiveNetworkErrors = 0;
 
         private CancellationTokenSource? _cts;

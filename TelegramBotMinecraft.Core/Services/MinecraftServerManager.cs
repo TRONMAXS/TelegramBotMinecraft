@@ -12,11 +12,14 @@ namespace TelegramBotMinecraft.Core.Services
     {
         private readonly JavaRepository _javaRepository;
         private readonly ServerRepository _serverRepository;
+        private readonly LoggerService _loggerService;
+
 
         private readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
         private readonly ConcurrentDictionary<string, ServerStatus> _currentStatuses = new();
 
         public event Action<string, ServerStatus>? ServerStatusChanged;
+        public event Action<string, string, string> OnServerNotification;
 
         private readonly Timer _backgroundCheckTimer;
         private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(5);
@@ -27,10 +30,11 @@ namespace TelegramBotMinecraft.Core.Services
         private readonly Regex warningRegex = new(@"Can't keep up!", RegexOptions.Compiled);
 
 
-        public MinecraftServerManager(JavaRepository javaRepository, ServerRepository serverRepository)
+        public MinecraftServerManager(JavaRepository javaRepository, ServerRepository serverRepository, LoggerService loggerService)
         {
             _javaRepository = javaRepository;
             _serverRepository = serverRepository;
+            _loggerService = loggerService;
 
             _backgroundCheckTimer = new Timer(async _ => await ExecutionRecoveryCheckAsync(), null, TimeSpan.Zero, _checkInterval);
         }
@@ -94,13 +98,22 @@ namespace TelegramBotMinecraft.Core.Services
             var serverData = await _serverRepository.GetServerByName(serverName);
             if (serverData == null) return false;
 
+            if (serverData.RconEnable == 0 ||
+                serverData.RconPort == null ||
+                serverData.RconPort < 0 ||
+                string.IsNullOrWhiteSpace(serverData.RconPass))
+            {
+                OnServerNotification?.Invoke("Запуск сервера", $"Сервер [{serverName}] нельзя запустить так как у него нету Rcon!", "Warning");
+                _loggerService.ErrorAppInfo($"Сервер [{serverName}] нельзя запустить так как у него нету Rcon!");
+                return false;
+            }
+
             var javaData = await _javaRepository.GetJavaByName(serverData.JavaName);
             if (javaData == null) return false;
 
+
             try
             {
-                ChangeStatus(serverName, ServerStatus.Starting);
-
                 var process = new Process
                 {
                     StartInfo = new ProcessStartInfo
@@ -124,11 +137,17 @@ namespace TelegramBotMinecraft.Core.Services
                 _activeProcesses[serverName] = process;
                 await _serverRepository.UpdateServer(serverName, process.Id);
 
+                ChangeStatus(serverName, ServerStatus.Starting);
+                OnServerNotification?.Invoke("Запуск сервера", $"Сервер [{serverName}] запускается...", "Information");
+                _loggerService.MessageAppInfo($"Сервер [{serverName}] запускается...");
+
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ChangeStatus(serverName, ServerStatus.Offline);
+                OnServerNotification?.Invoke("Ошибка запуска", $"Проверьте логи во вкладке Настройки", "Error");
+                _loggerService.ErrorAppInfo($"Ошибка при запуске сервера [{serverName}]: {ex.Message}");
                 return false;
             }
         }
@@ -148,11 +167,16 @@ namespace TelegramBotMinecraft.Core.Services
                 await rcon.SendCommandAsync("stop");
 
                 ChangeStatus(serverName, ServerStatus.Stopping);
+                OnServerNotification?.Invoke("Остановка сервера", $"Сервер [{serverName}] останавливается...", "Information");
+                _loggerService.MessageAppInfo($"Остановка сервера [{serverName}]...");
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                ChangeStatus(serverName, ServerStatus.Online);
+                OnServerNotification?.Invoke("Ошибка при остановке", $"Проверьте логи во вкладке Настройки", "Error");
+                _loggerService.ErrorAppInfo($"Ошибка при остановке сервера [{serverName}]: {ex.Message}");
                 return false;
             }
         }
