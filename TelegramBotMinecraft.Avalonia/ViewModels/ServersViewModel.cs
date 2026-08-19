@@ -292,10 +292,5 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
                 });
             }
         }
-
-        public void Dispose()
-        {
-            _minecraftServerManager.ServerStatusChanged -= OnServerStatusChanged;
-        }
     }
 }

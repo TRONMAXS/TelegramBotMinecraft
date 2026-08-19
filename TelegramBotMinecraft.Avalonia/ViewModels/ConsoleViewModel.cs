@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using AvaloniaEdit.Document;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -74,6 +73,8 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
             _notificationService = notificationService;
 
             _minecraftServerManager.ServerStatusChanged += OnServerStatusChanged;
+            _minecraftServerManager.OnServerNotification += async (title, message, type) =>
+                await _notificationService.ShowNotification(title, message, type);
             _ = LoadServersAsync();
         }
 
@@ -104,7 +105,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         private async Task StartServer()
         {
             if (SelectedServer == null) return;
-            await _notificationService.ShowNotification("Запуск сервера", $"Сервер [{SelectedServer.Name}] запускается...", "Information");
             await _minecraftServerManager.StartServer(SelectedServer.Name);
         }
 
@@ -113,15 +113,11 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
         {
             if (SelectedServer == null) return;
 
-            var ServerData = await _serverRepository.GetServerByName(SelectedServer.Name);
-            if (ServerData.IdProcess == -1) return;
-
             var result = await _dialogService.AskConfirmationAsync($"Вы уверены, что хотите остановить сервер {SelectedServer.Name}?");
 
             if (result == true) 
             {
                 await _minecraftServerManager.StopServer(SelectedServer.Name);
-                await _notificationService.ShowNotification("Остановка сервера", $"Сервер [{SelectedServer.Name}] останавливается...", "Warning");
             }
         }
 
@@ -231,11 +227,6 @@ namespace TelegramBotMinecraft.Avalonia.ViewModels
 
             _ = UpdateServerLogsAsync(value.Name);
             UpdateLogsRconServerAsync(value.Name);
-        }
-
-        public void Dispose()
-        {
-            _minecraftServerManager.ServerStatusChanged -= OnServerStatusChanged;
         }
     }
 }
