@@ -1,64 +1,50 @@
-# Telegram Bot Minecraft
+# TelegramBotMinecraft
 
-> ⚠️ **This project is currently under active development / Проект находится в активной разработке**
+![GitHub release](https://img.shields.io/github/v/release/TRONMAXS/TelegramBotMinecraft?include_prereleases&label=release)
+![GitHub repo size](https://img.shields.io/github/repo-size/TRONMAXS/TelegramBotMinecraft)
+![GitHub issues](https://img.shields.io/github/issues/TRONMAXS/TelegramBotMinecraft)
 
-A cross-platform application for managing Minecraft servers through a Telegram bot.
 
-Кроссплатформенное приложение для управления Minecraft-серверами через Telegram-бота.
-
-The project is being rewritten from **Windows Forms** to **Avalonia UI** with a modern architecture based on a shared Core library.
-
-Проект полностью переписывается с **Windows Forms** на **Avalonia UI** с современной архитектурой, основанной на общей Core-библиотеке.
+**Telegram-бот для удалённого управления Minecraft-серверами через Telegram с удобной графической панелью.**  
+Позволяет включать, выключать, проверять статус серверов и выполнять команды через RCON. Начиная с версии `v1.0.0-alpha.1`, проект полностью переписан с Windows Forms на современный кроссплатформенный движок **Avalonia UI** на базе **.NET 10** и паттерна **MVVM**.
 
 ---
 
-## Project Status / Статус проекта
+## Технологический стек
 
-The Avalonia version is the primary development branch.
-
-Версия на Avalonia является основной веткой разработки.
-
-The legacy Windows Forms version is available in the [`main`](https://github.com/TRONMAXS/TelegramBotMinecraft/tree/master) branch.
-
-Предыдущая версия на Windows Forms доступна в ветке [`main`](https://github.com/TRONMAXS/TelegramBotMinecraft/tree/master).
+* **Платформа:** .NET 10 (C#)
+* **UI-Движок:** Avalonia UI (v12.1.0)
+* **Стилизация:** Semi.Avalonia
+* **Архитектура UI:** CommunityToolkit.Mvvm (MVVM)
+* **База данных:** SQLite
 
 ---
 
-## Technologies / Технологии
+## Быстрый старт
 
-- .NET 10
-- Avalonia UI
-- CommunityToolkit.Mvvm
-- SQLite
-- Telegram.Bot
-- CoreRCON
+### Требования
+* Операционная система Windows 10 / 11 (x64).
+* Токен Telegram-бота (можно получить у [@BotFather](https://t.me/@BotFather).
 
----
-
-## Goals / Цели проекта
-
-- Cross-platform support / Кроссплатформенная поддержка
-- Modern MVVM architecture / Современная MVVM-архитектура
-- Better maintainability / Улучшенная поддерживаемость кода
-- Cleaner project structure / Чистая и модульная структура проекта
-- Improved performance / Повышение производительности
+### Запуск готовой сборки
+1. Перейдите в раздел [Releases](https://github.com/TRONMAXS/TelegramBotMinecraft/releases) и скачайте актуальную версию.
+2. Распакуйте архив в отдельную папку.
+3. Запустите файл `TelegramBotMinecraft.exe`.
 
 ---
 
-## Legacy Version / Легаси-версия
+## Сборка из исходников
 
-The previous Windows Forms implementation is kept only as a reference while the new application is being developed.
+Если вы хотите скомпилировать проект самостоятельно, клонируйте репозиторий и выполните команду публикации в терминале папки `TelegramBotMinecraft.Avalonia`:
 
-Старая реализация на Windows Forms сохраняется только как справочный вариант.
+```bash
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true
+```
 
-All new features will be implemented only in the Avalonia version.
-
-Все новые функции разрабатываются исключительно в версии на Avalonia.
+После успешной сборки готовая папка с исполняемым файлом и нативными библиотеками появится по пути: `bin/Release/net10.0/win-x64/publish/`.
 
 ---
 
-## License / Лицензия
+## 📄 Лицензия
 
-This project is licensed under the MIT License.
-
-Проект распространяется под лицензией MIT.
+Проект разрабатывается как Open-Source решение. Вы можете свободно использовать и модифицировать код под свои нужды.
