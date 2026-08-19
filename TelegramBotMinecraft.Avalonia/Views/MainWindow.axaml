@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:TelegramBotMinecraft.Avalonia.Views"
     xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
-    Title="Test"
+    Title="TelegramBotMinecraft"
     d:DesignHeight="730"
     d:DesignWidth="1220"
     x:DataType="vm:MainViewModel"
