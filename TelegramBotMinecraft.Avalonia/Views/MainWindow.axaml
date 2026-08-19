@@ -7,10 +7,12 @@
     xmlns:views="using:TelegramBotMinecraft.Avalonia.Views"
     xmlns:vm="using:TelegramBotMinecraft.Avalonia.ViewModels"
     Title="TelegramBotMinecraft"
+    MinWidth="1220"
+    MinHeight="730"
     d:DesignHeight="730"
     d:DesignWidth="1220"
     x:DataType="vm:MainViewModel"
-    CanResize="False"
+    CanResize="True"
     Icon="/Assets/TelegramBotMinecraft-logo.ico"
     mc:Ignorable="d">
     <Grid>
