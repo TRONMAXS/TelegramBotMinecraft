@@ -24,7 +24,7 @@
 
 ### Требования
 * Операционная система Windows 10 / 11 (x64).
-* Токен Telegram-бота (можно получить у [@BotFather](https://t.me/@BotFather).
+* Токен Telegram-бота (можно получить у [@BotFather](https://t.me/BotFather).
 
 ### Запуск готовой сборки
 1. Перейдите в раздел [Releases](https://github.com/TRONMAXS/TelegramBotMinecraft/releases) и скачайте актуальную версию.
